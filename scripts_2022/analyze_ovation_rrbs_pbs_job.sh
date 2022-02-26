@@ -7,11 +7,11 @@ main()
 	
 	#activate python virtual enviorment
 	source ${PYTHON_ENV}/bin/activate 
-	if [[ READ_TYPE == "single_end" ]]
-	then
-		trim_illumina_adapter_single_end $INPUT_FASTQ
-	#else #if [[ READ_TYPE == "paired_end"]]
-	fi
+		if [[ READ_TYPE == "single_end" ]]
+		then
+			trim_illumina_adapter_single_end $INPUT_FASTQ
+		#else #if [[ READ_TYPE == "paired_end"]]
+		fi
 	
 
 
@@ -22,7 +22,8 @@ main()
 set_software_paths()
 {
 	#cutadapt version 3.7
-	#cutadapt is a python package installed in PYTHON_ENV.	PYTHON_ENV=/home/s.benjamin/bioinformatics_software/ovation-rrbs-methyl-seq__python3-env
+	#cutadapt is a python package installed in PYTHON_ENV.
+	PYTHON_ENV=/home/s.benjamin/bioinformatics_software/ovation-rrbs-methyl-seq__python3-env
 	
 	#trim_galore version 0.6.8 (15 01 2022)
 	TRIM_GALORE=/home/s.benjamin/bioinformatics_software/TrimGalore/trim_galore

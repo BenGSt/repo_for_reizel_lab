@@ -7,7 +7,7 @@ main()
 	
 	#activate python virtual enviorment
 	source ${PYTHON_ENV}/bin/activate 
-	if [[ READ_TYPE == "single_end"]]
+	if [[ READ_TYPE == "single_end" ]]
 	then
 		trim_illumina_adapter_single_end $INPUT_FASTQ
 	#else #if [[ READ_TYPE == "paired_end"]]
