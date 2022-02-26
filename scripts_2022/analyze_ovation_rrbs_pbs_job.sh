@@ -21,6 +21,8 @@ main()
 
 set_software_paths()
 {
+	echo $0: setting path
+	
 	#cutadapt version 3.7
 	#cutadapt is a python package installed in PYTHON_ENV.
 	PYTHON_ENV=/home/s.benjamin/bioinformatics_software/ovation-rrbs-methyl-seq__python3-env
