@@ -73,19 +73,16 @@ arg_parse()
      -single-end)
         READ_TYPE="single_end"
         shift # past argument
-        shift # past value
         ;;
      -paired-end)
         READ_TYPE="paired_end"
         shift # past argument
-        shift # past value
         ;;
      -input_fastq_file)
         INPUT_FASTQ="$2"
         shift # past argument
         shift # past value
         ;;
-
       -*|--*)
         help
         exit 1
