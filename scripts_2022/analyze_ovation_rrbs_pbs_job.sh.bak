@@ -2,6 +2,7 @@
 
 main()
 {
+	echo im alive
 	arg_parse "$@"
 	set_software_paths
 	

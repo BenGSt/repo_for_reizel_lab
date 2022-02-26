@@ -54,7 +54,6 @@ set_software_paths()
 		
 		ADD_TO_PATH+=$(echo $executable | awk -F / 'NF{NF--};{OFS = FS; print $0}'):
 	done
-	echo $ADD_TO_PATH
 	export PATH="$ADD_TO_PATH:$PATH"
 }
 
