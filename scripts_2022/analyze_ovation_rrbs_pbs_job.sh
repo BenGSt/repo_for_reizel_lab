@@ -59,6 +59,7 @@ set_software_paths()
 trim_illumina_adapter_single_end()
 {
 	#first positional argument is fastq file to trim
+	echo $0 runnig: ${TRIM_GALORE} --adapter AGATCGGAAGAGC $1 
 	${TRIM_GALORE} --adapter AGATCGGAAGAGC $1  
 }
 
