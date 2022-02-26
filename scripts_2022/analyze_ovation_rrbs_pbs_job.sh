@@ -9,7 +9,7 @@ main()
 	source ${PYTHON_ENV}/bin/activate 
 	if [[ READ_TYPE == "single_end"]]
 	then
-		trim_illumina_adapter_single_end $input_fastq_file
+		trim_illumina_adapter_single_end $INPUT_FASTQ
 	#else #if [[ READ_TYPE == "paired_end"]]
 	fi
 	
@@ -73,6 +73,11 @@ arg_parse()
         ;;
      -paired-end)
         READ_TYPE="paired_end"
+        shift # past argument
+        shift # past value
+        ;;
+     -input_fastq_file)
+        INPUT_FASTQ="$2"
         shift # past argument
         shift # past value
         ;;

@@ -1,5 +1,24 @@
 #!/bin/bash
 
+main()
+{
+	arg_parse "$@"
+	set_software_paths
+	
+	#activate python virtual enviorment
+	source ${PYTHON_ENV}/bin/activate 
+	if [[ READ_TYPE == "single_end"]]
+	then
+		trim_illumina_adapter_single_end $input_fastq_file
+	#else #if [[ READ_TYPE == "paired_end"]]
+	fi
+	
+
+
+	deactivate #deactivate python virtual enviorment
+}
+
+
 set_software_paths()
 {
 	#cutadapt version 3.7
@@ -35,22 +54,39 @@ set_software_paths()
 	export PATH="$ADD_TO_PATH:$PATH"
 }
 
+
 trim_illumina_adapter_single_end()
 {
 	#first positional argument is fastq file to trim
 	${TRIM_GALORE} --adapter AGATCGGAAGAGC $1  
 }
 
-main()
+
+arg_parse()
 {
-	set_software_paths
-	
-	#activate python virtual enviorment
-	source ${PYTHON_ENV}/bin/activate 
-		trim_illumina_adapter_single_end $input_fastq_file
-		
-	
+  while [[ $# -gt 0 ]]; do
+    case $1 in
+     -single-end)
+        READ_TYPE="single_end"
+        shift # past argument
+        shift # past value
+        ;;
+     -paired-end)
+        READ_TYPE="paired_end"
+        shift # past argument
+        shift # past value
+        ;;
 
-
-	deactivate #deactivate python virtual enviorment
+      -*|--*)
+        help
+        exit 1
+        ;;
+      -h|--help)
+        help
+        exit 1
+        ;;
+    esac
+  done
 }
+
+main "$@"
