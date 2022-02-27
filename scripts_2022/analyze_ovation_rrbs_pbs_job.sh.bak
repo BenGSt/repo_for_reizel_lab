@@ -18,16 +18,13 @@ main()
 		then
 			trim_illumina_adapter_single_end $INPUT_FASTQ
 			trim_diversity_adaptors
+			align_to_genome
 			
-		#else #if [[ READ_TYPE == "paired_end"]]
+		#else #if [[ READ_TYPE == "paired_end" ]]
+			#TODO
 		fi
-	
-
-
 	deactivate #deactivate python virtual enviorment
 }
-
-
 
 
 trim_illumina_adapter_single_end()
@@ -38,21 +35,28 @@ trim_illumina_adapter_single_end()
 	#note from trim_galore manual 
 		#It seems that --cores 4 could be a sweet spot, anything above has diminishing returns.
 		#--cores 4 would then be: 4 (read) + 4 (write) + 4 (Cutadapt) + 2 (extra Cutadapt) + 1 (Trim Galore) = 15, and so forth.
-	echo $SCRIPT_NAME runnig: ${TRIM_GALORE} --adapter AGATCGGAAGAGC $1 --cores 4 \($(date)\)
+	echo $SCRIPT_NAME runnig: trim_galore --adapter AGATCGGAAGAGC $1 --cores 4 \($(date)\)
 	${TRIM_GALORE} --adapter AGATCGGAAGAGC $1  --cores 4
 }
 
 
 trim_diversity_adaptors()
 {
-	echo $SCRIPT_NAME runnig: $DIVERSITY_TRIM_SCRIPT -1 $(echo $INPUT_FASTQ |awk -F / '{print $NF}'| sed 's/\.fastq\.gz/_trimmed.fq.gz/') \($(date)\)
 	#https://github.com/nugentechnologies/NuMetRRBS#diversity-trimming-and-filtering-with-nugens-diversity-trimming-scripts
-	python2 $DIVERSITY_TRIM_SCRIPT -1 $(echo $INPUT_FASTQ |awk -F / '{print $NF}'| sed 's/\.fastq\.gz/_trimmed.fq.gz/')
+	
+	TRIM_GALORE_OUTPUT=$(echo $INPUT_FASTQ |awk -F / '{print $NF}'| sed 's/\.fastq\.gz/_trimmed.fq.gz/')
+	echo $SCRIPT_NAME runnig: $DIVERSITY_TRIM_SCRIPT -1 $TRIM_GALORE_OUTPUT \($(date)\)
+	
+	python2 $DIVERSITY_TRIM_SCRIPT -1 $TRIM_GALORE_OUTPUT
 }
 
 
 align_to_genome()
 {
+	TRIM_DIVERSITY_OUTPUT=
+	BISMARK_GENOME_LOCATION=
+	echo $SCRIPT_NAME runnig: bismark --bowtie2 $BISMARK_GENOME_LOCATION $TRIM_DIVERSITY_OUTPUT \($(date)\)
+	${BISMARK} --bowtie2 $BISMARK_GENOME_LOCATION $TRIM_DIVERSITY_OUTPUT
 }
 
 set_software_paths()
@@ -69,7 +73,7 @@ set_software_paths()
 	#pigz (multicore gzip needed for cutadapt multicore support)
 	PIGZ=/home/s.benjamin/other_software/pigz/pigz
 	
-	
+
 	#trim_galore version 0.6.8 (15 01 2022)
 	TRIM_GALORE=/home/s.benjamin/bioinformatics_software/TrimGalore/trim_galore
 	
