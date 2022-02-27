@@ -62,7 +62,7 @@ align_to_genome()
 set_software_paths()
 {
 
-	echo $SCRIPT_NAME: setting path ($(date))
+	echo $SCRIPT_NAME: setting path \($(date)\)
 	#cutadapt version 3.7
 	#cutadapt is a python package installed in PYTHON_ENV.
 	PYTHON_ENV=/home/s.benjamin/bioinformatics_software/ovation-rrbs-methyl-seq__python3-env

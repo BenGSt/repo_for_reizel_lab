@@ -18,7 +18,7 @@ main()
 		then
 			trim_illumina_adapter_single_end $INPUT_FASTQ
 			trim_diversity_adaptors
-			align_to_genome
+			#align_to_genome
 			
 		#else #if [[ READ_TYPE == "paired_end" ]]
 			#TODO
@@ -36,7 +36,7 @@ trim_illumina_adapter_single_end()
 		#It seems that --cores 4 could be a sweet spot, anything above has diminishing returns.
 		#--cores 4 would then be: 4 (read) + 4 (write) + 4 (Cutadapt) + 2 (extra Cutadapt) + 1 (Trim Galore) = 15, and so forth.
 	echo $SCRIPT_NAME runnig: trim_galore --adapter AGATCGGAAGAGC $1 --cores 4 \($(date)\)
-	${TRIM_GALORE} --adapter AGATCGGAAGAGC $1  --cores 4
+	${TRIM_GALORE} --adapter AGATCGGAAGAGC $1  --cores 4 --fastqc
 }
 
 
