@@ -54,13 +54,12 @@ arg_parse()
 help()
 {
 cat << EOF
-	 -single-end)
+	-single-end)
 	or
-     -paired-end)
-
-     -raw_samples_dir)
-        RAW_SAMPLES_DIR="$2"
-     -output_dir)
+	-paired-end)
+	-raw_samples_dir)
+	RAW_SAMPLES_DIR="$2"
+	-output_dir)
 EOF
 }
 
