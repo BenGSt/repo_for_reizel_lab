@@ -2,22 +2,23 @@
 
 main()
 {
-arg_parse "@"
-cd $OUTPUT_DIR
+	arg_parse "@"
+	cd $OUTPUT_DIR
 
-for sample in $(ls $RAW_SAMPLES_DIR| grep -P 'fastq|fq | grep -v md5')
-do
-	dir_name=$(echo $sample | awk -F . '{print $1}')
-	mkdir $dir_name
-	cd $dir_name
-	#TODO: send_job_from_here
-	echo ${analyze_ovation_script_single_sample} $READ_TYPE -input_fastq_file $sample | tee $dir_name.log
-	cd ..
-done
+	for sample in $(ls $RAW_SAMPLES_DIR| grep -P 'fastq|fq | grep -v md5')
+	do
+		dir_name=$(echo $sample | awk -F . '{print $1}')
+		mkdir $dir_name
+		cd $dir_name
+		#TODO: send_job_from_here
+		echo ${analyze_ovation_script_single_sample} $READ_TYPE -input_fastq_file $sample | tee $dir_name.log
+		cd ..
+	done
 }
 
 arg_parse()
 {
+exit 1
   while [[ $# -gt 0 ]]; do
     case $1 in
      -single-end)
@@ -38,10 +39,6 @@ arg_parse()
         shift # past argument
         shift # past value
         ;;		
-      -*|--*)
-        help
-        exit 1
-        ;;
       -h|--help)
         help
         exit 1
@@ -54,12 +51,12 @@ arg_parse()
 help()
 {
 cat << EOF
-	-single-end)
-	or
-	-paired-end)
-	-raw_samples_dir)
-	RAW_SAMPLES_DIR="$2"
-	-output_dir)
+-single-end)
+or
+-paired-end)
+-raw_samples_dir)
+RAW_SAMPLES_DIR="$2"
+-output_dir)
 EOF
 }
 
