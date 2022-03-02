@@ -5,7 +5,7 @@ main()
 	arg_parse "$@"
 	cd $OUTPUT_DIR
 
-	for sample in $(ls $RAW_SAMPLES_DIR| grep -P 'fastq|fq | grep -v md5')
+	for sample in $(ls $RAW_SAMPLES_DIR| grep -P 'fastq|fq' | grep -v md5)
 	do
 		dir_name=$(echo $sample | awk -F . '{print $1}')
 		mkdir $dir_name

@@ -11,7 +11,7 @@ main()
 		mkdir $dir_name
 		cd $dir_name
 		#TODO: send_job_from_here
-		echo ${analyze_ovation_script_single_sample} $READ_TYPE -input_fastq_file $sample | tee $dir_name.log
+		echo analyze_ovation_script_single_sample $READ_TYPE -input_fastq_file $sample | tee $dir_name.log
 		cd ..
 	done
 }
