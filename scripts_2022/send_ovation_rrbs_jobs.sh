@@ -3,6 +3,11 @@
 main()
 {
 	arg_parse "$@"
+	
+	if [[ ! -d $OUTPUT_DIR ]] then
+		do	mkdir $OUTPUT_DIR
+	fi
+	
 	cd $OUTPUT_DIR
 
 	for sample in $(ls $RAW_SAMPLES_DIR| grep -P 'fastq|fq' | grep -v md5)
@@ -20,7 +25,6 @@ arg_parse()
 {
 
   while [[ $# -gt 0 ]]; do
-  echo $1
     case $1 in
      -single-end)
         READ_TYPE="single-end"
