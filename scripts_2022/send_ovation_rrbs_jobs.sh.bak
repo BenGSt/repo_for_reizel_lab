@@ -2,31 +2,41 @@
 
 main()
 {
-for x in $(ls ~/raw_sequencing_data/KKTR-FahRenegeration-rrbs/FASTQ/FGC2166/)
+cd $OUTPUT_DIR
+
+for sample in $(ls $RAW_SAMPLES_DIR| grep -P 'fastq|fq | grep -v md5')
 do
-	mkdir $x
-	cd $x
+	dir_name=$(echo $sample | awk -F . '{print $1}')
+	mkdir $dir_name
+	cd $dir_name
 	#TODO: send_job_from_here
+	echo ${analyze_ovation_script_single_sample} $READ_TYPE -input_fastq_file $sample | tee $dir_name.log
 	cd ..
 done
 }
+
 arg_parse()
 {
   while [[ $# -gt 0 ]]; do
     case $1 in
      -single-end)
-        READ_TYPE="single_end"
+        READ_TYPE="single-end"
         shift # past argument
         ;;
      -paired-end)
-        READ_TYPE="paired_end"
+        READ_TYPE="paired-end"
         shift # past argument
         ;;
-     -input_fastq_file)
-        INPUT_FASTQ="$2"
+     -raw_samples_dir)
+        RAW_SAMPLES_DIR="$2"
         shift # past argument
         shift # past value
         ;;
+     -output_dir)
+        OUTPUT_DIR="$2"
+        shift # past argument
+        shift # past value
+        ;;		
       -*|--*)
         help
         exit 1
@@ -38,5 +48,19 @@ arg_parse()
     esac
   done
 }
+
+
+help()
+{
+	 -single-end)
+	or
+     -paired-end)
+
+     -raw_samples_dir)
+        RAW_SAMPLES_DIR="$2"
+     -output_dir)
+
+}
+
 
 main "$@"
