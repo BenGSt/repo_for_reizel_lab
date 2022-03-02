@@ -57,10 +57,10 @@ trim_diversity_adaptors()
 
 align_to_genome()
 {
-	TRIM_DIVERSITY_OUTPUT=
-	BISMARK_GENOME_LOCATION=
-	echo $SCRIPT_NAME runnig: bismark --bowtie2 $BISMARK_GENOME_LOCATION $TRIM_DIVERSITY_OUTPUT \($(date)\)
-	${BISMARK} --bowtie2 $BISMARK_GENOME_LOCATION $TRIM_DIVERSITY_OUTPUT
+	TRIM_DIVERSITY_OUTPUT=$(echo $TRIM_GALORE_OUTPUT | sed 's/\.gz/_trimmed.fq.gz/')
+	BISMARK_GENOME_LOCATION=/home/s.benjamin/genomic_reference_data/from_huji/mm10/Sequence/WholeGenomeFasta
+	echo $SCRIPT_NAME runnig: bismark --multicore 4 --bowtie2 $BISMARK_GENOME_LOCATION $TRIM_DIVERSITY_OUTPUT \($(date)\)
+	${BISMARK} --multicore 4 --bowtie2 $BISMARK_GENOME_LOCATION $TRIM_DIVERSITY_OUTPUT
 }
 
 set_software_paths()

@@ -16,9 +16,9 @@ main()
 	source ${PYTHON_ENV}/bin/activate 
 		if [[ $READ_TYPE == "single_end" ]]
 		then
-			trim_illumina_adapter_single_end $INPUT_FASTQ
-			trim_diversity_adaptors
-			#align_to_genome
+			time trim_illumina_adapter_single_end $INPUT_FASTQ
+			time trim_diversity_adaptors
+			time align_to_genome
 			
 		#else #if [[ READ_TYPE == "paired_end" ]]
 			#TODO
