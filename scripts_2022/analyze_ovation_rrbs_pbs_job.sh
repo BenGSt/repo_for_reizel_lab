@@ -3,11 +3,11 @@
 main()
 {
 	SCRIPT_NAME=$(echo $0 awk -F / '{print $NF}')
-	echo ########################################################
+	echo \###################$SCRIPT_NAME \($(date)\)#############
 	echo running: $SCRIPT_NAME "$@"
 	date
 	echo hostname: $(hostname)
-	echo ########################################################
+	echo /########################################################
 	
 	arg_parse "$@"
 	set_software_paths
@@ -24,6 +24,7 @@ main()
 			#TODO
 		fi
 	deactivate #deactivate python virtual enviorment
+	echo \##############finished $SCRIPT_NAME \($(date)\)#############
 }
 
 
@@ -35,28 +36,31 @@ trim_illumina_adapter_single_end()
 	#note from trim_galore manual 
 		#It seems that --cores 4 could be a sweet spot, anything above has diminishing returns.
 		#--cores 4 would then be: 4 (read) + 4 (write) + 4 (Cutadapt) + 2 (extra Cutadapt) + 1 (Trim Galore) = 15, and so forth.
-	echo $SCRIPT_NAME runnig: trim_galore --adapter AGATCGGAAGAGC $1 --cores 4 \($(date)\)
+	echo \###################$SCRIPT_NAME \($(date)\)#############
+	echo runnig: trim_galore --adapter AGATCGGAAGAGC $1 --cores 4 \($(date)\)
 	${TRIM_GALORE} --adapter AGATCGGAAGAGC $1  --cores 4 --fastqc
+	echo /########################################################
 }
 
 
 trim_diversity_adaptors()
 {
 	#https://github.com/nugentechnologies/NuMetRRBS#diversity-trimming-and-filtering-with-nugens-diversity-trimming-scripts
-	
+	echo \###################$SCRIPT_NAME \($(date)\)#############
 	TRIM_GALORE_OUTPUT=$(echo $INPUT_FASTQ |awk -F / '{print $NF}'| sed 's/\.fastq\.gz/_trimmed.fq.gz/')
-	echo $SCRIPT_NAME runnig: $DIVERSITY_TRIM_SCRIPT -1 $TRIM_GALORE_OUTPUT \($(date)\)
+	echo runnig: $DIVERSITY_TRIM_SCRIPT -1 $TRIM_GALORE_OUTPUT 
 	
 	python2 $DIVERSITY_TRIM_SCRIPT -1 $TRIM_GALORE_OUTPUT
+	echo /########################################################
 }
 
 
 align_to_genome()
 {
-	TRIM_DIVERSITY_OUTPUT=
-	BISMARK_GENOME_LOCATION=
-	echo $SCRIPT_NAME runnig: bismark --bowtie2 $BISMARK_GENOME_LOCATION $TRIM_DIVERSITY_OUTPUT \($(date)\)
-	${BISMARK} --bowtie2 $BISMARK_GENOME_LOCATION $TRIM_DIVERSITY_OUTPUT
+	TRIM_DIVERSITY_OUTPUT=$(echo $TRIM_GALORE_OUTPUT | sed 's/\.gz/_trimmed.fq.gz/')
+	BISMARK_GENOME_LOCATION=/home/s.benjamin/genomic_reference_data/from_huji/mm10/Sequence/WholeGenomeFasta
+	echo $SCRIPT_NAME runnig: bismark --multicore 4 --bowtie2 $BISMARK_GENOME_LOCATION $TRIM_DIVERSITY_OUTPUT \($(date)\)
+	${BISMARK} --multicore 4 --bowtie2 $BISMARK_GENOME_LOCATION $TRIM_DIVERSITY_OUTPUT
 }
 
 set_software_paths()
@@ -95,7 +99,7 @@ set_software_paths()
 	
 	#add paths to executables
 	ADD_TO_PATH=""
-	for executable in $TRIM_GALORE $BOWTIE2 $SAMTOOLS $BISMARK $JAVA  $FASTQC
+	for executable in $JAVA $PIGZ $TRIM_GALORE $BOWTIE2 $SAMTOOLS $BISMARK $FASTQC
 	do
 		
 		ADD_TO_PATH+=$(echo $executable | awk -F / 'NF{NF--};{OFS = FS; print $0}'):
