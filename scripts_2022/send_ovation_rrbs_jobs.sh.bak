@@ -2,6 +2,7 @@
 
 main()
 {
+arg_parse "@"
 cd $OUTPUT_DIR
 
 for sample in $(ls $RAW_SAMPLES_DIR| grep -P 'fastq|fq | grep -v md5')
