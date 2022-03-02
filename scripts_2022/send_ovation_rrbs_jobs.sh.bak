@@ -2,7 +2,7 @@
 
 main()
 {
-	arg_parse "@"
+	arg_parse "$@"
 	cd $OUTPUT_DIR
 
 	for sample in $(ls $RAW_SAMPLES_DIR| grep -P 'fastq|fq | grep -v md5')
@@ -18,8 +18,9 @@ main()
 
 arg_parse()
 {
-exit 1
+
   while [[ $# -gt 0 ]]; do
+  echo $1
     case $1 in
      -single-end)
         READ_TYPE="single-end"
