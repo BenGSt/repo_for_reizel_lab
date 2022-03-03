@@ -7,7 +7,8 @@ main()
 	echo running: $SCRIPT_NAME "$@"
 	date
 	echo hostname: $(hostname)
-	echo /########################################################
+	echo \########################################################
+	echo
 	
 	arg_parse "$@"
 	set_software_paths
@@ -39,7 +40,7 @@ trim_illumina_adapter_single_end()
 	echo \###################$SCRIPT_NAME \($(date)\)#############
 	echo runnig: trim_galore --adapter AGATCGGAAGAGC $1 --cores 4 \($(date)\)
 	${TRIM_GALORE} --adapter AGATCGGAAGAGC $1  --cores 4 --fastqc
-	echo /########################################################
+	echo \########################################################
 }
 
 
@@ -48,19 +49,21 @@ trim_diversity_adaptors()
 	#https://github.com/nugentechnologies/NuMetRRBS#diversity-trimming-and-filtering-with-nugens-diversity-trimming-scripts
 	echo \###################$SCRIPT_NAME \($(date)\)#############
 	TRIM_GALORE_OUTPUT=$(echo $INPUT_FASTQ |awk -F / '{print $NF}'| sed 's/\.fastq\.gz/_trimmed.fq.gz/')
-	echo runnig: $DIVERSITY_TRIM_SCRIPT -1 $TRIM_GALORE_OUTPUT 
+	echo runnig: python2 $DIVERSITY_TRIM_SCRIPT -1 $TRIM_GALORE_OUTPUT 
 	
 	python2 $DIVERSITY_TRIM_SCRIPT -1 $TRIM_GALORE_OUTPUT
-	echo /########################################################
+	echo \########################################################
 }
 
 
 align_to_genome()
 {
+	echo \###################$SCRIPT_NAME \($(date)\)#############
 	TRIM_DIVERSITY_OUTPUT=$(echo $TRIM_GALORE_OUTPUT | sed 's/\.gz/_trimmed.fq.gz/')
 	BISMARK_GENOME_LOCATION=/home/s.benjamin/genomic_reference_data/from_huji/mm10/Sequence/WholeGenomeFasta
 	echo $SCRIPT_NAME runnig: bismark --multicore 4 --bowtie2 $BISMARK_GENOME_LOCATION $TRIM_DIVERSITY_OUTPUT \($(date)\)
 	${BISMARK} --multicore 4 --bowtie2 $BISMARK_GENOME_LOCATION $TRIM_DIVERSITY_OUTPUT
+	echo \########################################################
 }
 
 set_software_paths()

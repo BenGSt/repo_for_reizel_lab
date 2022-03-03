@@ -2,7 +2,7 @@
 
 main()
 {
-	SCRIPT_NAME=$(echo $0 awk -F / '{print $NF}')
+	SCRIPT_NAME=$(echo $0 | awk -F / '{print $NF}')
 	echo \###################$SCRIPT_NAME \($(date)\)#############
 	echo running: $SCRIPT_NAME "$@"
 	date
