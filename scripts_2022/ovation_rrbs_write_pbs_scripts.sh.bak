@@ -28,7 +28,7 @@ main()
 #PBS  -l select=mem=64 GB
 #PBS  -l walltime=24:00:00
 PBS_O_WORKDIR=$dir_name
-cd $PBS_O_WORKDIR
+cd \$PBS_O_WORKDIR
 
 ./program.exe < input.file > output.file 2>&1
 $script $READ_TYPE -input_fastq_file $sample > output.file 2>&1 $dir_name.log
