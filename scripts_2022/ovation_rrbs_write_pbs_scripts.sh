@@ -31,7 +31,7 @@ PBS_O_WORKDIR=$dir_name
 cd \$PBS_O_WORKDIR
 
 
-$script $READ_TYPE -input_fastq_file $sample >  $dir_name.log 2>&1
+$script $READ_TYPE -input_fastq_file $RAW_SAMPLES_DIR/$sample >  $dir_name.log 2>&1
 EOF
 		cd ..
 	done
