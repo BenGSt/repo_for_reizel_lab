@@ -22,7 +22,6 @@ main()
 			time align_to_genome
 			#TODO: remove PCR duplicates (optional #ASK_TZACHI)
 			time methylation_calling
-			#TODO: 
 			
 		#else #if [[ READ_TYPE == "paired_end" ]]
 			#TODO
