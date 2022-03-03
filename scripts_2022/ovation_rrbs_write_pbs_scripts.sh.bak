@@ -18,7 +18,7 @@ main()
 		mkdir $dir_name
 		cd $dir_name
 		#TODO: send_job_from_here
-		cat << EOF > $output_dir.q
+		cat << EOF > $dir_name.q
 #!/bin/sh
 #PBS  -N  ovation_rrbs_${dir_name}
 #PBS  -q  queue_name
@@ -31,7 +31,7 @@ PBS_O_WORKDIR=$dir_name
 cd \$PBS_O_WORKDIR
 
 ./program.exe < input.file > output.file 2>&1
-$script $READ_TYPE -input_fastq_file $sample > output.file 2>&1 $dir_name.log
+$script $READ_TYPE -input_fastq_file $sample >  $dir_name.log 2>&1
 EOF
 		cd ..
 	done
