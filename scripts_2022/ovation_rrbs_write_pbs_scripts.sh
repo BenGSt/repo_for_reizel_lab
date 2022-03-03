@@ -17,8 +17,8 @@ main()
 		dir_name=$(echo $sample | awk -F . '{print $1}')
 		mkdir $dir_name
 		cd $dir_name
-		#TODO: send_job_from_here
-		cat << EOF > $dir_name.q
+		
+		cat << EOF > ovation_rrbs_${dir_name}.q
 #!/bin/sh
 #PBS  -N  ovation_rrbs_${dir_name}
 #PBS  -q  queue_name
@@ -43,11 +43,11 @@ arg_parse()
   while [[ $# -gt 0 ]]; do
     case $1 in
      -single-end)
-        READ_TYPE="single-end"
+        READ_TYPE="-single-end"
         shift # past argument
         ;;
      -paired-end)
-        READ_TYPE="paired-end"
+        READ_TYPE="-paired-end"
         shift # past argument
         ;;
      -raw_samples_dir)
