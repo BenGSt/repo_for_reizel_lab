@@ -18,7 +18,7 @@ main()
 		mkdir $dir_name
 		cd $dir_name
 		#TODO: send_job_from_here
-		cat << EOF
+		cat << EOF > $output_dir.q
 #!/bin/sh
 #PBS  -N  ovation_rrbs_${dir_name}
 #PBS  -q  queue_name
