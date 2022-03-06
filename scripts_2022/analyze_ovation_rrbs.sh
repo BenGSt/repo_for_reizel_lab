@@ -17,6 +17,7 @@ main()
 	source ${PYTHON_ENV}/bin/activate 
 		if [[ $READ_TYPE == "single_end" ]]
 		then
+			which python3
 			time trim_illumina_adapter_single_end $INPUT_FASTQ
 			time trim_diversity_adaptors
 			time align_to_genome
@@ -42,7 +43,7 @@ trim_illumina_adapter_single_end()
 		#--cores 4 would then be: 4 (read) + 4 (write) + 4 (Cutadapt) + 2 (extra Cutadapt) + 1 (Trim Galore) = 15, and so forth.
 	echo \###################$SCRIPT_NAME \($(date)\)#############
 	echo runnig: trim_galore --adapter AGATCGGAAGAGC $1 --cores 4 \($(date)\)
-	${TRIM_GALORE} --adapter AGATCGGAAGAGC $1  --cores $N_CORES --fastqc --path_to_cutadapt /home/s.benjamin/bioinformatics_software/ovation-rrbs-methyl-seq__python3-env/bin/cutadapt
+	${TRIM_GALORE} --adapter AGATCGGAAGAGC $1  --cores $N_CORES --fastqc 
 	echo \########################################################
 }
 
