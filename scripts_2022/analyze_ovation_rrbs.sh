@@ -22,7 +22,7 @@ main()
 			time align_to_genome
 			#TODO: remove PCR duplicates (optional #ASK_TZACHI)
 			time methylation_calling
-			#TODO: 
+			time combine_methylation_coverage_to_tiles 100 10 #<tile_size> <min_coverage>
 			
 		#else #if [[ READ_TYPE == "paired_end" ]]
 			#TODO
@@ -61,12 +61,18 @@ trim_diversity_adaptors()
 
 align_to_genome()
 {
-	echo \###################$SCRIPT_NAME \($(date)\)#############
 	TRIM_DIVERSITY_OUTPUT=$(echo $TRIM_GALORE_OUTPUT | sed 's/\.gz/_trimmed.fq.gz/')
 	BISMARK_GENOME_LOCATION=/utemp/s.benjamin/genomic_reference_data/from_huji/mm10/Sequence/WholeGenomeFasta
+
+	echo \###################$SCRIPT_NAME \($(date)\)#############
+
 	echo $SCRIPT_NAME runnig: bismark --multicore 4 --bowtie2 $BISMARK_GENOME_LOCATION $TRIM_DIVERSITY_OUTPUT \($(date)\)
 	${BISMARK} --multicore 4 --bowtie2 $BISMARK_GENOME_LOCATION $TRIM_DIVERSITY_OUTPUT
+
 	echo \########################################################
+	
+	#ASK_TZACHI: Library is assumed to be strand-specific (directional), alignments to strands complementary to the original top or bottom strands will be ignored (i.e. not performed!)
+	#is this what we want?
 }
 
 
@@ -78,11 +84,35 @@ methylation_calling()
 	ALIGNMENT_OUTPUT=$(echo $TRIM_DIVERSITY_OUTPUT | sed 's/\.fq\.gz/_bismark_bt2.bam/')
 	#By default, this mode will only consider cytosines in CpG context, but it can be extended to cytosines in any sequence context by using the option --CX
 	#ASK_TZACHI: all Cytosines, or only CpG context ?
-	 bismark_methylation_extractor --multicore 4 --bedGraph --buffer_size 10G --output bismark_methylation_extractor_output $ALIGNMENT_OUTPUT
+	 bismark_methylation_extractor --multicore 4 --bedGraph --buffer_size 10G --output methylation_extractor_output $ALIGNMENT_OUTPUT
 	
 	echo \########################################################
 }
 
+combine_methylation_coverage_to_100bp_tiles()
+{
+	#positional args: <tile_size> <min_coverage>
+
+	# adapted from Adam's script:
+	
+	# to make WholeGenome_100bpTiles.bed :
+	# cat mm9.chrom.sizes | grep -v -P 'X|Y|M' | awk '{OFS="\t"; for (i=1; i<=$2; i+=100) print $1,i,i+100-1}' > WholeGenome_100bpTiles.bed
+	
+	
+	
+	TILE_SIZE=$1
+	MIN_COVERAGE=$2
+	
+	cd bismark_methylation_extractor_output/
+	METH_CALLING_OUTPUT=$(ls |grep cov.gz)
+	# 100bp tiles variant 2: First calculate the tiles and then remove tiles with total coverage < 10
+	FileOut=$(echo ${METH_CALLING_OUTPUT} | awk -v tile_size=$TILE_SIZE -F "." '{print $1 "_" tile_size "bp_tiles.bed" }')
+	bedtools intersect -a /utemp/s.benjamin/genomic_reference_data/mm10_whole_genome_${TILE_SIZE}bpTiles.bed -b ${METH_CALLING_OUTPUT} -wa -wb | awk -v cov=${MIN_COVERAGE} -v tileSize=${TILE_SIZE} 'BEGIN {OFS="\t"; Prev=-1} {if ($2 == Prev) {T=T+$8+$9; M=M+$8} else {if (Prev!=-1 && T>=cov) {print PrevChr,Prev,Prev+tileSize-1,M/T};T=$8+$9; M=$8;}; Prev=$2; PrevChr=$1}' > ../${FileOut}
+
+
+	bedtools unionbedg -names `du -a -L | grep Tiles | awk '{print $2}' | sort | awk -F'/' '{print $NF}' | awk -F'.' '{print $1}'` -header -filler NA -i `du -a -L | grep Tiles | awk '{print $2}' | sort` > 100bpTiles_Tiles_Cov10_Tissues.bed
+
+}
 
 set_software_paths()
 {
@@ -117,10 +147,12 @@ set_software_paths()
 	#nugen diversity trimming script
 	DIVERSITY_TRIM_SCRIPT=/home/s.benjamin/bioinformatics_software/NuMetRRBS/trimRRBSdiversityAdaptCustomers.py
 	
+	#bedtools v2.30.0
+	BEDTOOLS=/home/s.benjamin/bioinformatics_software/bedtools2/bin/bedtools
 	
 	#add paths to executables
 	ADD_TO_PATH=""
-	for executable in $JAVA $PIGZ $TRIM_GALORE $BOWTIE2 $SAMTOOLS $BISMARK $FASTQC
+	for executable in $JAVA $PIGZ $TRIM_GALORE $BOWTIE2 $SAMTOOLS $BISMARK $FASTQC $BEDTOOLS
 	do
 		
 		ADD_TO_PATH+=$(echo $executable | awk -F / 'NF{NF--};{OFS = FS; print $0}'):
