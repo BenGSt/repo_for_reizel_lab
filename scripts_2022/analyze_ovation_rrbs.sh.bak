@@ -128,6 +128,7 @@ set_software_paths()
 {
 
 	echo $SCRIPT_NAME: setting path \($(date)\)
+	PYTHON3=/usr/bin/python3
 	#cutadapt version 3.7
 	#cutadapt is a python package installed in PYTHON_ENV.
 	PYTHON_ENV=/home/s.benjamin/bioinformatics_software/ovation-rrbs-methyl-seq__python3-env
@@ -165,7 +166,7 @@ set_software_paths()
 	
 	#add paths to executables
 	ADD_TO_PATH=""
-	for executable in $JAVA $PIGZ $TRIM_GALORE $BOWTIE2 $SAMTOOLS $BISMARK $FASTQC $BEDTOOLS $NUDUP
+	for executable in $JAVA $PIGZ $TRIM_GALORE $BOWTIE2 $SAMTOOLS $BISMARK $FASTQC $BEDTOOLS $NUDUP $PYTHON3
 	do
 		
 		ADD_TO_PATH+=$(echo $executable | awk -F / 'NF{NF--};{OFS = FS; print $0}'):

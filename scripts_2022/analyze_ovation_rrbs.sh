@@ -17,8 +17,8 @@ main()
 	source ${PYTHON_ENV}/bin/activate 
 		if [[ $READ_TYPE == "single_end" ]]
 		then
-			echo which python 3 \#############
-			which python3
+			echo which python 3.6 \#############
+			which python3.6
 			echo \#################################
 			# time trim_illumina_adapter_single_end $INPUT_FASTQ
 			# time trim_diversity_adaptors
