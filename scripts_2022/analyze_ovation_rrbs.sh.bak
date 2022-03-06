@@ -20,11 +20,11 @@ main()
 		if [[ $READ_TYPE == "single_end" ]]
 		then
 			time trim_illumina_adapter_single_end $INPUT_FASTQ
-			# time trim_diversity_adaptors
-			# time align_to_genome
+			time trim_diversity_adaptors
+			time align_to_genome
 			##TODO: remove PCR duplicates (optional )
-			# time methylation_calling
-			# time combine_methylation_coverage_to_tiles 100 10 #<tile_size> <min_coverage>
+			time methylation_calling
+			time combine_methylation_coverage_to_tiles 100 10 #<tile_size> <min_coverage>
 			
 		#else #if [[ READ_TYPE == "paired_end" ]]
 			#TODO
@@ -43,7 +43,7 @@ trim_illumina_adapter_single_end()
 		#It seems that --cores 4 could be a sweet spot, anything above has diminishing returns.
 		#--cores 4 would then be: 4 (read) + 4 (write) + 4 (Cutadapt) + 2 (extra Cutadapt) + 1 (Trim Galore) = 15, and so forth.
 	echo \###################$SCRIPT_NAME \($(date)\)#############
-	echo runnig: trim_galore --adapter AGATCGGAAGAGC $1 --cores 4 \($(date)\)
+	echo runnig: trim_galore --adapter AGATCGGAAGAGC $1 --cores $N_CORES \($(date)\)
 	${TRIM_GALORE} --adapter AGATCGGAAGAGC $1  --cores $N_CORES --fastqc 
 	echo \########################################################
 }
