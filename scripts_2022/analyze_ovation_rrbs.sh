@@ -17,7 +17,7 @@ main()
 	source ${PYTHON_ENV}/bin/activate 
 		if [[ $READ_TYPE == "single_end" ]]
 		then
-			python3='/usr/local/python-3.8.5/bin/python3.8'
+			alias python3='/usr/local/python-3.8.5/bin/python3.8'
 			echo which python 3 \#############
 			which python3
 			echo \#################################
