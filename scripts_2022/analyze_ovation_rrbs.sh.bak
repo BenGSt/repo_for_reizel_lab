@@ -17,13 +17,15 @@ main()
 	source ${PYTHON_ENV}/bin/activate 
 		if [[ $READ_TYPE == "single_end" ]]
 		then
+			echo which python 3 \#############
 			which python3
-			time trim_illumina_adapter_single_end $INPUT_FASTQ
-			time trim_diversity_adaptors
-			time align_to_genome
-			#TODO: remove PCR duplicates (optional )
-			time methylation_calling
-			time combine_methylation_coverage_to_tiles 100 10 #<tile_size> <min_coverage>
+			echo \#################################
+			# time trim_illumina_adapter_single_end $INPUT_FASTQ
+			# time trim_diversity_adaptors
+			# time align_to_genome
+			TODO: remove PCR duplicates (optional )
+			# time methylation_calling
+			# time combine_methylation_coverage_to_tiles 100 10 #<tile_size> <min_coverage>
 			
 		#else #if [[ READ_TYPE == "paired_end" ]]
 			#TODO
