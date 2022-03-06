@@ -31,9 +31,9 @@ main()
 PBS_O_WORKDIR=$(pwd)
 cd \$PBS_O_WORKDIR
 
-source /home/s.benjamin/bioinformatics_software/ovation-rrbs-methyl-seq__python3-env/bin/activate
+
 $script -n_cores $N_CORES $READ_TYPE -input_fastq_file $RAW_SAMPLES_DIR/$sample >  $dir_name.log 2>&1
-deactivate
+
 EOF
 		cd ..
 	done
