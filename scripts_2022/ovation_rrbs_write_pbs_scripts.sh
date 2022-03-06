@@ -21,7 +21,7 @@ main()
 		cat << EOF > ovation_rrbs_${dir_name}.q
 #!/bin/sh
 #PBS  -N  ovation_rrbs_${dir_name}
-#PBS  -q  queue_name
+#PBS  -q  zeus_all_q 
 #PBS  -m  abe
 #PBS  -M  s.benjamin@technion.ac.il
 #PBS  -l select=1:ncpus=${N_CORES}
