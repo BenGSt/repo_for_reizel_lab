@@ -4,7 +4,7 @@ main()
 {
 	arg_parse "$@"
 	
-	script=/home/s.benjamin/bioinformatics_software/repo_for_reizel_lab/scripts_2022/analyze_ovation_rrbs_pbs_job.sh
+	script=/home/s.benjamin/bioinformatics_software/repo_for_reizel_lab/scripts_2022/analyze_ovation_rrbs.sh
 	
 	if [[ ! -d $OUTPUT_DIR ]]; then
 		mkdir $OUTPUT_DIR

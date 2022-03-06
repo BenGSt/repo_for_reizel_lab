@@ -1,5 +1,6 @@
 #!/bin/bash
 
+
 main()
 {
 	arg_parse "$@"
@@ -27,7 +28,7 @@ main()
 #PBS  -l select=1:ncpus=${N_CORES}
 #PBS  -l select=mem=64gb
 #PBS  -l walltime=24:00:00
-PBS_O_WORKDIR=$dir_name
+PBS_O_WORKDIR=$(pwd)
 cd \$PBS_O_WORKDIR
 
 
