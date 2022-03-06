@@ -24,7 +24,7 @@ main()
 #PBS  -q  queue_name
 #PBS  -m  abe
 #PBS  -M  s.benjamin@technion.ac.il
-#PBS  -l select=1:ncpus=20
+#PBS  -l select=1:ncpus=${N_CORES}
 #PBS  -l select=mem=64 GB
 #PBS  -l walltime=24:00:00
 PBS_O_WORKDIR=$dir_name
