@@ -51,7 +51,7 @@ arg_parse()
         shift # past argument
         ;;
      -raw_samples_dir)
-        RAW_SAMPLES_DIR="realpath $2"
+        RAW_SAMPLES_DIR="$(realpath $2)"
         shift # past argument
         shift # past value
         ;;
