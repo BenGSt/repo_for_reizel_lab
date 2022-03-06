@@ -20,7 +20,7 @@ main()
 			time trim_illumina_adapter_single_end $INPUT_FASTQ
 			time trim_diversity_adaptors
 			time align_to_genome
-			#TODO: remove PCR duplicates (optional #ASK_TZACHI)
+			#TODO: remove PCR duplicates (optional )
 			time methylation_calling
 			time combine_methylation_coverage_to_tiles 100 10 #<tile_size> <min_coverage>
 			
@@ -75,10 +75,10 @@ align_to_genome()
 	#is this what we want?
 }
 
-remove PCR duplicates()
-{
+# remove PCR duplicates()
+# {
 
-}
+# }
 
 methylation_calling()
 {
