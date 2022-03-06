@@ -17,9 +17,7 @@ main()
 	source ${PYTHON_ENV}/bin/activate 
 		if [[ $READ_TYPE == "single_end" ]]
 		then
-			alias python3='/usr/local/python-3.8.5/bin/python3.8'
-			echo which python 3 \#############
-			which python3
+			echo /###########################
 			/home/s.benjamin/bioinformatics_software/ovation-rrbs-methyl-seq__python3-env/bin/python3 -V
 			echo \#################################
 			# time trim_illumina_adapter_single_end $INPUT_FASTQ
