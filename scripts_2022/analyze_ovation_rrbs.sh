@@ -15,7 +15,8 @@ main()
 	
 	#activate python virtual enviorment
 	# source ${PYTHON_ENV}/bin/activate 
-	source /utemp/s.benjamin/test_ovation_rrbs_pipline/cutadapt-env/bin/activate
+	# source /utemp/s.benjamin/test_ovation_rrbs_pipline/cutadapt-env/bin/activate
+	source /home/s.benjamin/bioinformatics_software/cutadapt-env/bin/activate
 		if [[ $READ_TYPE == "single_end" ]]
 		then
 			time trim_illumina_adapter_single_end $INPUT_FASTQ
