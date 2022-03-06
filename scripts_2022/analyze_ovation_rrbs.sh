@@ -99,7 +99,8 @@ combine_methylation_coverage_to_tiles()
 	# cat mm9.chrom.sizes | grep -v -P 'X|Y|M' | awk '{OFS="\t"; for (i=1; i<=$2; i+=100) print $1,i,i+100-1}' > WholeGenome_100bpTiles.bed
 	
 	
-	
+	echo \###################$SCRIPT_NAME \($(date)\)#############
+	echo $SCRIPT_NAME runnig: combine_methylation_coverage_to_tiles $1 $2
 	TILE_SIZE=$1
 	MIN_COVERAGE=$2
 	
@@ -109,8 +110,9 @@ combine_methylation_coverage_to_tiles()
 	FileOut=$(echo ${METH_CALLING_OUTPUT} | awk -v tile_size=$TILE_SIZE -F "." '{print $1 "_" tile_size "bp_tiles.bed" }')
 	bedtools intersect -a /utemp/s.benjamin/genomic_reference_data/mm10_whole_genome_${TILE_SIZE}bpTiles.bed -b ${METH_CALLING_OUTPUT} -wa -wb | awk -v cov=${MIN_COVERAGE} -v tileSize=${TILE_SIZE} 'BEGIN {OFS="\t"; Prev=-1} {if ($2 == Prev) {T=T+$8+$9; M=M+$8} else {if (Prev!=-1 && T>=cov) {print PrevChr,Prev,Prev+tileSize-1,M/T};T=$8+$9; M=$8;}; Prev=$2; PrevChr=$1}' > ../${FileOut}
 
-
+	#nor sure what this is for
 	#bedtools unionbedg -names `du -a -L | grep Tiles | awk '{print $2}' | sort | awk -F'/' '{print $NF}' | awk -F'.' '{print $1}'` -header -filler NA -i `du -a -L | grep Tiles | awk '{print $2}' | sort` > 100bpTiles_Tiles_Cov10_Tissues.bed
+	echo \########################################################
 
 }
 

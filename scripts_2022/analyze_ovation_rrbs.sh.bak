@@ -22,7 +22,7 @@ main()
 			time align_to_genome
 			#TODO: remove PCR duplicates (optional #ASK_TZACHI)
 			time methylation_calling
-			time combine_methylation_coverage_to_tiles 100 10 #<tile_size> <min_coverage>
+			time combine_methylation_coverage_to_tiles 100 1 #<tile_size> <min_coverage>
 			
 		#else #if [[ READ_TYPE == "paired_end" ]]
 			#TODO
@@ -110,7 +110,7 @@ combine_methylation_coverage_to_tiles()
 	bedtools intersect -a /utemp/s.benjamin/genomic_reference_data/mm10_whole_genome_${TILE_SIZE}bpTiles.bed -b ${METH_CALLING_OUTPUT} -wa -wb | awk -v cov=${MIN_COVERAGE} -v tileSize=${TILE_SIZE} 'BEGIN {OFS="\t"; Prev=-1} {if ($2 == Prev) {T=T+$8+$9; M=M+$8} else {if (Prev!=-1 && T>=cov) {print PrevChr,Prev,Prev+tileSize-1,M/T};T=$8+$9; M=$8;}; Prev=$2; PrevChr=$1}' > ../${FileOut}
 
 
-	bedtools unionbedg -names `du -a -L | grep Tiles | awk '{print $2}' | sort | awk -F'/' '{print $NF}' | awk -F'.' '{print $1}'` -header -filler NA -i `du -a -L | grep Tiles | awk '{print $2}' | sort` > 100bpTiles_Tiles_Cov10_Tissues.bed
+	#bedtools unionbedg -names `du -a -L | grep Tiles | awk '{print $2}' | sort | awk -F'/' '{print $NF}' | awk -F'.' '{print $1}'` -header -filler NA -i `du -a -L | grep Tiles | awk '{print $2}' | sort` > 100bpTiles_Tiles_Cov10_Tissues.bed
 
 }
 
