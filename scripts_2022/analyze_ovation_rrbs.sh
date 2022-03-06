@@ -22,7 +22,7 @@ main()
 			time align_to_genome
 			#TODO: remove PCR duplicates (optional #ASK_TZACHI)
 			time methylation_calling
-			time combine_methylation_coverage_to_tiles 100 1 #<tile_size> <min_coverage>
+			time combine_methylation_coverage_to_tiles 100 10 #<tile_size> <min_coverage>
 			
 		#else #if [[ READ_TYPE == "paired_end" ]]
 			#TODO
@@ -42,7 +42,7 @@ trim_illumina_adapter_single_end()
 		#--cores 4 would then be: 4 (read) + 4 (write) + 4 (Cutadapt) + 2 (extra Cutadapt) + 1 (Trim Galore) = 15, and so forth.
 	echo \###################$SCRIPT_NAME \($(date)\)#############
 	echo runnig: trim_galore --adapter AGATCGGAAGAGC $1 --cores 4 \($(date)\)
-	${TRIM_GALORE} --adapter AGATCGGAAGAGC $1  --cores 4 --fastqc
+	${TRIM_GALORE} --adapter AGATCGGAAGAGC $1  --cores $N_CORES --fastqc
 	echo \########################################################
 }
 
@@ -66,8 +66,8 @@ align_to_genome()
 
 	echo \###################$SCRIPT_NAME \($(date)\)#############
 
-	echo $SCRIPT_NAME runnig: bismark --multicore 4 --bowtie2 $BISMARK_GENOME_LOCATION $TRIM_DIVERSITY_OUTPUT \($(date)\)
-	${BISMARK} --multicore 4 --bowtie2 $BISMARK_GENOME_LOCATION $TRIM_DIVERSITY_OUTPUT
+	echo $SCRIPT_NAME runnig: bismark --multicore $N_CORES --bowtie2 $BISMARK_GENOME_LOCATION $TRIM_DIVERSITY_OUTPUT \($(date)\)
+	${BISMARK} --multicore $N_CORES --bowtie2 $BISMARK_GENOME_LOCATION $TRIM_DIVERSITY_OUTPUT
 
 	echo \########################################################
 	
@@ -79,12 +79,12 @@ align_to_genome()
 methylation_calling()
 {
 	echo \###################$SCRIPT_NAME \($(date)\)#############
-	echo $SCRIPT_NAME runnig: /bismark_methylation_extractor --gzip --bedGraph --buffer_size 10G
+	echo $SCRIPT_NAME runnig: /bismark_methylation_extractor --multicore $N_CORES --bedGraph --buffer_size 10G --output methylation_extractor_output $ALIGNMENT_OUTPUT
 
 	ALIGNMENT_OUTPUT=$(echo $TRIM_DIVERSITY_OUTPUT | sed 's/\.fq\.gz/_bismark_bt2.bam/')
 	#By default, this mode will only consider cytosines in CpG context, but it can be extended to cytosines in any sequence context by using the option --CX
 	#ASK_TZACHI: all Cytosines, or only CpG context ?
-	 bismark_methylation_extractor --multicore 4 --bedGraph --buffer_size 10G --output methylation_extractor_output $ALIGNMENT_OUTPUT
+	 bismark_methylation_extractor --multicore $N_CORES --bedGraph --buffer_size 10G --output methylation_extractor_output $ALIGNMENT_OUTPUT
 	
 	echo \########################################################
 }
@@ -162,6 +162,14 @@ set_software_paths()
 	export PATH="$ADD_TO_PATH:$PATH"
 }
 
+help()
+{
+	cat << EOF
+	-single-end or -paired-end
+	-input_fastq_file
+	-n_cores
+EOF
+}
 
 arg_parse()
 {
@@ -177,6 +185,11 @@ arg_parse()
         ;;
      -input_fastq_file)
         INPUT_FASTQ="$2"
+        shift # past argument
+        shift # past value
+        ;;
+	-n_cores)
+        N_CORES="$2"
         shift # past argument
         shift # past value
         ;;

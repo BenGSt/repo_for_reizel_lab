@@ -22,7 +22,7 @@ main()
 			time align_to_genome
 			#TODO: remove PCR duplicates (optional #ASK_TZACHI)
 			time methylation_calling
-			time combine_methylation_coverage_to_tiles 100 1 #<tile_size> <min_coverage>
+			time combine_methylation_coverage_to_tiles 100 10 #<tile_size> <min_coverage>
 			
 		#else #if [[ READ_TYPE == "paired_end" ]]
 			#TODO
@@ -42,7 +42,7 @@ trim_illumina_adapter_single_end()
 		#--cores 4 would then be: 4 (read) + 4 (write) + 4 (Cutadapt) + 2 (extra Cutadapt) + 1 (Trim Galore) = 15, and so forth.
 	echo \###################$SCRIPT_NAME \($(date)\)#############
 	echo runnig: trim_galore --adapter AGATCGGAAGAGC $1 --cores 4 \($(date)\)
-	${TRIM_GALORE} --adapter AGATCGGAAGAGC $1  --cores 4 --fastqc
+	${TRIM_GALORE} --adapter AGATCGGAAGAGC $1  --cores $N_CORES --fastqc
 	echo \########################################################
 }
 
@@ -66,8 +66,8 @@ align_to_genome()
 
 	echo \###################$SCRIPT_NAME \($(date)\)#############
 
-	echo $SCRIPT_NAME runnig: bismark --multicore 4 --bowtie2 $BISMARK_GENOME_LOCATION $TRIM_DIVERSITY_OUTPUT \($(date)\)
-	${BISMARK} --multicore 4 --bowtie2 $BISMARK_GENOME_LOCATION $TRIM_DIVERSITY_OUTPUT
+	echo $SCRIPT_NAME runnig: bismark --multicore $N_CORES --bowtie2 $BISMARK_GENOME_LOCATION $TRIM_DIVERSITY_OUTPUT \($(date)\)
+	${BISMARK} --multicore $N_CORES --bowtie2 $BISMARK_GENOME_LOCATION $TRIM_DIVERSITY_OUTPUT
 
 	echo \########################################################
 	
@@ -79,12 +79,12 @@ align_to_genome()
 methylation_calling()
 {
 	echo \###################$SCRIPT_NAME \($(date)\)#############
-	echo $SCRIPT_NAME runnig: /bismark_methylation_extractor --gzip --bedGraph --buffer_size 10G
+	echo $SCRIPT_NAME runnig: /bismark_methylation_extractor --multicore $N_CORES --bedGraph --buffer_size 10G --output methylation_extractor_output $ALIGNMENT_OUTPUT
 
 	ALIGNMENT_OUTPUT=$(echo $TRIM_DIVERSITY_OUTPUT | sed 's/\.fq\.gz/_bismark_bt2.bam/')
 	#By default, this mode will only consider cytosines in CpG context, but it can be extended to cytosines in any sequence context by using the option --CX
 	#ASK_TZACHI: all Cytosines, or only CpG context ?
-	 bismark_methylation_extractor --multicore 4 --bedGraph --buffer_size 10G --output methylation_extractor_output $ALIGNMENT_OUTPUT
+	 bismark_methylation_extractor --multicore $N_CORES --bedGraph --buffer_size 10G --output methylation_extractor_output $ALIGNMENT_OUTPUT
 	
 	echo \########################################################
 }
@@ -99,7 +99,8 @@ combine_methylation_coverage_to_tiles()
 	# cat mm9.chrom.sizes | grep -v -P 'X|Y|M' | awk '{OFS="\t"; for (i=1; i<=$2; i+=100) print $1,i,i+100-1}' > WholeGenome_100bpTiles.bed
 	
 	
-	
+	echo \###################$SCRIPT_NAME \($(date)\)#############
+	echo $SCRIPT_NAME runnig: combine_methylation_coverage_to_tiles $1 $2
 	TILE_SIZE=$1
 	MIN_COVERAGE=$2
 	
@@ -109,8 +110,9 @@ combine_methylation_coverage_to_tiles()
 	FileOut=$(echo ${METH_CALLING_OUTPUT} | awk -v tile_size=$TILE_SIZE -F "." '{print $1 "_" tile_size "bp_tiles.bed" }')
 	bedtools intersect -a /utemp/s.benjamin/genomic_reference_data/mm10_whole_genome_${TILE_SIZE}bpTiles.bed -b ${METH_CALLING_OUTPUT} -wa -wb | awk -v cov=${MIN_COVERAGE} -v tileSize=${TILE_SIZE} 'BEGIN {OFS="\t"; Prev=-1} {if ($2 == Prev) {T=T+$8+$9; M=M+$8} else {if (Prev!=-1 && T>=cov) {print PrevChr,Prev,Prev+tileSize-1,M/T};T=$8+$9; M=$8;}; Prev=$2; PrevChr=$1}' > ../${FileOut}
 
-
+	#nor sure what this is for
 	#bedtools unionbedg -names `du -a -L | grep Tiles | awk '{print $2}' | sort | awk -F'/' '{print $NF}' | awk -F'.' '{print $1}'` -header -filler NA -i `du -a -L | grep Tiles | awk '{print $2}' | sort` > 100bpTiles_Tiles_Cov10_Tissues.bed
+	echo \########################################################
 
 }
 
@@ -160,6 +162,13 @@ set_software_paths()
 	export PATH="$ADD_TO_PATH:$PATH"
 }
 
+help()
+{
+	-single-end or -paired-end
+	-input_fastq_file
+	-n_cores
+	
+}
 
 arg_parse()
 {
@@ -175,6 +184,11 @@ arg_parse()
         ;;
      -input_fastq_file)
         INPUT_FASTQ="$2"
+        shift # past argument
+        shift # past value
+        ;;
+	-n_cores)
+        N_CORES="$2"
         shift # past argument
         shift # past value
         ;;

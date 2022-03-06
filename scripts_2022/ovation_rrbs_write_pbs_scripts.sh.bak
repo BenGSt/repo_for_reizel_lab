@@ -31,7 +31,7 @@ PBS_O_WORKDIR=$dir_name
 cd \$PBS_O_WORKDIR
 
 
-$script $READ_TYPE -input_fastq_file $sample >  $dir_name.log 2>&1
+$script $READ_TYPE -input_fastq_file $RAW_SAMPLES_DIR/$sample >  $dir_name.log 2>&1
 EOF
 		cd ..
 	done
@@ -60,6 +60,11 @@ arg_parse()
         shift # past argument
         shift # past value
         ;;		
+	 -n_cores)
+        N_CORES="$2"
+        shift # past argument
+        shift # past value
+        ;;
       -h|--help)
         help
         exit 1
@@ -75,8 +80,10 @@ cat << EOF
 	-single-end)
 	or
 	-paired-end)
+	
 	-raw_samples_dir)
 	-output_dir)
+	-n_cores)
 EOF
 }
 
