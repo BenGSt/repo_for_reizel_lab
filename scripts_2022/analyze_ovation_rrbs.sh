@@ -75,6 +75,10 @@ align_to_genome()
 	#is this what we want?
 }
 
+remove PCR duplicates()
+{
+
+}
 
 methylation_calling()
 {
@@ -116,6 +120,7 @@ combine_methylation_coverage_to_tiles()
 
 }
 
+
 set_software_paths()
 {
 
@@ -152,15 +157,19 @@ set_software_paths()
 	#bedtools v2.30.0
 	BEDTOOLS=/home/s.benjamin/bioinformatics_software/bedtools2/bin/bedtools
 	
+	#tecan nudup tool for pcr duplicates 
+	NUDUP=/home/s.benjamin/bioinformatics_software/nudup/nudup.py
+	
 	#add paths to executables
 	ADD_TO_PATH=""
-	for executable in $JAVA $PIGZ $TRIM_GALORE $BOWTIE2 $SAMTOOLS $BISMARK $FASTQC $BEDTOOLS
+	for executable in $JAVA $PIGZ $TRIM_GALORE $BOWTIE2 $SAMTOOLS $BISMARK $FASTQC $BEDTOOLS $NUDUP
 	do
 		
 		ADD_TO_PATH+=$(echo $executable | awk -F / 'NF{NF--};{OFS = FS; print $0}'):
 	done
 	export PATH="$ADD_TO_PATH:$PATH"
 }
+
 
 help()
 {
@@ -170,6 +179,7 @@ help()
 	-n_cores
 EOF
 }
+
 
 arg_parse()
 {

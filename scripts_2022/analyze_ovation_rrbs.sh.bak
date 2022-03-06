@@ -75,6 +75,10 @@ align_to_genome()
 	#is this what we want?
 }
 
+remove PCR duplicates()
+{
+
+}
 
 methylation_calling()
 {
@@ -164,10 +168,11 @@ set_software_paths()
 
 help()
 {
+	cat << EOF
 	-single-end or -paired-end
 	-input_fastq_file
 	-n_cores
-	
+EOF
 }
 
 arg_parse()
