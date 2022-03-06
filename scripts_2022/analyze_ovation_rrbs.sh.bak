@@ -89,7 +89,7 @@ methylation_calling()
 	echo \########################################################
 }
 
-combine_methylation_coverage_to_100bp_tiles()
+combine_methylation_coverage_to_tiles()
 {
 	#positional args: <tile_size> <min_coverage>
 
