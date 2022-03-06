@@ -103,7 +103,7 @@ combine_methylation_coverage_to_tiles()
 	TILE_SIZE=$1
 	MIN_COVERAGE=$2
 	
-	cd bismark_methylation_extractor_output/
+	cd methylation_extractor_output/
 	METH_CALLING_OUTPUT=$(ls |grep cov.gz)
 	# 100bp tiles variant 2: First calculate the tiles and then remove tiles with total coverage < 10
 	FileOut=$(echo ${METH_CALLING_OUTPUT} | awk -v tile_size=$TILE_SIZE -F "." '{print $1 "_" tile_size "bp_tiles.bed" }')
