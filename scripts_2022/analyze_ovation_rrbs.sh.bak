@@ -17,10 +17,7 @@ main()
 	source ${PYTHON_ENV}/bin/activate 
 		if [[ $READ_TYPE == "single_end" ]]
 		then
-			echo /###########################
-			/home/s.benjamin/bioinformatics_software/ovation-rrbs-methyl-seq__python3-env/bin/python3 -V
-			echo \#################################
-			# time trim_illumina_adapter_single_end $INPUT_FASTQ
+			time trim_illumina_adapter_single_end $INPUT_FASTQ
 			# time trim_diversity_adaptors
 			# time align_to_genome
 			##TODO: remove PCR duplicates (optional )

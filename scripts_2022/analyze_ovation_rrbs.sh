@@ -14,7 +14,8 @@ main()
 	set_software_paths
 	
 	#activate python virtual enviorment
-	source ${PYTHON_ENV}/bin/activate 
+	# source ${PYTHON_ENV}/bin/activate 
+	source /utemp/s.benjamin/test_ovation_rrbs_pipline/cutadapt-env/bin/activate
 		if [[ $READ_TYPE == "single_end" ]]
 		then
 			time trim_illumina_adapter_single_end $INPUT_FASTQ
