@@ -20,7 +20,7 @@ main()
 		cd $dir_name
 		
 		cat << EOF > ovation_rrbs_${dir_name}.q
-#!/bin/sh
+#!/bin/bash
 #PBS  -N  ovation_rrbs_${dir_name}
 #PBS  -q  zeus_all_q 
 #PBS  -m  abe
