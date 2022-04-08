@@ -14,9 +14,8 @@ main()
 	set_software_paths
 	
 	#activate python virtual enviorment
-	# source ${PYTHON_ENV}/bin/activate 
-	# source /utemp/s.benjamin/test_ovation_rrbs_pipline/cutadapt-env/bin/activate
-	source /home/s.benjamin/bioinformatics_software/cutadapt-env/bin/activate
+	# source /home/s.benjamin/bioinformatics_software/cutadapt-env/bin/activate
+	source ${PYTHON_ENV}/bin/activate 
 		if [[ $READ_TYPE == "single_end" ]]
 		then
 			time trim_illumina_adapter_single_end $INPUT_FASTQ
@@ -130,7 +129,7 @@ set_software_paths()
 	PYTHON3=/usr/bin/python3
 	#cutadapt version 3.7
 	#cutadapt is a python package installed in PYTHON_ENV.
-	PYTHON_ENV=/home/s.benjamin/bioinformatics_software/ovation-rrbs-methyl-seq__python3-env
+	PYTHON_ENV=/home/s.benjamin/bioinformatics_software/cutadapt-env/
 	
 	#java version "1.8.0_202"
 	JAVA=/usr/local/matlab2021b/sys/java/jre/glnxa64/jre/bin/java
