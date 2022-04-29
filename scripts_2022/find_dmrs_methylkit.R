@@ -282,6 +282,7 @@ no_prolong = function()
 
 
 ###__main__##
+if (argv$install-packeges) {install_packages}
 
 # Create a parser
 p <- arg_parser("Find DMRs with methylKit")
@@ -296,7 +297,7 @@ p <- add_argument(p, "--install-packeges", help="install requirements")
 
 # Parse the command line arguments
 argv <- parse_args(p)
-if (argv$install-packeges) {install_packages}
+
 
 library(methylKit)
 library(GenomicFeatures) # for getting annotation info
