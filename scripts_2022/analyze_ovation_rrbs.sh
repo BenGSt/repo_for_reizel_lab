@@ -88,6 +88,7 @@ methylation_calling()
 
 	ALIGNMENT_OUTPUT=$(echo $TRIM_DIVERSITY_OUTPUT | sed 's/\.fq\.gz/_bismark_bt2.bam/')
 	#By default, this mode will only consider cytosines in CpG context, but it can be extended to cytosines in any sequence context by using the option --CX
+	#ASK_TZACHI: all Cytosines, or only CpG context ?
 	 bismark_methylation_extractor --multicore $N_CORES --bedGraph --buffer_size 10G --output methylation_extractor_output $ALIGNMENT_OUTPUT
 	
 	echo \########################################################
