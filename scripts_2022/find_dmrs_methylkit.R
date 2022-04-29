@@ -6,9 +6,7 @@ install_packages = function()
 {
   if (!require("dplyr", quietly = TRUE))
     install.packages("dplyr")
-  
-  if (!require("argparser", quietly = TRUE))
-    install.packages("argparser")
+
   
   if (!require("BiocManager", quietly = TRUE))
     install.packages("BiocManager")
@@ -282,8 +280,11 @@ no_prolong = function()
 
 
 ###__main__##
-install_packages
-# if (argv$install-packeges) {install_packages}
+
+if (!require("argparser", quietly = TRUE))
+  install.packages("argparser")
+
+if (argv$install-packeges) {install_packages()}
 
 # Create a parser
 p <- arg_parser("Find DMRs with methylKit")
