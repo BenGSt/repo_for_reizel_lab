@@ -280,11 +280,11 @@ no_prolong = function()
 
 
 ###__main__##
-
-if (!require("argparser", quietly = TRUE))
-  install.packages("argparser")
-
-if (argv$install-packeges) {install_packages()}
+install_packages()
+# if (!require("argparser", quietly = TRUE))
+#   install.packages("argparser")
+# 
+# if (argv$install-packeges) {install_packages()}
 
 # Create a parser
 p <- arg_parser("Find DMRs with methylKit")
