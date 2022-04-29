@@ -7,6 +7,9 @@ install_packages = function()
   if (!require("dplyr", quietly = TRUE))
     install.packages("dplyr")
   
+  if (!require("argparser", quietly = TRUE))
+    install.packages("argparser")
+  
   if (!require("BiocManager", quietly = TRUE))
     install.packages("BiocManager")
   
