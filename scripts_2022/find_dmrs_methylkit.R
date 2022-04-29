@@ -1,12 +1,5 @@
 #!/usr/bin/env Rscript
 
-library(methylKit)
-library(GenomicFeatures) # for getting annotation info
-library(genomation) #for annotating 
-library(rGREAT)
-library(dplyr)
-library(argparser)
-
 
 
 install_packages = function()
@@ -300,10 +293,17 @@ p <- add_argument(p, "--install-packeges", help="install requirements")
 
 # Parse the command line arguments
 argv <- parse_args(p)
-if (argv$install-packeges) {install_packages()}
+if (argv$install-packeges) {install_packages}
+
+library(methylKit)
+library(GenomicFeatures) # for getting annotation info
+library(genomation) #for annotating 
+library(rGREAT)
+library(dplyr)
+library(argparser)
+
 treatments = strsplit(argv$treatments,' +')[[1]] %>% as.numeric
 samp_ids = strsplit(argv$samp_ids,' +')[[1]]
-
 
 main(argv$meth_call_files_dir, samp_ids, treatments, argv$pipeline, argv$output_dir)
 
