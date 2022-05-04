@@ -77,6 +77,10 @@ trim_diversity_adaptors()
 	else
 	  TRIM_GALORE_OUTPUT_1=$(echo $INPUT_INPUT_FASTQ_1 |awk -F / '{print $NF}'| sed 's/\(\.fastq\|.fq\)\.gz/_val_1.fq.gz/')
 	  TRIM_GALORE_OUTPUT_2=$(echo $INPUT_INPUT_FASTQ_2 |awk -F / '{print $NF}'| sed 's/\(\.fastq\|.fq\)\.gz/_val_2.fq.gz/')
+
+	  echo DEBUG
+	  echo TRIM_GALORE_OUTPUT_1 = $TRIM_GALORE_OUTPUT_1
+
 	  echo runnig: python2 $DIVERSITY_TRIM_SCRIPT -1 $TRIM_GALORE_OUTPUT_1 -2 $TRIM_GALORE_OUTPUT_2
 	  python2 $DIVERSITY_TRIM_SCRIPT -1 $TRIM_GALORE_OUTPUT_1 -2 $TRIM_GALORE_OUTPUT_2
 	fi
