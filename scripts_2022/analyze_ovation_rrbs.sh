@@ -94,7 +94,7 @@ align_to_genome()
 	else
     TRIM_DIVERSITY_OUTPUT_1=$(echo $TRIM_GALORE_OUTPUT_1 | sed 's/\.gz/_trimmed.fq.gz/')
     TRIM_DIVERSITY_OUTPUT_2=$(echo $TRIM_GALORE_OUTPUT_2 | sed 's/\.gz/_trimmed.fq.gz/')
-    COMMAND=$(echo $BISMARK --multicore $N_CORES --bowtie2 $BISMARK_GENOME_LOCATION -1 $TRIM_GALORE_OUTPUT_1 -2 $TRIM_DIVERSITY_OUTPUT_2)
+    COMMAND=$(echo $BISMARK --multicore $N_CORES --bowtie2 $BISMARK_GENOME_LOCATION -1 $TRIM_DIVERSITY_OUTPUT_1 -2 $TRIM_DIVERSITY_OUTPUT_2)
 	fi
 
   echo \###################$SCRIPT_NAME \($(date)\)#############
