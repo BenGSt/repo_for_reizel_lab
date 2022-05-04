@@ -1,0 +1,31 @@
+function write_table_for_heatmaps() #args : <path to all_samples_100bp_tiles.bed> 
+{
+    mkdir heatmaps
+    meth_scores_file=$1
+    for dmrs in dmrs_25p_hyper.bed dmrs_25p_hypo.bed; do
+        outfile=heatmaps/meth_scores_${dmrs}
+        head -1 $meth_scores_file > $outfile
+        bedtools intersect -wa -a $meth_scores_file -b $dmrs >> $outfile
+    done
+}
+
+
+
+
+#choose cov files
+cat  ../../../FAH1_names_barcodes.csv| grep -P 'YoungYoung|OldOld'| grep -v Prolong| awk 'BEGIN{FS=","; printf "\""}{printf $1"|"}'| sed 's/\(.*\)|/\1\"\n/'
+cp $(realpath  ../../../bismkark_meth_extractor_output/*| grep -P "AAGAGG|AAGCCT|ACCTCA|GCACTA|GTGCTT") ./   
+
+#find DMRs (cmd)
+"C:\Program Files\R\R-4.1.2\bin\Rscript.exe" "C:/Users/bengs/Nextcloud/Tzachi_bioinformatics/bioinformatics_repo/scripts_2022/find_dmrs_methylkit.R" -m "meth_cov_files" -s "YoungYoung YoungYoung OldOld OldOld OldOld" -t "1 1 0 0 0" -p "bismarkCoverage" -o "C:\Users\bengs\Nextcloud\Tzachi_bioinformatics\Fah_regeneration\more_dmrs\youngYoung_vs_Oldold"
+
+#heatmaps
+cd /mnt/c/Users/bengs/Nextcloud/Tzachi_bioinformatics/Fah_regeneration/more_dmrs/youngYoung_vs_Oldold
+write_table_for_heatmaps /mnt/c/Users/bengs/Nextcloud/Tzachi_bioinformatics/Fah_regeneration/all_samples_100bp_tiles.bed
+#Note: the table includes all samples and not only those used to find DMRs.
+ 
+#make png figures
+	
+"C:\Program Files\R\R-4.1.2\bin\Rscript.exe"  "C:/Users/bengs/Nextcloud/Tzachi_bioinformatics/bioinformatics_repo/scripts_2022/make_heatmap.R" --scores_bed_file meth_scores_dmrs_25p_hyper.bed --sample_names "YoungYoung YoungYoung OldOld YoungYoungProlong Young YoungYoungProlong OldOld Old Young OldOld Old" --include_samples_by_name "YoungYoung OldOld" --output_file heatmap_25p_hyper.png --title "Methylation Scores YoungYoung vs. OldOld" 
+
+#########

@@ -1,0 +1,86 @@
+######################################
+#convert thompsons sites to bed files
+######################################
+cat Thompson_2018_conserved_CpGs_elastic_net_coefficients.csv | sed 's/,/\t/g' | awk '{print $1, $2, $3}' | awk 'NR<=2{print $0}; NR>2{printf("%s\t%.0f\t%s\n",$1,$2,$3)}' | awk '{OFS="\t"; print $1, $2, $2, $3}' > Thompson_2018_conserved_CpGs_elastic_net_coefficients_mm10.bed
+
+cat Thompson_2018_all_CpGs_elastic_net_coefficients.csv | sed 's/,/\t/g' | awk '{print $1, $2, $3}' | awk 'NR<=2{print $0}; NR>2{printf("%s\t%.0f\t%s\n",$1,$2,$3)}' | awk '{OFS="\t"; print $1, $2, $2, $3}' > Thompson_2018_all_CpGs_elastic_net_coefficients_mm10.bed
+
+zcat GSE120137_MM10_EpigeneticAgeClock_RidgeRegression.csv.gz  | sed 's/,/\t/g' | awk '{OFS="\t";print $1,$2,$2,$3}' > Thompson_2018_all_CpGs_ridge_coefficients_mm10.bed
+#note: manually commnet first 2 lines
+
+#check how many of the sites are in our samples
+for sample in $(ls ../Fah_regeneration/bismkark_meth_extractor_output/); do echo $sample;  bedtools intersect -f 1 -a Thompson_2018_all_CpGs_elastic_net_coefficients_mm10.bed -b ../Fah_regeneration/bismkark_meth_extractor_output/$sample |  wc -l; done
+#####################################################################
+
+get_age_predictions() #<coefficients_file>, <sample_dir>
+{
+ intersept=$(awk 'NR==2{print $2}' $1)
+
+ #method 1 - missing CpGs are given methylation 0
+ for sample in $(ls $2)
+  do
+   printf $sample"\t"
+   bedtools intersect -wa -wb -f 1 -a $1 -b $2/$sample | awk 'BEGIN{print "#chr \tCpG_coordinate\tcoefficient\t%methylation\tcoeffXmeth"}; {printf("%s\t%d\t%.4f\t%.4f\t%.4f\n", $1,$2,$4,($8 / 100), $4*($8/100))}' | awk -v y=$intersept '{sum+=$5}; END{printf("%.2f\n", y + sum)}'
+  done
+}
+
+###########################################################
+#calculate age using all_CpGs_elastic_net_coefficients
+#missing CpGs are given methylation 0
+#Results seem reasonable
+##########################################################
+sample_dir=../Fah_regeneration/bismkark_meth_extractor_output/
+coefficients_file=Thompson_2018_all_CpGs_elastic_net_coefficients_mm10.bed
+get_age_predictions $coefficients_file $sample_dir
+
+
+###########################################################
+#calculate age using evolutionary conserved_CpGs_elastic_net_coefficients
+#missing CpGs are given methylation 0
+#Results too low
+##########################################################
+sample_dir=../Fah_regeneration/bismkark_meth_extractor_output/
+coefficients_file=Thompson_2018_conserved_CpGs_elastic_net_coefficients_mm10.bed
+get_age_predictions $coefficients_file $sample_dir
+
+
+###########################################################
+#calculate age using Thompson_2018_all_CpGs_ridge_coefficients_mm10
+#missing CpGs are given methylation 0
+#Results too low
+##########################################################
+sample_dir=../Fah_regeneration/bismkark_meth_extractor_output/
+coefficients_file=Thompson_2018_all_CpGs_ridge_coefficients_mm10.bed
+get_age_predictions $coefficients_file $sample_dir
+
+
+
+########
+notes
+########
+
+
+intersept=$(awk 'NR==2{print $2}' $coefficients_file)
+
+#method 1 - missing CpGs are given methylation 0
+for sample in $(ls $sample_dir)
+ do
+  printf $sample"\t"
+  bedtools intersect -wa -wb -f 1 -a $coefficients_file -b $sample_dir/$sample | awk 'BEGIN{print "#chr\tCpG_coordinate\tcoefficient\t%methylation\tcoeffXmeth"}; {printf("%s\t%d\t%.4f\t%.4f\t%.4f\n", $1,$2,$4,($8 / 100), $4*($8/100))}' | awk -v y=$intersept '{sum+=$5}; END{printf("%.2f\n", y + sum)}'
+ done
+
+
+#method 2 - tried givign missing CpGs a methylation 0.5 - dosn't work well getting numbers that are too high ~80
+missing CpGs are given methylation sample_avg_meth (~0.4) - dosn't work well getting numbers that are too high ~70
+#TODO: get avg values from large dataset containing these missing sites? 
+
+
+for sample in $(ls ../Fah_regeneration/bismkark_meth_extractor_output/)
+ do
+  printf $sample"\t"
+  sample_avg_meth=$( zcat $sample_dir/$sample | awk '{avg+=$4} END{print (avg/NR)/100}')
+  bedtools subtract -f 1 -a $coefficients_file -b $sample_dir/$sample | awk -v meth_val=$sample_avg_meth '{OFS="\t"; print $0, meth_val}'  > missing_CpGs.bed
+
+  cat   <(bedtools intersect -wa -wb -f 1 -a $coefficients_file -b $sample_dir/$sample |  awk 'BEGIN{print "#chr\tCpG_coordinate\tcoefficient\t%methylation\tcoeffXmeth"}; {printf("%s\t%d\t%.4f\t%.4f\t%.4f\n", $1,$2,$4,($8 / 100), $4*($8/100))}' ) missing_CpGs.bed | awk -v y=$intersept '{sum+=$5}; END{printf("%.2f\n", y + sum)}'
+ done
+##########################################################

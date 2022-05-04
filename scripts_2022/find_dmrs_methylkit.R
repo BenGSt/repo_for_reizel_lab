@@ -4,18 +4,21 @@
 
 install_packages = function()
 {
+  if (!require("argparser", quietly = TRUE))
+    install.packages("argparser", dependencies = TRUE)
+  
   if (!require("dplyr", quietly = TRUE))
-    install.packages("dplyr")
+    install.packages("dplyr", dependencies = TRUE)
 
   
   if (!require("BiocManager", quietly = TRUE))
-    install.packages("BiocManager")
+    install.packages("BiocManager", dependencies = TRUE)
   
-  BiocManager::install("methylKit")
-  BiocManager::install("GenomicFeatures")
-  install.packages("RMariaDB") # needed for makeTxDbFromUCSC from "GenomicFeatures"
-  BiocManager::install("genomation")
-  BiocManager::install("rGREAT")
+  BiocManager::install("methylKit", dependencies = TRUE)
+  BiocManager::install("GenomicFeatures", dependencies = TRUE)
+  install.packages("RMariaDB", dependencies = TRUE) # needed for makeTxDbFromUCSC from "GenomicFeatures"
+  BiocManager::install("genomation", dependencies = TRUE)
+  BiocManager::install("rGREAT", dependencies = TRUE)
   
 }
 
@@ -104,8 +107,8 @@ main = function(meth_call_files_dir, samp_ids, treatments, pipeline, output_dir)
 {
   if (! dir.exists(output_dir)){dir.create(output_dir)}
   setwd(output_dir)
-  dir.create("figures")
-  setwd(str_c(out_dir, "/figures"))
+  if (! dir.exists("figures")){dir.create("figures")}
+  setwd(str_c(output_dir, "/figures"))
   
   tiles_raw_Cov10_unite=make_tiles(meth_call_files_dir, pipeline, samp_ids,
                                     treatments)
@@ -129,9 +132,11 @@ main = function(meth_call_files_dir, samp_ids, treatments, pipeline, output_dir)
   # get hypo methylated bases
   dmrs_25p_hypo = getMethylDiff(tiles_raw_Cov10_unite_DMRs,difference=25,
                                 qvalue=0.01,type="hypo")
-  # visualize the distribution of hypo/hyper-methylated bases/regions per chromosome 
+  # visualize the distribution of hypo/hyper-methylated bases/regions per chromosome
+  png("meth_diff_per_chr.png")
   diffMethPerChr(tiles_raw_Cov10_unite_DMRs,plot=TRUE,qvalue.cutoff=0.01,
                  meth.cutoff=25)
+  dev.off()
   
   
   #write methDiff files
@@ -140,17 +145,18 @@ main = function(meth_call_files_dir, samp_ids, treatments, pipeline, output_dir)
   write.table(dmrs_25p_hypo, str_c(output_dir,"/dmrs_25p_hypo.tsv"),sep="\t")
   
   #write bed files (only chr start end)
-  write.table(getData(dmrs_25p_hyper)[,1:3], str_c(output_dir,"dmrs_25p_hyper.bed"),sep="\t", row.names = FALSE, col.names = FALSE, quote = FALSE)
+  write.table(getData(dmrs_25p_hyper)[,1:3], str_c(output_dir,"/dmrs_25p_hyper.bed"),sep="\t", row.names = FALSE, col.names = FALSE, quote = FALSE)
   write.table(getData(dmrs_25p_hypo)[,1:3], str_c(output_dir,"/dmrs_25p_hypo.bed"),sep="\t",  row.names = FALSE , col.names = FALSE, quote = FALSE)
-  write.table(getData(tiles_raw_Cov10_unite)[,1:3], str_c(output_dir,"all_100bp_tiles_united.bed"),sep="\t",  row.names = FALSE , col.names = FALSE, quote = FALSE)
+  write.table(getData(tiles_raw_Cov10_unite)[,1:3], str_c(output_dir,"/all_100bp_tiles_united.bed"),sep="\t",  row.names = FALSE , col.names = FALSE, quote = FALSE)
   #bg for graet
-  write.table(rbind(getData(dmrs_25p_hyper)[,1:3], getData(dmrs_25p_hypo)[,1:3], sample_n(getData(tiles_raw_Cov10_unite)[,1:3], 3000)) %>% unique(), str_c(output_dir,"dmrs_plus_random_3000_100bp_tiles.bed") ,sep="\t",  row.names = FALSE , col.names = FALSE, quote = FALSE)
-  write.table(rbind(getData(dmrs_25p_hyper)[,1:3], getData(dmrs_25p_hypo)[,1:3], sample_n(getData(tiles_raw_Cov10_unite)[,1:3], 5000)) %>% unique(), str_c(output_dir, "dmrs_plus_random_5000_100bp_tiles.bed"),sep="\t",  row.names = FALSE , col.names = FALSE, quote = FALSE)
-  write.table(rbind(getData(dmrs_25p_hyper)[,1:3], getData(dmrs_25p_hypo)[,1:3], sample_n(getData(tiles_raw_Cov10_unite)[,1:3], 50000)) %>% unique(), str_c(output_dir,"dmrs_plus_random_50000_100bp_tiles.bed"),sep="\t",  row.names = FALSE , col.names = FALSE, quote = FALSE)
+  write.table(rbind(getData(dmrs_25p_hyper)[,1:3], getData(dmrs_25p_hypo)[,1:3], sample_n(getData(tiles_raw_Cov10_unite)[,1:3], 3000)) %>% unique(), str_c(output_dir,"/_dmrs_plus_random_3000_100bp_tiles.bed") ,sep="\t",  row.names = FALSE , col.names = FALSE, quote = FALSE)
+  write.table(rbind(getData(dmrs_25p_hyper)[,1:3], getData(dmrs_25p_hypo)[,1:3], sample_n(getData(tiles_raw_Cov10_unite)[,1:3], 5000)) %>% unique(), str_c(output_dir, "/_dmrs_plus_random_5000_100bp_tiles.bed"),sep="\t",  row.names = FALSE , col.names = FALSE, quote = FALSE)
+  write.table(rbind(getData(dmrs_25p_hyper)[,1:3], getData(dmrs_25p_hypo)[,1:3], sample_n(getData(tiles_raw_Cov10_unite)[,1:3], 50000)) %>% unique(), str_c(output_dir,"/_dmrs_plus_random_50000_100bp_tiles.bed"),sep="\t",  row.names = FALSE , col.names = FALSE, quote = FALSE)
   
   
   
   #get annotation info
+  # TODO: add option to point to a KnownGenes.bed file and don't download every time
   mm10KG_txdb <- makeTxDbFromUCSC(genome="mm10", tablename="knownGene")
   bed_path <- file.path(output_dir, "mm10KnownGenes.bed")
   rtracklayer::export(asBED(mm10KG_txdb), bed_path)
@@ -280,12 +286,19 @@ no_prolong = function()
 
 
 ###__main__##
-install_packages()
+# install_packages()
 # if (!require("argparser", quietly = TRUE))
 #   install.packages("argparser")
 # 
 # if (argv$install-packeges) {install_packages()}
 
+library(argparser, quietly=T)
+library(methylKit, quietly=TRUE)
+library(GenomicFeatures, quietly=T) # for getting annotation info
+library(genomation, quietly=T) #for annotating 
+library(rGREAT, quietly=T)
+library(dplyr, quietly=T)
+library(stringr, quietly=T)
 # Create a parser
 p <- arg_parser("Find DMRs with methylKit")
 
@@ -298,15 +311,12 @@ p <- add_argument(p, "--output_dir", help="directory to save the results in", sh
 p <- add_argument(p, "--install-packeges", help="install requirements")
 
 # Parse the command line arguments
+
 argv <- parse_args(p)
 
 
-library(methylKit)
-library(GenomicFeatures) # for getting annotation info
-library(genomation) #for annotating 
-library(rGREAT)
-library(dplyr)
-library(argparser)
+
+
 
 treatments = strsplit(argv$treatments,' +')[[1]] %>% as.numeric
 samp_ids = strsplit(argv$samp_ids,' +')[[1]]
