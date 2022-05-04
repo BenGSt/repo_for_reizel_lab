@@ -121,9 +121,8 @@ methylation_calling()
 	  #By default, this mode will only consider cytosines in CpG context, but it can be extended to cytosines in any sequence context by using the option --CX
     COMMAND=$(echo bismark_methylation_extractor --multicore $N_CORES --bedGraph --buffer_size 10G --output methylation_extractor_output $ALIGNMENT_OUTPUT)
 	else
-	  ALIGNMENT_OUTPUT_1=$(echo $TRIM_DIVERSITY_OUTPUT_1 | sed 's/\.fq\.gz/_bismark_bt2.bam/')
-	  ALIGNMENT_OUTPUT_2=$(echo $TRIM_DIVERSITY_OUTPUT_2 | sed 's/\.fq\.gz/_bismark_bt2.bam/')
-    COMMAND=$(echo bismark_methylation_extractor -p --multicore $N_CORES --bedGraph --buffer_size 10G --output methylation_extractor_output $ALIGNMENT_OUTPUT_1 $ALIGNMENT_OUTPUT_2)
+	  ALIGNMENT_OUTPUT=$(echo $TRIM_DIVERSITY_OUTPUT_1 | sed 's/\.fq\.gz/_bismark_bt2_pe.bam/')
+    COMMAND=$(echo bismark_methylation_extractor -p --multicore $N_CORES --bedGraph --buffer_size 10G --output methylation_extractor_output $ALIGNMENT_OUTPUT)
 	fi
 
 	echo \###################$SCRIPT_NAME \($(date)\)#############
