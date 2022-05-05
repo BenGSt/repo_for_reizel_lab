@@ -10,19 +10,33 @@ main()
 	if [[ ! -d $OUTPUT_DIR ]]; then
 		mkdir $OUTPUT_DIR
 	fi
-	
 	cd $OUTPUT_DIR
 
-	for sample in $(ls $RAW_SAMPLES_DIR| grep -P 'fastq|fq' | grep -v md5)
+  if [[ $READ_TYPE == "single_end" ]] ; then
+    sample_list=$(ls $RAW_SAMPLES_DIR| grep -P 'fastq|fq' | grep -v md5)
+	else
+    sample_list=$(ls $RAW_SAMPLES_DIR| grep R1 |grep -P 'fastq|fq' | grep -v md5)
+	fi
+
+
+	for sample in $samle_list
 	do
-		dir_name=$(echo $sample | awk -F . '{print $1}')
+	  if [[ $READ_TYPE == "single_end" ]] ; then
+      dir_name=$(echo $sample| awk -F . '{print $1}')
+      script_args=$(echo -n_cores $N_CORES $READ_TYPE -input_fastq_file $RAW_SAMPLES_DIR/$sample \>  $dir_name.log 2\>\&1)
+	  else
+	    r1=$sample
+	    r2=$(echo $sample| sed 's/R1/R2/')
+      dir_name=$(echo $sample| awk -F . '{print $1}'| sed 's/R1_//')
+      script_args=$(echo -n_cores $N_CORES $READ_TYPE -paired_input_fastq_files $RAW_SAMPLES_DIR/${r1} $RAW_SAMPLES_DIR/${r2} \>  $dir_name.log 2\>\&1)
+	  fi
+
 		mkdir $dir_name
 		cd $dir_name
-		
 		cat << EOF > ovation_rrbs_${dir_name}.q
 #!/bin/bash
 #PBS  -N  ovation_rrbs_${dir_name}
-#PBS  -q  zeus_all_q 
+#PBS  -q  zeus_all_q
 #PBS  -m  abe
 #PBS  -M  s.benjamin@technion.ac.il
 #PBS  -l select=1:ncpus=${N_CORES}
@@ -32,7 +46,7 @@ PBS_O_WORKDIR=$(pwd)
 cd \$PBS_O_WORKDIR
 
 
-$script -n_cores $N_CORES $READ_TYPE -input_fastq_file $RAW_SAMPLES_DIR/$sample >  $dir_name.log 2>&1
+$script $script_args
 
 EOF
 		cd ..
