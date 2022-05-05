@@ -17,6 +17,7 @@ main()
   if [[ $READ_TYPE == "single_end" ]] ; then
     sample_list=$(ls $RAW_SAMPLES_DIR| grep -P 'fastq|fq' | grep -v md5)
 	else
+	  echp pe #debug
     sample_list=$(ls $RAW_SAMPLES_DIR| grep R1 |grep -P 'fastq|fq' | grep -v md5)
 	fi
 
