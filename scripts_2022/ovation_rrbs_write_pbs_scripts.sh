@@ -17,7 +17,7 @@ main()
   if [[ $READ_TYPE == "single_end" ]] ; then
     sample_list=$(ls $RAW_SAMPLES_DIR| grep -P 'fastq|fq' | grep -v md5)
 	else
-	  echp pe #debug
+	  echo pe #debug
     sample_list=$(ls $RAW_SAMPLES_DIR| grep R1 |grep -P 'fastq|fq' | grep -v md5)
 	fi
 
@@ -25,6 +25,7 @@ main()
 	for sample in $samle_list
 	do
 	  if [[ $READ_TYPE == "single_end" ]] ; then
+	    echo se #debug
       dir_name=$(echo $sample| awk -F . '{print $1}')
       script_args=$(echo -n_cores $N_CORES $READ_TYPE -input_fastq_file $RAW_SAMPLES_DIR/$sample \>  $dir_name.log 2\>\&1)
 	  else
