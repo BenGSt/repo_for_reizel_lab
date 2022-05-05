@@ -27,6 +27,8 @@ main()
       dir_name=$(echo $sample| awk -F . '{print $1}')
       script_args=$(echo -n_cores $N_CORES $READ_TYPE -input_fastq_file $RAW_SAMPLES_DIR/$sample \>  $dir_name.log 2\>\&1)
 	  else
+	    echo sample = $sample
+	    echp pe #debug
 	    r1=$sample
 	    r2=$(echo $sample| sed 's/R1/R2/')
       dir_name=$(echo $sample| awk -F . '{print $1}'| sed 's/R1_//')
