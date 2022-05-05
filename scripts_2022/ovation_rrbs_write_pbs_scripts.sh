@@ -22,7 +22,7 @@ main()
 	fi
 
 
-	for sample in $samle_list
+	for sample in $sample_list
 	do
 	  if [[ $READ_TYPE == "single_end" ]] ; then
 	    echo se #debug
