@@ -3,6 +3,8 @@
 
 main()
 {
+
+
 	arg_parse "$@"
 	
 	script=/home/s.benjamin/bioinformatics_software/repo_for_reizel_lab/scripts_2022/analyze_ovation_rrbs.sh
@@ -93,6 +95,8 @@ arg_parse()
 help()
 {
 cat << EOF
+  makes a directory for each sample and writes a pbs script ready to be run with qsub to it.
+
 	-single-end)
 	or
 	-paired-end)
