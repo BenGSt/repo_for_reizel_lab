@@ -33,6 +33,7 @@ main()
       script_args=$(echo -n_cores $N_CORES $READ_TYPE -paired_input_fastq_files $RAW_SAMPLES_DIR/${r1} $RAW_SAMPLES_DIR/${r2} \>  $dir_name.log 2\>\&1)
 	  fi
 
+    echo mkdir $dir_name #debug
 		mkdir $dir_name
 		cd $dir_name
 		cat << EOF > ovation_rrbs_${dir_name}.q
