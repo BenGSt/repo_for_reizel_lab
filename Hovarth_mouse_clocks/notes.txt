@@ -103,14 +103,15 @@ for sample in $(ls ../Fah_regeneration/bismkark_meth_extractor_output/)
 
 ### method 3 substitute missing CpG meth score with there 100 bp tile score ####
 
+all_samp_tiles=../Fah_regeneration/all_samples_100bp_tiles.bed
 for sample in $(ls ../Fah_regeneration/bismkark_meth_extractor_output/)
  do
-  all_samp_tiles=../Fah_regeneration/all_samples_100bp_tiles.bed
   barcode=$(echo $sample| sed  's/.*_\([A-Z]\{6\}\)_.*$/\1/')
   sample_column=$(awk -v barcode=$barcode 'NR==1{for (i=0;i<=NF;i++) {if ($i==barcode) print i}}' $all_samp_tiles)
-
+  cut -f 1,2,3,$sample_column $all_samp_tiles  > 100_bp_tiles.bed
   bedtools subtract -f 1 -a $coefficients_file -b $sample_dir/$sample  > missing_CpGs.bed
+  bedtools intersect -wa -wb -f 1 -a missing_CpGs.bed -b 100_bp_tiles.bed | awk '{print $1, $2, $4, $8, $4*$8}' > missing_CpGs_scored_by_tile.bed
 
-  cat   <(bedtools intersect -wa -wb -f 1 -a $coefficients_file -b $sample_dir/$sample |  awk 'BEGIN{print "#chr\tCpG_coordinate\tcoefficient\t%methylation\tcoeffXmeth"}; {printf("%s\t%d\t%.4f\t%.4f\t%.4f\n", $1,$2,$4,($8 / 100), $4*($8/100))}' ) missing_CpGs.bed | awk -v y=$intersept '{sum+=$5}; END{printf("%.2f\n", y + sum)}'
+  cat   <(bedtools intersect -wa -wb -f 1 -a $coefficients_file -b $sample_dir/$sample |  awk 'BEGIN{print "#chr\tCpG_coordinate\tcoefficient\t%methylation\tcoeffXmeth"}; {printf("%s\t%d\t%.4f\t%.4f\t%.4f\n", $1,$2,$4,($8 / 100), $4*($8/100))}' ) missing_CpGs_scored_by_tile.bed | awk -v y=$intersept '{sum+=$5}; END{printf("%.2f\n", y + sum)}'
  done
 ##########################################################

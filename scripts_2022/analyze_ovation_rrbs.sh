@@ -122,8 +122,8 @@ methylation_calling()
     COMMAND=$(echo bismark_methylation_extractor --multicore $N_CORES --bedGraph --buffer_size 10G --output methylation_extractor_output $ALIGNMENT_OUTPUT)
 	else
 	  ALIGNMENT_OUTPUT=$(echo $TRIM_DIVERSITY_OUTPUT_1 | sed 's/\.fq\.gz/_bismark_bt2_pe.bam/')
-	  mv $ALIGNMENT_OUTPUT $(echo $ALIGNMENT_OUTPUT | sed 's/_R1_val_1//')
-	  ALIGNMENT_OUTPUT=$(echo $ALIGNMENT_OUTPUT | sed 's/_R1_val_1//')
+	  mv $ALIGNMENT_OUTPUT $(echo $ALIGNMENT_OUTPUT | sed 's/_R1_001_val_1//')
+	  ALIGNMENT_OUTPUT=$(echo $ALIGNMENT_OUTPUT | sed 's/_R1_001_val_1//')
 	  # TODO: looks like bismark wrote one bam for the 2 paired files,
 	    # but it's name includes the R1 name I changed the name - make sure the bam file really represents both
     COMMAND=$(echo bismark_methylation_extractor -p --multicore $N_CORES --bedGraph --buffer_size 10G --output methylation_extractor_output $ALIGNMENT_OUTPUT)
