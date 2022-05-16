@@ -177,8 +177,8 @@ set_software_paths()
 	#trim_galore version 0.6.8 (15 01 2022)
 	TRIM_GALORE=/home/s.benjamin/bioinformatics_software/TrimGalore/trim_galore
 	
-	#Bowtie 2 version 2.2.3
-	BOWTIE2=/usr/local/bin/bowtie2
+	#Bowtie 2 version 2.4.5
+	BOWTIE2=/home/s.benjamin/bioinformatics_software/bowtie2-2.4.5-linux-x86_64
 	
 	#samtools version 0.1.19-44428cd
 	SAMTOOLS=/usr/local/samtools/bin/samtools
