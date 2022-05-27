@@ -156,7 +156,7 @@ main = function(meth_call_files_dir, samp_ids, treatments, pipeline, output_dir,
   write.table(rbind(getData(dmrs_25p_hyper)[,1:3], getData(dmrs_25p_hypo)[,1:3], sample_n(getData(tiles_raw_Cov10_unite)[,1:3], 50000)) %>% unique(), str_c(dir_name,"_dmrs_plus_random_50000_100bp_tiles.bed"),sep="\t",  row.names = FALSE , col.names = FALSE, quote = FALSE)
   
   
-  if (!is.null(known_genes_file))
+  if (is.null(known_genes_file))
   {
     #get annotation info
     # TODO: add option to point to a KnownGenes.bed file and don't download every time
