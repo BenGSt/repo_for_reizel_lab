@@ -91,6 +91,7 @@ make_tiles = function(meth_call_files_dir, pipeline, samp_ids,
 #'                    are found as the difference between  1 - 0 groups (1 - treated , 0 - control)
 #' @param pipeline name of the alignment pipeline, it can be either "amp", "bismark","bismarkCoverage", "bismarkCytosineReport" or a list (default:'amp'). See methylkit documentation for more details.
 #' @param output_dir directory to save the results in
+#' @param known_genes_file for annotation
 #'
 #' @return
 #' @export methdiff files , bed files, figures
@@ -103,7 +104,7 @@ make_tiles = function(meth_call_files_dir, pipeline, samp_ids,
 #' setwd("C:/Users/bengs/Nextcloud/Tzachi_bioinformatics/Fah_regeneration")
 #' dir.create("figures")
 #' setwd("C:/Users/bengs/Nextcloud/Tzachi_bioinformatics/Fah_regeneration/figures")
-main = function(meth_call_files_dir, samp_ids, treatments, pipeline, output_dir)
+main = function(meth_call_files_dir, samp_ids, treatments, pipeline, output_dir, known_genes_file)
 {
   if (! dir.exists(output_dir)){dir.create(output_dir)}
   setwd(output_dir)
@@ -155,12 +156,17 @@ main = function(meth_call_files_dir, samp_ids, treatments, pipeline, output_dir)
   write.table(rbind(getData(dmrs_25p_hyper)[,1:3], getData(dmrs_25p_hypo)[,1:3], sample_n(getData(tiles_raw_Cov10_unite)[,1:3], 50000)) %>% unique(), str_c(dir_name,"_dmrs_plus_random_50000_100bp_tiles.bed"),sep="\t",  row.names = FALSE , col.names = FALSE, quote = FALSE)
   
   
+  if (!is.null(known_genes_file))
+  {
+    #get annotation info
+    # TODO: add option to point to a KnownGenes.bed file and don't download every time
+    mm10KG_txdb <- makeTxDbFromUCSC(genome="mm10", tablename="knownGene")
+    bed_path <- file.path(output_dir, "mm10KnownGenes.bed")
+    rtracklayer::export(asBED(mm10KG_txdb), bed_path)
+  }
+  else 
+    bed_path = known_genes_file
   
-  #get annotation info
-  # TODO: add option to point to a KnownGenes.bed file and don't download every time
-  mm10KG_txdb <- makeTxDbFromUCSC(genome="mm10", tablename="knownGene")
-  bed_path <- file.path(output_dir, "mm10KnownGenes.bed")
-  rtracklayer::export(asBED(mm10KG_txdb), bed_path)
   
   #annotate DMRs
   gene.obj=readTranscriptFeatures(bed_path)
@@ -213,6 +219,7 @@ p <- add_argument(p, "--samp_ids", help="vector with the names of the samples (m
 p <- add_argument(p, "--treatments", help="vector with the condition of each sample (0 or 1) the dmrs are found as the difference between  1 - 0 groups (1 - treated , 0 - control)", short="-t")
 p <- add_argument(p, "--pipeline", help="name of the alignment pipeline, it can be either amp, bismark,bismarkCoverage, bismarkCytosineReport or a list. See methylkit documentation for more details.", short="-p")
 p <- add_argument(p, "--output_dir", help="directory to save the results in", short="-o")
+p <- add_argument(p, "--known_genes_file", help="annotaion info e.g. mm10KnownGenes.bed, if none is given will be downloaded")
 p <- add_argument(p, "--install-packeges", help="install requirements")
 
 # Parse the command line arguments
@@ -225,6 +232,7 @@ argv <- parse_args(p)
 
 treatments = strsplit(argv$treatments,' +')[[1]] %>% as.numeric
 samp_ids = strsplit(argv$samp_ids,' +')[[1]]
+known_genes_file = argv$known_genes_file
 
-main(argv$meth_call_files_dir, samp_ids, treatments, argv$pipeline, argv$output_dir)
+main(argv$meth_call_files_dir, samp_ids, treatments, argv$pipeline, argv$output_dir,known_genes_file)
 
