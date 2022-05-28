@@ -6,7 +6,7 @@
 
 function main() #args : <path to all_samples_100bp_tiles.bed> <sample_dir>
 {
-	cd $sample_dir
+	cd $2
     mkdir heatmaps
     meth_scores_file=$1
     for dmrs in dmrs_25p_hyper.bed dmrs_25p_hypo.bed; do
