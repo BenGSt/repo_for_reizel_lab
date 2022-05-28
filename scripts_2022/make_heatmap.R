@@ -27,33 +27,29 @@ main = function(scores_bed_file, sample_names=NULL, include_samples_by_name=NULL
   dev.off()
 }
 
-# scores_bed_file = "C:/Users/bengs/Nextcloud/Tzachi_bioinformatics/Fah_regeneration/more_dmrs/youngYoung_vs_Oldold/heatmaps/meth_scores_dmrs_25p_hypo.bed"
-# sample_names = "YoungYoung YoungYoung OldOld YoungYoungProlong Young YoungYoungProlong OldOld Old Young OldOld Old"
-# include_samples_by_name = "YoungYoung OldOld"
-# output_file = "C:/Users/bengs/Nextcloud/Tzachi_bioinformatics/Fah_regeneration/more_dmrs/youngYoung_vs_Oldold/heatmaps/test.png"
 
 # Create a parser
 p <- arg_parser("Make DMRs heatmap")
 
 # Add command line arguments
 p <- add_argument(p, "--scores_bed_file", short="-m", help="bed file with methylation scores for the samples")
-p <- add_argument(p, "--sample_names", short="-s", help="string with the names of the samples seperated by space (optional)", default=NULL)
+p <- add_argument(p, "--sample_names", short="-s", help="string with the names of the samples seperated by \"-\" (optional)", default=NULL)
 p <- add_argument(p, "--include_samples_by_name", short="-i", help="names of the samples to include in the heatmap (subset of sample_names)", default=NULL)
 p <- add_argument(p, "--output_file", short="-o", help="path to output png", default = "heatmap.png")
-p <- add_argument(p, "--title", short="-t", help="plot title", default = "Methylation Scores\n test newline")
+p <- add_argument(p, "--title", short="-t", help="plot title", default = "Methylation Scores Heatmap")
 
 # Parse the command line arguments
 argv <- parse_args(p)
 
 
-if (! is.na(argv$sample_name)){
-  sample_names = strsplit(argv$sample_names,' +')[[1]]
+if (! is.na(argv$sample_names)){
+  sample_names = strsplit(argv$sample_names,'-')[[1]]
 } else {
   sample_names = NULL
   }
 
 if (! is.na(argv$include_samples_by_name)) {
-  include_samples_by_name = strsplit(argv$include_samples_by_name,' +')[[1]]
+  include_samples_by_name = strsplit(argv$include_samples_by_name,'-')[[1]]
 } else {
   include_samples_by_name = NULL
 }
