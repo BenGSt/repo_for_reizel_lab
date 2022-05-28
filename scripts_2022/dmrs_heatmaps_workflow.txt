@@ -19,6 +19,9 @@ cp $(realpath  ../../../bismkark_meth_extractor_output/*| grep -P "AAGAGG|AAGCCT
 #find DMRs (cmd)
 "C:\Program Files\R\R-4.1.2\bin\Rscript.exe" "C:/Users/bengs/Nextcloud/Tzachi_bioinformatics/bioinformatics_repo/scripts_2022/find_dmrs_methylkit.R" -m "meth_cov_files" -s "YoungYoung YoungYoung OldOld OldOld OldOld" -t "1 1 0 0 0" -p "bismarkCoverage" -o "C:\Users\bengs\Nextcloud\Tzachi_bioinformatics\Fah_regeneration\more_dmrs\youngYoung_vs_Oldold"
 
+#make all_samples_100bp_tiles.bed
+bedtools unionbedg -names $(find | grep 100bp | grep -v 56pBS_S7_L002_001 | awk -F / '{print $2}' | sed 's/_001//')  -header -filler NA -i $(find | grep 100bp | grep -v 56pBS_S7_L002_001)  > all_samples_100bp_tiles.bed
+
 #heatmaps
 cd /mnt/c/Users/bengs/Nextcloud/Tzachi_bioinformatics/Fah_regeneration/more_dmrs/youngYoung_vs_Oldold
 write_table_for_heatmaps /mnt/c/Users/bengs/Nextcloud/Tzachi_bioinformatics/Fah_regeneration/all_samples_100bp_tiles.bed
