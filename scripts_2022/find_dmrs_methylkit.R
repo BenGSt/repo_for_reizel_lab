@@ -217,8 +217,8 @@ p <- arg_parser("Find DMRs with methylKit")
 
 # Add command line arguments
 p <- add_argument(p, "--meth_call_files_dir",  help="directory where the .cov files are (all will be used)", short="-m")
-p <- add_argument(p, "--samp_ids", help="vector with the names of the samples (must match the order of the .cov files)", short="-s")
-p <- add_argument(p, "--treatments", help="vector with the condition of each sample (0 or 1) the dmrs are found as the difference between  1 - 0 groups (1 - treated , 0 - control)", short="-t")
+p <- add_argument(p, "--samp_ids", help="vector with the names of the samples seperated by \"-\" (must match the order of the .cov files)", short="-s")
+p <- add_argument(p, "--treatments", help="vector with the condition of each sample (0 or 1) seperated by \"-\" the dmrs are found as the difference between  1 - 0 groups (1 - treated , 0 - control)", short="-t")
 p <- add_argument(p, "--pipeline", help="name of the alignment pipeline, it can be either amp, bismark,bismarkCoverage, bismarkCytosineReport or a list. See methylkit documentation for more details.", short="-p")
 p <- add_argument(p, "--output_dir", help="directory to save the results in", short="-o")
 p <- add_argument(p, "--known_genes_file", help="annotaion info e.g. mm10KnownGenes.bed, if none is given will be downloaded")
@@ -227,9 +227,12 @@ p <- add_argument(p, "--install-packeges", help="install requirements")
 # Parse the command line arguments
 argv <- parse_args(p)
 
-
-treatments = strsplit(argv$treatments,' +')[[1]] %>% as.numeric
-samp_ids = strsplit(argv$samp_ids,' +')[[1]]
+# to solve problem on condor multiple jobs will be using - instead of whitespace
+# to separate treatments and samp_ids
+treatments = strsplit(argv$treatments,'-')[[1]] %>% as.numeric
+samp_ids = strsplit(argv$samp_ids,'-')[[1]]
+# treatments = strsplit(argv$treatments,' +')[[1]] %>% as.numeric
+# samp_ids = strsplit(argv$samp_ids,' +')[[1]]
 
 main(argv$meth_call_files_dir, samp_ids, treatments, argv$pipeline, argv$output_dir, argv$known_genes_file)
 
