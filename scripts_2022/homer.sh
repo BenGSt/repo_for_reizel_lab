@@ -14,4 +14,4 @@ bedtools getfasta -fi $reference_genome -bed $2  -fo $(echo $2 | sed 's/.bed/.fa
 bedtools getfasta -fi $reference_genome -bed $1 -fo `echo $1 | sed s/".bed"/".fa"/`
 
 #find motifs with  background
-findMotifs.pl `echo $1 | sed s/".bed"/".fa"/` fasta `echo $1 | sed s/".bed"/"_HOMER_RTESULTS"/` -p 1 -fastaBg $(echo $2 | sed 's/.bed/.fa/') 
+findMotifs.pl `echo $1 | sed s/".bed"/".fa"/` fasta `echo $1 | sed s/".bed"/"_HOMER_RESULTS"/` -p 1 -fastaBg $(echo $2 | sed 's/.bed/.fa/') 
