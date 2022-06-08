@@ -169,7 +169,7 @@ combine_methylation_coverage_to_tiles()
 
 set_software_paths()
 {
-
+	echo set_software_paths
 	# on Atlas I'm using conda for env managment, so tge software should be in path already. 
 	# leaving this function if I want to change something without the env.
 	#TODO: consider using calls to program name from the rest of the script and delete this function.
