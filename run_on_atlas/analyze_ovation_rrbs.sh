@@ -25,7 +25,7 @@ main()
 	echo
 	
 	arg_parse "$@"
-	set_software_paths()
+	set_software_paths
 
 	echo debug: im here #debug
 	if [[ $READ_TYPE == "single_end" ]]
