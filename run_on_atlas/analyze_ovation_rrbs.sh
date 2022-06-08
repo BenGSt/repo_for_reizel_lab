@@ -27,6 +27,7 @@ main()
 	arg_parse "$@"
 	set_software_paths()
 
+	echo debug: im here #debug
 	if [[ $READ_TYPE == "single_end" ]]
 	then
 		time trim_illumina_adapter_single_end $INPUT_FASTQ
