@@ -3,6 +3,17 @@
 GENOMIC_REFERENCE_LOCATION=/storage/bfe_reizel/bengst/genomic_reference_data
 BISMARK_GENOME_LOCATION=${GENOMIC_REFERENCE_LOCATION}/from_huji/mm10/Sequence/WholeGenomeFasta
 
+
+help()
+{
+	cat << EOF
+	-single-end or -paired-end
+	-input_fastq_file or -paired_input_fastq_files
+	-n_cores
+EOF
+}
+
+
 main()
 {
 	SCRIPT_NAME=$(echo $0 | awk -F / '{print $NF}')
@@ -14,30 +25,29 @@ main()
 	echo
 	
 	arg_parse "$@"
-	
-	
-	source /Local/bfe_reizel/anaconda3/bin/activate ovation_rrbs_pipeline_2022
-	source ${PYTHON_ENV}/bin/activate 
-		if [[ $READ_TYPE == "single_end" ]]
-		then
-			time trim_illumina_adapter_single_end $INPUT_FASTQ
-			time trim_diversity_adaptors
-			time align_to_genome
-			##TODO: remove PCR duplicates (optional )
-			time methylation_calling
-			time combine_methylation_coverage_to_tiles 100 10 #<tile_size> <min_coverage>
-			
-		else #if [[ READ_TYPE == "paired_end" ]]
-			time trim_illumina_adapter_paired_end $INPUT_FASTQ_1 $INPUT_FASTQ_2
-			time trim_diversity_adaptors
-			time align_to_genome
-			##TODO: remove PCR duplicates (optional )
-			time methylation_calling
-			time combine_methylation_coverage_to_tiles 100 10 #<tile_size> <min_coverage>
-		fi
-	conda deactivate 
+	set_software_paths()
+
+	if [[ $READ_TYPE == "single_end" ]]
+	then
+		time trim_illumina_adapter_single_end $INPUT_FASTQ
+		time trim_diversity_adaptors
+		time align_to_genome
+		##TODO: remove PCR duplicates (optional )
+		time methylation_calling
+		time combine_methylation_coverage_to_tiles 100 10 #<tile_size> <min_coverage>
+		
+	else #if [[ READ_TYPE == "paired_end" ]]
+		time trim_illumina_adapter_paired_end $INPUT_FASTQ_1 $INPUT_FASTQ_2
+		time trim_diversity_adaptors
+		time align_to_genome
+		##TODO: remove PCR duplicates (optional )
+		time methylation_calling
+		time combine_methylation_coverage_to_tiles 100 10 #<tile_size> <min_coverage>
+	fi
+
 	echo \##############finished $SCRIPT_NAME \($(date)\)#############
 }
+
 
 trim_illumina_adapter_paired_end() #<R1> <R2>
 {
@@ -156,15 +166,34 @@ combine_methylation_coverage_to_tiles()
 }
 
 
-
-help()
+set_software_paths()
 {
-	cat << EOF
-	-single-end or -paired-end
-	-input_fastq_file or -paired_input_fastq_files
-	-n_cores
-EOF
+
+	# on Atlas I'm using conda for env managment, so tge software should be in path already. 
+	# leaving this function if I want to change something without the env.
+	#TODO: consider using calls to program name from the rest of the script and delete this function.
+	
+	PYTHON3=python
+
+	TRIM_GALORE=trim_galore
+	
+	BOWTIE2=bowtie2
+	
+	SAMTOOLS=samtools
+
+	BISMARK=bismark
+	
+	FASTQC=fastqc
+
+	DIVERSITY_TRIM_SCRIPT=trimRRBSdiversityAdaptCustomers.py
+
+	BEDTOOLS=bedtools
+	
+	#tecan nudup tool for pcr duplicates 
+	NUDUP=nudup.py
 }
+
+
 
 
 arg_parse()
