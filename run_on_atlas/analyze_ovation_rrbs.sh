@@ -1,5 +1,8 @@
 #!/bin/bash
 
+GENOMIC_REFERENCE_LOCATION=/storage/bfe_reizel/bengst/genomic_reference_data
+BISMARK_GENOME_LOCATION=${GENOMIC_REFERENCE_LOCATION}/from_huji/mm10/Sequence/WholeGenomeFasta
+
 main()
 {
 	SCRIPT_NAME=$(echo $0 | awk -F / '{print $NF}')
@@ -11,10 +14,9 @@ main()
 	echo
 	
 	arg_parse "$@"
-	set_software_paths
 	
-	#activate python virtual enviorment
-	# source /home/s.benjamin/bioinformatics_software/cutadapt-env/bin/activate
+	
+	source /Local/bfe_reizel/anaconda3/bin/activate ovation_rrbs_pipeline_2022
 	source ${PYTHON_ENV}/bin/activate 
 		if [[ $READ_TYPE == "single_end" ]]
 		then
@@ -33,14 +35,14 @@ main()
 			time methylation_calling
 			time combine_methylation_coverage_to_tiles 100 10 #<tile_size> <min_coverage>
 		fi
-	deactivate #deactivate python virtual enviorment
+	conda deactivate 
 	echo \##############finished $SCRIPT_NAME \($(date)\)#############
 }
 
 trim_illumina_adapter_paired_end() #<R1> <R2>
 {
 	#positional argument are  R1, R2 fastq file to trim
-	#note on nulticores from cutadapt manual
+	#note on multicores from cutadapt manual
 		#To automatically detect the number of available cores, use -j 0 (or --cores=0). The detection takes into account resource restrictions that may be in place. For example, if running Cutadapt as a batch job on a cluster system, the actual number of cores assigned to the job will be used. (This works if the cluster systems uses the cpuset(1) mechanism to impose the resource limitation.)
 	#note from trim_galore manual
 		#It seems that --cores 4 could be a sweet spot, anything above has diminishing returns.
@@ -87,7 +89,6 @@ trim_diversity_adaptors()
 
 align_to_genome()
 {
-  BISMARK_GENOME_LOCATION=/utemp/s.benjamin/genomic_reference_data/from_huji/mm10/Sequence/WholeGenomeFasta
   if [[ $READ_TYPE == "single_end" ]] ; then
     TRIM_DIVERSITY_OUTPUT=$(echo $TRIM_GALORE_OUTPUT | sed 's/\.gz/_trimmed.fq.gz/')
     COMMAND=$(echo $BISMARK --multicore $N_CORES --bowtie2 $BISMARK_GENOME_LOCATION $TRIM_DIVERSITY_OUTPUT)
@@ -102,14 +103,11 @@ align_to_genome()
   $COMMAND
   echo \########################################################
 
-
-
-
 	#ASK_TZACHI: Library is assumed to be strand-specific (directional), alignments to strands complementary to the original top or bottom strands will be ignored (i.e. not performed!)
 	#is this what we want?
 }
 
-# remove PCR duplicates()
+#TODO: remove PCR duplicates() 
 # {
 
 # }
@@ -147,7 +145,7 @@ combine_methylation_coverage_to_tiles()
 	METH_CALLING_OUTPUT=$(ls |grep cov.gz)
 	# 100bp tiles variant 2: First calculate the tiles and then remove tiles with total coverage < 10
 	FileOut=$(echo ${METH_CALLING_OUTPUT} | awk -v tile_size=$TILE_SIZE -F "." '{print $1 "_" tile_size "bp_tiles.bed" }')
-	bedtools intersect -a /utemp/s.benjamin/genomic_reference_data/mm10_whole_genome_${TILE_SIZE}bpTiles.bed -b ${METH_CALLING_OUTPUT} -wa -wb | awk -v cov=${MIN_COVERAGE} -v tileSize=${TILE_SIZE} 'BEGIN {OFS="\t"; Prev=-1} {if ($2 == Prev) {T=T+$8+$9; M=M+$8} else {if (Prev!=-1 && T>=cov) {print PrevChr,Prev,Prev+tileSize-1,M/T};T=$8+$9; M=$8;}; Prev=$2; PrevChr=$1}' > ../${FileOut}
+	bedtools intersect -a ${GENOMIC_REFERENCE_LOCATION}/mm10_whole_genome_${TILE_SIZE}bpTiles.bed -b ${METH_CALLING_OUTPUT} -wa -wb | awk -v cov=${MIN_COVERAGE} -v tileSize=${TILE_SIZE} 'BEGIN {OFS="\t"; Prev=-1} {if ($2 == Prev) {T=T+$8+$9; M=M+$8} else {if (Prev!=-1 && T>=cov) {print PrevChr,Prev,Prev+tileSize-1,M/T};T=$8+$9; M=$8;}; Prev=$2; PrevChr=$1}' > ../${FileOut}
 	#nor sure what this is for
 	#bedtools unionbedg -names `du -a -L | grep Tiles | awk '{print $2}' | sort | awk -F'/' '{print $NF}' | awk -F'.' '{print $1}'` -header -filler NA -i `du -a -L | grep Tiles | awk '{print $2}' | sort` > 100bpTiles_Tiles_Cov10_Tissues.bed
 
@@ -157,56 +155,6 @@ combine_methylation_coverage_to_tiles()
 
 }
 
-
-set_software_paths()
-{
-
-	echo $SCRIPT_NAME: setting path \($(date)\)
-	PYTHON3=/usr/bin/python3
-	#cutadapt version 3.7
-	#cutadapt is a python package installed in PYTHON_ENV.
-	PYTHON_ENV=/home/s.benjamin/bioinformatics_software/cutadapt-env/
-	
-	#java version "1.8.0_202"
-	JAVA=/usr/local/matlab2021b/sys/java/jre/glnxa64/jre/bin/java
-	
-	#pigz (multicore gzip needed for cutadapt multicore support)
-	PIGZ=/home/s.benjamin/other_software/pigz/pigz
-	
-
-	#trim_galore version 0.6.8 (15 01 2022)
-	TRIM_GALORE=/home/s.benjamin/bioinformatics_software/TrimGalore/trim_galore
-	
-	#Bowtie 2 version 2.4.5
-	BOWTIE2=/home/s.benjamin/bioinformatics_software/bowtie2-2.4.5-linux-x86_64/bowtie2
-	
-	#samtools version 0.1.19-44428cd
-	SAMTOOLS=/usr/local/samtools/bin/samtools
-	
-	#Bismark Version: v0.23.1
-	BISMARK=/home/s.benjamin/bioinformatics_software/Bismark-0.23.1/bismark
-	
-	#FastQC v0.11.9
-	FASTQC=/home/s.benjamin/bioinformatics_software/FastQC/fastqc
-	
-	#nugen diversity trimming script
-	DIVERSITY_TRIM_SCRIPT=/home/s.benjamin/bioinformatics_software/NuMetRRBS/trimRRBSdiversityAdaptCustomers.py
-	
-	#bedtools v2.30.0
-	BEDTOOLS=/home/s.benjamin/bioinformatics_software/bedtools2/bin/bedtools
-	
-	#tecan nudup tool for pcr duplicates 
-	NUDUP=/home/s.benjamin/bioinformatics_software/nudup/nudup.py
-	
-	#add paths to executables
-	ADD_TO_PATH=""
-	for executable in $JAVA $PIGZ $TRIM_GALORE $BOWTIE2 $SAMTOOLS $BISMARK $FASTQC $BEDTOOLS $NUDUP $PYTHON3
-	do
-		
-		ADD_TO_PATH+=$(echo $executable | awk -F / 'NF{NF--};{OFS = FS; print $0}'):
-	done
-	export PATH="$ADD_TO_PATH:$PATH"
-}
 
 
 help()
