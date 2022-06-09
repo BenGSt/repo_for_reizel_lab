@@ -27,7 +27,6 @@ main()
 	arg_parse "$@"
 	set_software_paths
 
-	echo debug: im here #debug
 	if [[ $READ_TYPE == "single_end" ]]
 	then
 		time trim_illumina_adapter_single_end $INPUT_FASTQ
@@ -170,7 +169,7 @@ combine_methylation_coverage_to_tiles()
 set_software_paths()
 {
 	echo set_software_paths
-	# on Atlas I'm using conda for env managment, so tge software should be in path already. 
+	# on Atlas I'm using conda for env managment, so the software should be in path already. 
 	# leaving this function if I want to change something without the env.
 	#TODO: consider using calls to program name from the rest of the script and delete this function.
 	
@@ -186,7 +185,7 @@ set_software_paths()
 	
 	FASTQC=fastqc
 
-	DIVERSITY_TRIM_SCRIPT=trimRRBSdiversityAdaptCustomers.py
+	DIVERSITY_TRIM_SCRIPT=/Local/bfe_reizel/anaconda3/envs/ovation_rrbs_pipeline_2022/bin/trimRRBSdiversityAdaptCustomers.py
 
 	BEDTOOLS=bedtools
 	
