@@ -1,11 +1,14 @@
 #!/bin/bash
 
+GENOMIC_REFERENCE_LOCATION=/storage/bfe_reizel/bengst/genomic_reference_data
+BISMARK_GENOME_LOCATION=${GENOMIC_REFERENCE_LOCATION}/from_huji/mm10/Sequence/WholeGenomeFasta
+
 
 help()
 {
 	cat << EOF
-	run first
-	resources: 4 cores, 500MB RAM
+	run after trim_illumina_adaptors.sh, trim_diversity_adaptors.sh
+		resources: 20 cores, 40GB RAM
 
 	-single-end or -paired-end
 	-input_fastq_file <sample.fq.gz> or -paired_input_fastq_files <sample_R1.fq.gz> <sample_R2.fq.gz>
@@ -33,12 +36,7 @@ main()
 	arg_parse "$@"
 	set_software_paths
 
-	if [[ $read_type == "single_end" ]]
-	then
-		time trim_illumina_adapter_single_end $input_fastq
-	else #if [[ $read_type == "paired_end" ]]
-		time trim_illumina_adapter_paired_end $input_fastq_1 $input_fastq_2
-	fi
+	align_to_genome
 
 	echo
 	echo
@@ -55,29 +53,27 @@ main()
 }
 
 
-trim_illumina_adapter_paired_end() #<R1> <R2>
+align_to_genome()
 {
-	#positional argument are  R1, R2 fastq file to trim
-	#note on multicores from cutadapt manual
-		#To automatically detect the number of available cores, use -j 0 (or --cores=0). The detection takes into account resource restrictions that may be in place. For example, if running Cutadapt as a batch job on a cluster system, the actual number of cores assigned to the job will be used. (This works if the cluster systems uses the cpuset(1) mechanism to impose the resource limitation.)
-	#note from trim_galore manual
-		#It seems that --cores 4 could be a sweet spot, anything above has diminishing returns.
-		#--cores 4 would then be: 4 (read) + 4 (write) + 4 (Cutadapt) + 2 (extra Cutadapt) + 1 (Trim Galore) = 15, and so forth.
-	echo runnig: trim_galore --paired --adapter AGATCGGAAGAGC --adapter2 AAATCAAAAAAAC $1 $2 --cores $n_cores --fastqc \($(date)\)
-	${TRIM_GALORE} --paired --adapter AGATCGGAAGAGC --adapter2 AAATCAAAAAAAC $1 $2 --cores $n_cores --fastqc
-}
+  #see http://felixkrueger.github.io/Bismark/Docs/ :
+    #"--parallel 4 for e.g. the GRCm38 mouse genome will probably use ~20 cores and eat ~48GB of RAM,
+    # but at the same time reduce the alignment time to ~25-30%. You have been warned."
+  n_parallel_instances = $(( $n_cores / 5 ))
 
+  if [[ $read_type == "single_end" ]] ; then
+    trim_diversity_output=$(echo $trim_galore_output | sed 's/\.gz/_trimmed.fq.gz/')
+    command=$(echo $BISMARK --multicore $n_cores --bowtie2 $BISMARK_GENOME_LOCATION $trim_diversity_output)
+	else
+    trim_diversity_output_1=$(echo $trim_galore_output_1 | sed 's/\.gz/_trimmed.fq.gz/')
+    trim_diversity_output_2=$(echo $trim_galore_output_2 | sed 's/\.gz/_trimmed.fq.gz/')
+    command=$(echo $BISMARK --multicore $n_cores --bowtie2 $BISMARK_GENOME_LOCATION -1 $trim_diversity_output_1 -2 $trim_diversity_output_2)
+	fi
 
-trim_illumina_adapter_single_end()
-{
-	#first positional argument is fastq file to trim
-	#note on nulticores from cutadapt manual
-		#To automatically detect the number of available cores, use -j 0 (or --cores=0). The detection takes into account resource restrictions that may be in place. For example, if running Cutadapt as a batch job on a cluster system, the actual number of cores assigned to the job will be used. (This works if the cluster systems uses the cpuset(1) mechanism to impose the resource limitation.)
-	#note from trim_galore manual
-		#It seems that --cores 4 could be a sweet spot, anything above has diminishing returns.
-		#--cores 4 would then be: 4 (read) + 4 (write) + 4 (Cutadapt) + 2 (extra Cutadapt) + 1 (Trim Galore) = 15, and so forth.
-	echo runnig: trim_galore --adapter AGATCGGAAGAGC $1 --cores $n_cores \($(date)\)
-	${TRIM_GALORE} --adapter AGATCGGAAGAGC $1  --cores $n_cores --fastqc
+  echo runnig: $command \($(date)\)
+  $command
+
+	#ASK_TZACHI: Library is assumed to be strand-specific (directional), alignments to strands complementary to the original top or bottom strands will be ignored (i.e. not performed!)
+	#is this what we want?
 }
 
 

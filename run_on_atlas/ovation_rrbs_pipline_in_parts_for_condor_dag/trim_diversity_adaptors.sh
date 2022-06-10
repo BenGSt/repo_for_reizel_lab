@@ -4,6 +4,9 @@
 help()
 {
 	cat << EOF
+	run after trim_illumina_adaptors.sh
+	resources: 1 core, 500MB RAM
+
 	-single-end or -paired-end
 	-input_fastq_file <sample.fq.gz> or -paired_input_fastq_files <sample_R1.fq.gz> <sample_R2.fq.gz>
 	-n_cores
