@@ -21,6 +21,7 @@ main()
 	echo running: $script_name "$@"
 	echo date: $(date)
 	echo hostname: $(hostname)
+	echo pwd: $(pwd)
 	echo \#################################
 	echo \#################################
 	echo
@@ -38,6 +39,7 @@ main()
 	echo finished: $script_name "$@"
 	echo date: $(date)
 	echo hostname: $(hostname)
+	echo pwd: $(pwd)
 	echo \#################################
 	echo \#################################
 	echo
