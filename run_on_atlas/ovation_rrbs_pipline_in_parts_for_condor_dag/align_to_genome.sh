@@ -62,11 +62,11 @@ align_to_genome()
 
   if [[ $read_type == "single_end" ]] ; then
     trim_diversity_output=$(echo $trim_galore_output | sed 's/\.gz/_trimmed.fq.gz/')
-    command=$(echo $BISMARK --multicore $n_cores --bowtie2 $BISMARK_GENOME_LOCATION $trim_diversity_output)
+    command=$(echo $BISMARK --multicore $n_parallel_instances --bowtie2 $BISMARK_GENOME_LOCATION $trim_diversity_output)
 	else
     trim_diversity_output_1=$(echo $trim_galore_output_1 | sed 's/\.gz/_trimmed.fq.gz/')
     trim_diversity_output_2=$(echo $trim_galore_output_2 | sed 's/\.gz/_trimmed.fq.gz/')
-    command=$(echo $BISMARK --multicore $n_cores --bowtie2 $BISMARK_GENOME_LOCATION -1 $trim_diversity_output_1 -2 $trim_diversity_output_2)
+    command=$(echo $BISMARK --multicore $n_parallel_instances --bowtie2 $BISMARK_GENOME_LOCATION -1 $trim_diversity_output_1 -2 $trim_diversity_output_2)
 	fi
 
   echo runnig: $command \($(date)\)
