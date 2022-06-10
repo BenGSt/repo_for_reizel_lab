@@ -50,7 +50,6 @@ main()
 trim_diversity_adaptors()
 {
 	#https://github.com/nugentechnologies/NuMetRRBS#diversity-trimming-and-filtering-with-nugens-diversity-trimming-scripts
-	echo \###################$SCRIPT_NAME \($(date)\)#############
 	if [[ $READ_TYPE == "single_end" ]] ; then
 	  trim_galore_output=$(echo $input_fastq |awk -F / '{print $NF}'| sed 's/\(\.fastq\|.fq\)\.gz/_trimmed.fq.gz/')
 	  echo runnig: python2 $DIVERSITY_TRIM_SCRIPT -1 $trim_galore_output
@@ -61,8 +60,6 @@ trim_diversity_adaptors()
 	  echo runnig: python2 $DIVERSITY_TRIM_SCRIPT -1 $trim_galore_output_1 -2 $trim_galore_output_2
 	  python2 $DIVERSITY_TRIM_SCRIPT -1 $trim_galore_output_1 -2 $trim_galore_output_2
 	fi
-
-	echo \########################################################
 }
 
 

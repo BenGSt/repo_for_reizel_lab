@@ -60,10 +60,8 @@ trim_illumina_adapter_paired_end() #<R1> <R2>
 	#note from trim_galore manual
 		#It seems that --cores 4 could be a sweet spot, anything above has diminishing returns.
 		#--cores 4 would then be: 4 (read) + 4 (write) + 4 (Cutadapt) + 2 (extra Cutadapt) + 1 (Trim Galore) = 15, and so forth.
-	echo \###################$script_name \($(date)\)#############
 	echo runnig: trim_galore --paired --adapter AGATCGGAAGAGC --adapter2 AAATCAAAAAAAC $1 $2 --cores $n_cores --fastqc \($(date)\)
 	${TRIM_GALORE} --paired --adapter AGATCGGAAGAGC --adapter2 AAATCAAAAAAAC $1 $2 --cores $n_cores --fastqc
-	echo \########################################################
 }
 
 
@@ -75,10 +73,8 @@ trim_illumina_adapter_single_end()
 	#note from trim_galore manual
 		#It seems that --cores 4 could be a sweet spot, anything above has diminishing returns.
 		#--cores 4 would then be: 4 (read) + 4 (write) + 4 (Cutadapt) + 2 (extra Cutadapt) + 1 (Trim Galore) = 15, and so forth.
-	echo \###################$script_name \($(date)\)#############
 	echo runnig: trim_galore --adapter AGATCGGAAGAGC $1 --cores $n_cores \($(date)\)
 	${TRIM_GALORE} --adapter AGATCGGAAGAGC $1  --cores $n_cores --fastqc
-	echo \########################################################
 }
 
 
