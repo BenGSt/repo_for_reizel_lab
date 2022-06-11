@@ -61,12 +61,23 @@ align_to_genome()
   n_parallel_instances = $(( $n_cores / 5 ))
 
   if [[ $read_type == "single_end" ]] ; then
+    trim_galore_output=$(echo $input_fastq |awk -F / '{print $NF}'| sed 's/\(\.fastq\|.fq\)\.gz/_trimmed.fq.gz/')
     trim_diversity_output=$(echo $trim_galore_output | sed 's/\.gz/_trimmed.fq.gz/')
-    command=$(echo $BISMARK --multicore $n_parallel_instances --bowtie2 $BISMARK_GENOME_LOCATION $trim_diversity_output)
+    rename=$(echo $trim_diversity_output| sed 's/\.fq_trimmed/_trimmed/')
+    mv $trim_diversity_output $rename
+
+    command=$(echo $BISMARK --multicore $n_parallel_instances --bowtie2 $BISMARK_GENOME_LOCATION $rename)
 	else
+	  trim_galore_output_1=$(echo $input_fastq_1 |awk -F / '{print $NF}'| sed 's/\(\.fastq\|.fq\)\.gz/_val_1.fq.gz/')
+	  trim_galore_output_2=$(echo $input_fastq_2 |awk -F / '{print $NF}'| sed 's/\(\.fastq\|.fq\)\.gz/_val_2.fq.gz/')
     trim_diversity_output_1=$(echo $trim_galore_output_1 | sed 's/\.gz/_trimmed.fq.gz/')
     trim_diversity_output_2=$(echo $trim_galore_output_2 | sed 's/\.gz/_trimmed.fq.gz/')
-    command=$(echo $BISMARK --multicore $n_parallel_instances --bowtie2 $BISMARK_GENOME_LOCATION -1 $trim_diversity_output_1 -2 $trim_diversity_output_2)
+    rename_1=$(echo $trim_diversity_output_1| sed 's/\.fq_trimmed/_trimmed/')
+    rename_2=$(echo $trim_diversity_output_2| sed 's/\.fq_trimmed/_trimmed/')
+    mv $trim_diversity_output_1 $rename_1
+    mv $trim_diversity_output_2 $rename_2
+
+    command=$(echo $BISMARK --multicore $n_parallel_instances --bowtie2 $BISMARK_GENOME_LOCATION -1 $rename_1 -2 $rename_2)
 	fi
 
   echo runnig: $command \($(date)\)
