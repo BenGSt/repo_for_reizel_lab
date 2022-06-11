@@ -58,7 +58,7 @@ align_to_genome()
   #see http://felixkrueger.github.io/Bismark/Docs/ :
     #"--parallel 4 for e.g. the GRCm38 mouse genome will probably use ~20 cores and eat ~48GB of RAM,
     # but at the same time reduce the alignment time to ~25-30%. You have been warned."
-  n_parallel_instances = $(( $n_cores / 5 ))
+  n_parallel_instances=$(( $n_cores / 5 ))
 
   if [[ $read_type == "single_end" ]] ; then
     trim_galore_output=$(echo $input_fastq |awk -F / '{print $NF}'| sed 's/\(\.fastq\|.fq\)\.gz/_trimmed.fq.gz/')
