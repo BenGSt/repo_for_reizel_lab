@@ -1,14 +1,13 @@
 #!/bin/bash
 
-GENOMIC_REFERENCE_LOCATION=/storage/bfe_reizel/bengst/genomic_reference_data
-BISMARK_GENOME_LOCATION=${GENOMIC_REFERENCE_LOCATION}/from_huji/mm10/Sequence/WholeGenomeFasta
-
+N_INSTANCES=1 #ignores n_cores
+BUFFER_SIZE=10G
 
 help()
 {
 	cat << EOF
-	run after trim_illumina_adaptors.sh, trim_diversity_adaptors.sh
-		resources: 10 cores, 32GB RAM
+	run after trim_illumina_adaptors.sh, trim_diversity_adaptors.sh, align_to_genome.sh
+	resources: 1 core, 10GB RAM
 
 	-single-end or -paired-end
 	-input_fastq_file <sample.fq.gz> or -paired_input_fastq_files <sample_R1.fq.gz> <sample_R2.fq.gz>
@@ -36,7 +35,7 @@ main()
 	arg_parse "$@"
 	set_software_paths
 
-	time align_to_genome
+	time methylation_calling
 
 	echo
 	echo
@@ -52,44 +51,30 @@ main()
 	echo
 }
 
-
-align_to_genome()
+methylation_calling()
 {
-  #see http://felixkrueger.github.io/Bismark/Docs/ :
-    #"--parallel 4 for e.g. the GRCm38 mouse genome will probably use ~20 cores and eat ~48GB of RAM,
-    # but at the same time reduce the alignment time to ~25-30%. You have been warned."
-  # Atlas max cpu request is 10 so I want to have 2 instances of bismark (5 cores each theoretically)
-  # This is set in align_jobs.sub .
-  # since I am using the same input as in rrbs_jobs.args (-n_cores 4) it is divided in 2
-  # TODO: generalize this. possible solution: make align_job.sh read align_jobs.sub and divide request_cpus by 4,
-  #       no division will be necessery here.
-  n_parallel_instances=$(( $n_cores / 2 ))
-
-  if [[ $read_type == "single_end" ]] ; then
+  if [[ $read_type == "single_end" ]]; then
     trim_galore_output=$(echo $input_fastq |awk -F / '{print $NF}'| sed 's/\(\.fastq\|.fq\)\.gz/_trimmed.fq.gz/')
     trim_diversity_output=$(echo $trim_galore_output | sed 's/\.gz/_trimmed.fq.gz/')
-    rename=$(echo $trim_diversity_output| sed 's/\.fq_trimmed/_trimmed/')
-    mv $trim_diversity_output $rename
-
-    command=$(echo $BISMARK --multicore $n_parallel_instances --bowtie2 $BISMARK_GENOME_LOCATION $rename)
+    rename=$(echo $trim_diversity_output| sed 's/\.fq_trimmed/_trimmed/'
+	  alignment_output=$(echo $rename | sed 's/\.fq\.gz/_bismark_bt2.bam/')
+	  #By default, this mode will only consider cytosines in CpG context, but it can be extended to cytosines in any sequence context by using the option --CX
+    command=$(echo bismark_methylation_extractor --multicore $N_INSTANCES --bedGraph --buffer_size $BUFFER_SIZE --output methylation_extractor_output $alignment_output)
 	else
 	  trim_galore_output_1=$(echo $input_fastq_1 |awk -F / '{print $NF}'| sed 's/\(\.fastq\|.fq\)\.gz/_val_1.fq.gz/')
-	  trim_galore_output_2=$(echo $input_fastq_2 |awk -F / '{print $NF}'| sed 's/\(\.fastq\|.fq\)\.gz/_val_2.fq.gz/')
+    rename=$(echo $trim_diversity_output| sed 's/\.fq_trimmed/_trimmed/'
     trim_diversity_output_1=$(echo $trim_galore_output_1 | sed 's/\.gz/_trimmed.fq.gz/')
-    trim_diversity_output_2=$(echo $trim_galore_output_2 | sed 's/\.gz/_trimmed.fq.gz/')
     rename_1=$(echo $trim_diversity_output_1| sed 's/\.fq_trimmed/_trimmed/')
-    rename_2=$(echo $trim_diversity_output_2| sed 's/\.fq_trimmed/_trimmed/')
-    mv $trim_diversity_output_1 $rename_1
-    mv $trim_diversity_output_2 $rename_2
-
-    command=$(echo $BISMARK --multicore $n_parallel_instances --bowtie2 $BISMARK_GENOME_LOCATION -1 $rename_1 -2 $rename_2)
+	  alignment_output=$(echo $rename_1 | sed 's/\.fq\.gz/_bismark_bt2_pe.bam/')
+#	  mv $alignment_output $(echo $alignment_output | sed 's/_R1_001_val_1//')
+#	  alignment_output=$(echo $alignment_output | sed 's/_R1_001_val_1//')
+	  # TODO: looks like bismark wrote one bam for the 2 paired files,
+	    # but it's name includes the R1 name I changed the name - make sure the bam file really represents both
+    command=$(echo bismark_methylation_extractor -p --multicore $n_cores --bedGraph --buffer_size 10G --output methylation_extractor_output $alignment_output)
 	fi
 
-  echo runnig: $command \($(date)\)
-  $command
-
-	#ASK_TZACHI: Library is assumed to be strand-specific (directional), alignments to strands complementary to the original top or bottom strands will be ignored (i.e. not performed!)
-	#is this what we want?
+	echo $SCRIPT_NAME runnig: $command
+	$command
 }
 
 
