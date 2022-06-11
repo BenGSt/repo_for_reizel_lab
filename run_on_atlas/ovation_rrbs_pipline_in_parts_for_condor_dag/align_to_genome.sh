@@ -58,7 +58,12 @@ align_to_genome()
   #see http://felixkrueger.github.io/Bismark/Docs/ :
     #"--parallel 4 for e.g. the GRCm38 mouse genome will probably use ~20 cores and eat ~48GB of RAM,
     # but at the same time reduce the alignment time to ~25-30%. You have been warned."
-  n_parallel_instances=$(( $n_cores / 5 ))
+  # Atlas max cpu request is 10 so I want to have 2 instances of bismark (5 cores each theoretically)
+  # This is set in align_jobs.sub .
+  # since I am using the same input as in rrbs_jobs.args (-n_cores 4) it is divided in 2
+  # TODO: generalize this. possible solution: make align_job.sh read align_jobs.sub and divide request_cpus by 4,
+  #       no division will be necessery here.
+  n_parallel_instances=$(( $n_cores / 2 ))
 
   if [[ $read_type == "single_end" ]] ; then
     trim_galore_output=$(echo $input_fastq |awk -F / '{print $NF}'| sed 's/\(\.fastq\|.fq\)\.gz/_trimmed.fq.gz/')
