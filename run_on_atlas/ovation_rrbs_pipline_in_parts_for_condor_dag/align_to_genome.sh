@@ -36,7 +36,7 @@ main()
 	arg_parse "$@"
 	set_software_paths
 
-	align_to_genome
+	time align_to_genome
 
 	echo
 	echo

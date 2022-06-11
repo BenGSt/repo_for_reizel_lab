@@ -33,7 +33,7 @@ main()
 	arg_parse "$@"
 	set_software_paths
 
-	trim_diversity_adaptors
+	time trim_diversity_adaptors
 
 	echo
 	echo
