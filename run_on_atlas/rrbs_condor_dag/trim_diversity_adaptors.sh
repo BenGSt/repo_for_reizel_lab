@@ -1,4 +1,3 @@
-
 #!/bin/bash
 
 N_CORES=1

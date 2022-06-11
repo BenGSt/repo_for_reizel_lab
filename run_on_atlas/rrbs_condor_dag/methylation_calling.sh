@@ -1,8 +1,8 @@
-
 #!/bin/bash
 
 N_INSTANCES=1 #ignores n_cores
 BUFFER_SIZE=10G
+
 
 help()
 {
@@ -53,18 +53,19 @@ main()
 	echo
 }
 
+
 methylation_calling()
 {
   if [[ $read_type == "single_end" ]]; then
     trim_galore_output=$(echo $input_fastq |awk -F / '{print $NF}'| sed 's/\(\.fastq\|.fq\)\.gz/_trimmed.fq.gz/')
     trim_diversity_output=$(echo $trim_galore_output | sed 's/\.gz/_trimmed.fq.gz/')
-    rename=$(echo $trim_diversity_output| sed 's/\.fq_trimmed/_trimmed/'
+    rename=$(echo $trim_diversity_output| sed 's/\.fq_trimmed/_trimmed/')
 	  alignment_output=$(echo $rename | sed 's/\.fq\.gz/_bismark_bt2.bam/')
 	  #By default, this mode will only consider cytosines in CpG context, but it can be extended to cytosines in any sequence context by using the option --CX
     command=$(echo bismark_methylation_extractor --multicore $N_INSTANCES --bedGraph --buffer_size $BUFFER_SIZE --output methylation_extractor_output $alignment_output)
 	else
 	  trim_galore_output_1=$(echo $input_fastq_1 |awk -F / '{print $NF}'| sed 's/\(\.fastq\|.fq\)\.gz/_val_1.fq.gz/')
-    rename=$(echo $trim_diversity_output| sed 's/\.fq_trimmed/_trimmed/'
+    rename=$(echo $trim_diversity_output| sed 's/\.fq_trimmed/_trimmed/')
     trim_diversity_output_1=$(echo $trim_galore_output_1 | sed 's/\.gz/_trimmed.fq.gz/')
     rename_1=$(echo $trim_diversity_output_1| sed 's/\.fq_trimmed/_trimmed/')
 	  alignment_output=$(echo $rename_1 | sed 's/\.fq\.gz/_bismark_bt2_pe.bam/')

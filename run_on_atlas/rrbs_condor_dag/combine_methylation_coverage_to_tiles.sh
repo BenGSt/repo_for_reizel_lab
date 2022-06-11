@@ -74,8 +74,6 @@ combine_methylation_coverage_to_tiles()
 }
 
 
-
-
 set_software_paths()
 {
   #	echo setting software paths
