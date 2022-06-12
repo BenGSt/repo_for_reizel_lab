@@ -1,10 +1,9 @@
 #!/bin/bash
 
 N_CORES=10
-MEM=32B
-n_parallel_instances=3
+MEM=16GB
+N_PARALLEL_INSTANCES=2
 
-MEM=500MB
 
 GENOMIC_REFERENCE_LOCATION=/storage/bfe_reizel/bengst/genomic_reference_data
 BISMARK_GENOME_LOCATION=${GENOMIC_REFERENCE_LOCATION}/from_huji/mm10/Sequence/WholeGenomeFasta
@@ -14,7 +13,7 @@ help()
 {
 	cat << EOF
 	run after trim_illumina_adaptors.sh, trim_diversity_adaptors.sh
-		resources: 10 cores, 32GB RAM
+		resources: 10 cores, 16GB RAM
 
 	-single-end or -paired-end
 	-input_fastq_file <sample.fq.gz> or -paired_input_fastq_files <sample_R1.fq.gz> <sample_R2.fq.gz>
@@ -75,7 +74,7 @@ align_to_genome()
     rename=$(echo $trim_diversity_output| sed 's/\.fq_trimmed/_trimmed/')
     mv $trim_diversity_output $rename
 
-    command=$(echo $BISMARK --multicore $n_parallel_instances --bowtie2 $BISMARK_GENOME_LOCATION $rename)
+    command=$(echo $BISMARK --multicore $N_PARALLEL_INSTANCES--bowtie2 $BISMARK_GENOME_LOCATION $rename)
 	else
 	  trim_galore_output_1=$(echo $input_fastq_1 |awk -F / '{print $NF}'| sed 's/\(\.fastq\|.fq\)\.gz/_val_1.fq.gz/')
 	  trim_galore_output_2=$(echo $input_fastq_2 |awk -F / '{print $NF}'| sed 's/\(\.fastq\|.fq\)\.gz/_val_2.fq.gz/')
@@ -86,7 +85,7 @@ align_to_genome()
     mv $trim_diversity_output_1 $rename_1
     mv $trim_diversity_output_2 $rename_2
 
-    command=$(echo $BISMARK --multicore $n_parallel_instances --bowtie2 $BISMARK_GENOME_LOCATION -1 $rename_1 -2 $rename_2)
+    command=$(echo $BISMARK --multicore $N_PARALLEL_INSTANCES--bowtie2 $BISMARK_GENOME_LOCATION -1 $rename_1 -2 $rename_2)
 	fi
 
   echo runnig: $command \($(date)\)
