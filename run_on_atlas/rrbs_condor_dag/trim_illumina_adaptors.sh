@@ -121,6 +121,7 @@ set_software_paths()
 arg_parse()
 {
   while [[ $# -gt 0 ]]; do
+    echo debug: arg_pase loop
     case $1 in
      -single-end)
         read_type="single_end"
