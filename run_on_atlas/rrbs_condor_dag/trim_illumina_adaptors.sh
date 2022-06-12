@@ -122,6 +122,7 @@ arg_parse()
 {
   while [[ $# -gt 0 ]]; do
     echo debug: arg_pase loop
+    echo \$@: "$@"
     case $1 in
      -single-end)
         read_type="single_end"
