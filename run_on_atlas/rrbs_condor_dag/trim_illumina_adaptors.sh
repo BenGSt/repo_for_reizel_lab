@@ -136,23 +136,23 @@ arg_parse()
         shift # past argument
         shift # past value
         ;;
-      -paired_input_fastq_files)
+     -paired_input_fastq_files)
         input_fastq_1="$2"
         shift # past argument
         input_fastq_2="$2"
         shift # past argument2
         shift # past value
         ;;
-	-output_dir)
+	   -output_dir)
         output_dir="$2"
         shift # past argument
         shift # past value
         ;;
-      -*|--*)
+     -*|--*)
         help
         exit 1
         ;;
-      -h|--help)
+     -h|--help)
         help
         exit 1
         ;;
