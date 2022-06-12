@@ -18,9 +18,12 @@ EOF
 
 main()
 {
+  echo debug: arg_parse
 	arg_parse "$@"
 	set_software_paths
+	echo debug: set_software_paths
   cd $output_dir
+  echo debug: cd $output_dir
 	script_name=$(echo $0 | awk -F / '{print $NF}')
 
 	echo
