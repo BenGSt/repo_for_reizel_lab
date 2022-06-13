@@ -43,7 +43,7 @@ executables=(
             methylation_calling.sh \
             combine_methylation_coverage_to_tiles.sh \
 )
-cores=(4 1 10 1 1)
+cores=(8 1 10 1 1)
 rams=(300MB 10MB 16GB 10GB 500MB)
 
 for i in "${!submission_file_names[@]}"; do

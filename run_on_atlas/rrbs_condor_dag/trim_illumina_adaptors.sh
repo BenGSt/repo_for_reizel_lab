@@ -1,13 +1,13 @@
 #!/bin/bash
 
-N_CORES=10
+N_CORES=8
 MEM=300MB
 
 help()
 {
 	cat << EOF
 	run first
-	resources: 10 cores, 300MB RAM
+	resources: 8 cores, 300MB RAM
 
 	-single-end or -paired-end
 	-input_fastq_file <sample.fq.gz> or -paired_input_fastq_files <sample_R1.fq.gz> <sample_R2.fq.gz>
