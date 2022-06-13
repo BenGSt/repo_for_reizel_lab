@@ -74,7 +74,7 @@ align_to_genome()
     rename=$(echo $trim_diversity_output| sed 's/\.fq_trimmed/_trimmed/')
     mv $trim_diversity_output $rename
 
-    command=$(echo $BISMARK --multicore $N_PARALLEL_INSTANCES--bowtie2 $BISMARK_GENOME_LOCATION $rename)
+    command=$(echo $BISMARK --multicore $N_PARALLEL_INSTANCES --bowtie2 $BISMARK_GENOME_LOCATION $rename)
 	else
 	  trim_galore_output_1=$(echo $input_fastq_1 |awk -F / '{print $NF}'| sed 's/\(\.fastq\|.fq\)\.gz/_val_1.fq.gz/')
 	  trim_galore_output_2=$(echo $input_fastq_2 |awk -F / '{print $NF}'| sed 's/\(\.fastq\|.fq\)\.gz/_val_2.fq.gz/')
@@ -85,7 +85,7 @@ align_to_genome()
     mv $trim_diversity_output_1 $rename_1
     mv $trim_diversity_output_2 $rename_2
 
-    command=$(echo $BISMARK --multicore $N_PARALLEL_INSTANCES--bowtie2 $BISMARK_GENOME_LOCATION -1 $rename_1 -2 $rename_2)
+    command=$(echo $BISMARK --multicore $N_PARALLEL_INSTANCES --bowtie2 $BISMARK_GENOME_LOCATION -1 $rename_1 -2 $rename_2)
 	fi
 
   echo runnig: $command \($(date)\)
