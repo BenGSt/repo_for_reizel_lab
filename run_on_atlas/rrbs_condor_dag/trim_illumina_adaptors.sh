@@ -18,12 +18,9 @@ EOF
 
 main()
 {
-  echo debug: arg_parse
 	arg_parse "$@"
 	set_software_paths
-	echo debug: set_software_paths
   cd $output_dir
-  echo debug: cd $output_dir
 	script_name=$(echo $0 | awk -F / '{print $NF}')
 
 	echo
@@ -121,8 +118,6 @@ set_software_paths()
 arg_parse()
 {
   while [[ $# -gt 0 ]]; do
-    echo debug: arg_pase loop
-    echo \$@: "$@"
     case $1 in
      -single-end)
         read_type="single_end"
