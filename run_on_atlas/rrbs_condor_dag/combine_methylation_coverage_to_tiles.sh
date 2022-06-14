@@ -4,7 +4,7 @@
 help()
 {
 	cat << EOF
-	run after trim_illumina_adaptors.sh
+	run after trim_illumina_adaptors.sh, trim_diversity_adaptors.sh, align_to_genome.sh, methylation_calling.sh
 	resources: 1 core, 500MB RAM
 
 	-input_fastq_file <sample.fq.gz> or -paired_input_fastq_files <sample_R1.fq.gz> <sample_R2.fq.gz>
@@ -104,32 +104,43 @@ set_software_paths()
 
 
 
+
 arg_parse()
 {
+  #Note: don't need any pf these except for output_dir, the rest are left here for compatibility to rrbs_jobs.args
+  #TODO: adjust this so it stayes commpatible with rrbs_jobs.args but doesn't parse unnecessary args.
   while [[ $# -gt 0 ]]; do
     case $1 in
+     -single-end)
+        read_type="single_end"
+        shift # past argument
+        ;;
+     -paired-end)
+        read_type="paired_end"
+        shift # past argument
+        ;;
      -input_fastq_file)
         input_fastq="$2"
         shift # past argument
         shift # past value
         ;;
-     -paired_input_fastq_files)
+      -paired_input_fastq_files)
         input_fastq_1="$2"
         shift # past argument
         input_fastq_2="$2"
         shift # past argument2
         shift # past value
         ;;
-     -output_dir)
+	-output_dir)
         output_dir="$2"
         shift # past argument
         shift # past value
         ;;
-     -*|--*)
+      -*|--*)
         help
         exit 1
         ;;
-     -h|--help)
+      -h|--help)
         help
         exit 1
         ;;
