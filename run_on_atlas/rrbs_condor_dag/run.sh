@@ -11,6 +11,9 @@ main()
   write_condor_submition_files
   write_condor_dag
   make_dirs
+
+  echo Submit the jobs by running: condor_submit_dag rrbs_jobs.dag
+  echo Good Luck!
 }
 
 

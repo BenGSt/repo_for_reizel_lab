@@ -88,6 +88,8 @@ set_software_paths()
 	# leaving this function if I want to change something without the env.
 	#TODO: consider using calls to program name from the rest of the script and delete this function.
 
+  source /Local/bfe_reizel/anaconda3/bin/activate ovation_rrbs_pipeline_2022
+
 	PYTHON3=python
 
 	TRIM_GALORE=trim_galore
