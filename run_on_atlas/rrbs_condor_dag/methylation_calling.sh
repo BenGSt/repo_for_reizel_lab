@@ -75,7 +75,7 @@ methylation_calling()
 #	  alignment_output=$(echo $alignment_output | sed 's/_R1_001_val_1//')
 	  # TODO: looks like bismark wrote one bam for the 2 paired files,
 	    # but it's name includes the R1 name I changed the name - make sure the bam file really represents both
-    command=$(echo bismark_methylation_extractor -p --multicore $N_PARALLEL_INSTANCES --bedGraph --buffer_size 10G --output methylation_extractor_output $alignment_output)
+    command=$(echo bismark_methylation_extractor -p --multicore $N_PARALLEL_INSTANCES --bedGraph --buffer_size $BUFFER_SIZE --output methylation_extractor_output $alignment_output)
 	fi
 
 	echo $SCRIPT_NAME runnig: $command
