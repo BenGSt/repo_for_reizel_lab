@@ -60,7 +60,7 @@ Arguments = \$(args)
 universe = vanilla
 log = ./\$(name)/condor_logs/\$(name)_$(echo ${executables[$i]} | sed 's/.sh//').log
 output = ./\$(name)/condor_logs/\$(name)_$(echo ${executables[$i]} | sed 's/.sh//').out
-error = ./\$(name)/condor_logs/\$(name)_$(echo ${executables[$i]} | sed 's/.sh//').error
+error = ./\$(name)/condor_logs/\$(name)_$(echo ${executables[$i]} | sed 's/.sh//').out
 queue name, args from rrbs_jobs.args
 EOF
 
