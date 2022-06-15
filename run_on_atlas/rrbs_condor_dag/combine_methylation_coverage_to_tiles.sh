@@ -7,7 +7,7 @@ help()
 {
 	cat << EOF
 	run after trim_illumina_adaptors.sh, trim_diversity_adaptors.sh, align_to_genome.sh, methylation_calling.sh
-	resources: 1 core, 2GB RAM
+	resources: 1 core, 3GB RAM
 
 	-input_fastq_file <sample.fq.gz> or -paired_input_fastq_files <sample_R1.fq.gz> <sample_R2.fq.gz>
 	-output_dir
