@@ -1,8 +1,8 @@
 #!/bin/bash
 
-N_CORES=6
-N_PARALLEL_INSTANCES=1 #each instance uses 3 cores (according to doc) #ignores n_cores
-BUFFER_SIZE=2G #buffer size for unix sort
+N_CORES=10
+N_PARALLEL_INSTANCES=4 #each instance uses 3 cores (according to doc) #ignores n_cores
+BUFFER_SIZE=10G #buffer size for unix sort
 MEM=3GB
 
 
