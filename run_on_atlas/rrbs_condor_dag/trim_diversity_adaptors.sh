@@ -37,6 +37,7 @@ main()
 	echo
 
 	time trim_diversity_adaptors
+  cleanup
 
 	echo
 	echo
@@ -66,6 +67,15 @@ trim_diversity_adaptors()
 	  echo runnig: python2 $DIVERSITY_TRIM_SCRIPT -1 $trim_galore_output_1 -2 $trim_galore_output_2
 	  python2 $DIVERSITY_TRIM_SCRIPT -1 $trim_galore_output_1 -2 $trim_galore_output_2
 	fi
+}
+
+
+cleanup()
+{
+  cmd="rm $trim_galore_output $trim_galore_output_1 $trim_galore_output_2"
+  echo cleanup: "$cmd"
+  $cmd
+
 }
 
 

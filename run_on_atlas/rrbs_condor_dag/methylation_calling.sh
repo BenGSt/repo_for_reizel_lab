@@ -64,7 +64,7 @@ methylation_calling()
     rename=$(echo $trim_diversity_output| sed 's/\.fq_trimmed/_trimmed/')
 	  alignment_output=$(echo $rename | sed 's/\.fq\.gz/_bismark_bt2.bam/')
 	  #By default, this mode will only consider cytosines in CpG context, but it can be extended to cytosines in any sequence context by using the option --CX
-    command=$(echo bismark_methylation_extractor --multicore $N_PARALLEL_INSTANCES --bedGraph --buffer_size $BUFFER_SIZE --output methylation_extractor_output $alignment_output)
+    command=$(echo bismark_methylation_extractor --multicore $N_PARALLEL_INSTANCES --gzip --bedGraph --buffer_size $BUFFER_SIZE --output methylation_extractor_output $alignment_output)
 	else
 	  trim_galore_output_1=$(echo $input_fastq_1 |awk -F / '{print $NF}'| sed 's/\(\.fastq\|.fq\)\.gz/_val_1.fq.gz/')
     rename=$(echo $trim_diversity_output| sed 's/\.fq_trimmed/_trimmed/')
@@ -75,7 +75,7 @@ methylation_calling()
 #	  alignment_output=$(echo $alignment_output | sed 's/_R1_001_val_1//')
 	  # TODO: looks like bismark wrote one bam for the 2 paired files,
 	    # but it's name includes the R1 name I changed the name - make sure the bam file really represents both
-    command=$(echo bismark_methylation_extractor -p --multicore $N_PARALLEL_INSTANCES --bedGraph --buffer_size $BUFFER_SIZE --output methylation_extractor_output $alignment_output)
+    command=$(echo bismark_methylation_extractor -p --multicore $N_PARALLEL_INSTANCES --gzip --bedGraph --buffer_size $BUFFER_SIZE --output methylation_extractor_output $alignment_output)
 	fi
 
 	echo $SCRIPT_NAME runnig: $command

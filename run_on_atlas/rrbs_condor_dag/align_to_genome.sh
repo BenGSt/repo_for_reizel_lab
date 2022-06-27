@@ -43,6 +43,7 @@ main()
 	echo
 
 	time align_to_genome
+	cleanup
 
 	echo
 	echo
@@ -93,6 +94,15 @@ align_to_genome()
 
 	#ASK_TZACHI: Library is assumed to be strand-specific (directional), alignments to strands complementary to the original top or bottom strands will be ignored (i.e. not performed!)
 	#is this what we want?
+}
+
+
+cleanup()
+{
+  cmd="rm $trim_diversity_output $trim_diversity_trim_diversity_output_1 $trim_diversity_trim_diversity_output_2"
+  echo cleanup: "$cmd"
+  $cmd
+
 }
 
 
