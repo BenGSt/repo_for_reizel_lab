@@ -35,6 +35,7 @@ main()
 	echo
 	echo
 
+  #TODO: rm bam file and only keep bismark.cov?
 	time combine_methylation_coverage_to_tiles 100 10 #<tile_size> <min_coverage>
 
 	echo
