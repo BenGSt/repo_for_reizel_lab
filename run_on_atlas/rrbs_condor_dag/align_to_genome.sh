@@ -99,7 +99,7 @@ align_to_genome()
 
 cleanup()
 {
-  cmd="rm $trim_diversity_output $trim_diversity_output_1 $trim_diversity_output_2"
+  cmd="rm $rename $rename_1 $rename_2"
   echo cleanup: "$cmd"
   $cmd
 

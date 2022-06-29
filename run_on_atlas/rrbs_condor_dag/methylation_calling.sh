@@ -40,6 +40,7 @@ main()
 	echo
 
 	time methylation_calling
+  cleanup
 
 	echo
 	echo
@@ -82,6 +83,15 @@ methylation_calling()
 	$command
 }
 
+
+cleanup()
+{
+  cmd="rm $alignment_output"
+  cmd2="rm $(find ./ | grep -P 'OT|OB')"
+  echo cleanup: "$cmd" , "$cmd2"
+  $cmd $cmd2
+
+}
 
 set_software_paths()
 {
