@@ -89,7 +89,8 @@ cleanup()
   cmd="rm $alignment_output"
   cmd2="rm $(find ./ | grep -P 'OT|OB')"
   echo cleanup: "$cmd" , "$cmd2"
-  $cmd $cmd2
+  $cmd
+  $cmd2
 
 }
 
