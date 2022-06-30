@@ -21,9 +21,9 @@ write_rrbs_jobs_args() # <1 for single end or 2 for piared end> <raw_data_dir>
 {
   for sample_name in $(ls $2); do
     if [[ $1 == 1 ]]; then
-      echo $sample_name, -output_dir $(pwd)/$sample_name -single_end -input_fastq_file $(realpath $2/$sample_name/*) >> rrbs_jobs.args
+      echo $sample_name, -output_dir $(pwd)/$sample_name -single_end -input_fastq_file $(realpath $2/$sample_name/*.fastq.gz) >> rrbs_jobs.args
     else
-      echo $sample_name, -output_dir $(pwd)/$sample_name -paired-end -paired_input_fastq_files $(realpath $2/$sample_name/*) >> rrbs_jobs.args
+      echo $sample_name, -output_dir $(pwd)/$sample_name -paired-end -paired_input_fastq_files $(realpath $2/$sample_name/*.fastq.gz) >> rrbs_jobs.args
     fi
   done
 }
