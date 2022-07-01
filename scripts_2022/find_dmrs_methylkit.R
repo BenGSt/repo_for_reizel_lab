@@ -149,7 +149,7 @@ main = function(meth_call_files_dir, samp_ids, treatments, pipeline, output_dir,
   write.table(getData(dmrs_25p_hyper)[,1:3], str_c(output_dir,"/dmrs_25p_hyper.bed"),sep="\t", row.names = FALSE, col.names = FALSE, quote = FALSE)
   write.table(getData(dmrs_25p_hypo)[,1:3], str_c(output_dir,"/dmrs_25p_hypo.bed"),sep="\t",  row.names = FALSE , col.names = FALSE, quote = FALSE)
   write.table(getData(tiles_raw_Cov10_unite)[,1:3], str_c(output_dir,"/all_100bp_tiles_united.bed"),sep="\t",  row.names = FALSE , col.names = FALSE, quote = FALSE)
-  #bg for graet
+  #bg for great
   name = str_split(output_dir, "/")[[1]] %>% tail(n=1)
   write.table(rbind(getData(dmrs_25p_hyper)[,1:3], getData(dmrs_25p_hypo)[,1:3], sample_n(getData(tiles_raw_Cov10_unite)[,1:3], 3000)) %>% unique(), str_c(output_dir,"/", name,"_dmrs_plus_random_3000_100bp_tiles.bed") ,sep="\t",  row.names = FALSE , col.names = FALSE, quote = FALSE)
   write.table(rbind(getData(dmrs_25p_hyper)[,1:3], getData(dmrs_25p_hypo)[,1:3], sample_n(getData(tiles_raw_Cov10_unite)[,1:3], 5000)) %>% unique(), str_c(output_dir,"/", name, "_dmrs_plus_random_5000_100bp_tiles.bed"),sep="\t",  row.names = FALSE , col.names = FALSE, quote = FALSE)
@@ -159,7 +159,7 @@ main = function(meth_call_files_dir, samp_ids, treatments, pipeline, output_dir,
   if (is.null(known_genes_file))
   {
     #get annotation info
-    # TODO: add option to point to a KnownGenes.bed file and don't download every time
+    #download  KnownGenes.bed file it wasn't given by user
     mm10KG_txdb <- makeTxDbFromUCSC(genome="mm10", tablename="knownGene")
     bed_path <- file.path(output_dir, "mm10KnownGenes.bed")
     rtracklayer::export(asBED(mm10KG_txdb), bed_path)
@@ -226,7 +226,7 @@ p <- add_argument(p, "--install-packeges", help="install requirements")
 # Parse the command line arguments
 argv <- parse_args(p)
 
-# to solve problem on condor multiple jobs will be using - instead of whitespace
+# to solve problem on condor multiple jobs will be using "-" instead of whitespace
 # to separate treatments and samp_ids
 treatments = strsplit(argv$treatments,'-')[[1]] %>% as.numeric
 samp_ids = strsplit(argv$samp_ids,'-')[[1]]
