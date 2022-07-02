@@ -32,10 +32,7 @@ write_dmr_jobs_args() # <1 for single end or 2 for piared end> <raw_data_dir>
 write_heatmap_jobs_args() # <1 for single end or 2 for piared end> <raw_data_dir>
 {
  echo 97_vs_91, /storage/bfe_reizel/bengst/analyzed_data/KKTR-TargetingMafAMotifWithTet/dmrs_01.07.2022/all_samples_100bp_tiles_each_run_as_separate_samples.bed \
-      97_vs_91 \
-
-
-  --output_file  > heatmap_jobs.args
+      97_vs_91 > heatmap_jobs.args
 
  echo edit heatmap_jobs.args if you want to select part of the samples \(see /scripts_2022/make_heatmap.R\)
 }

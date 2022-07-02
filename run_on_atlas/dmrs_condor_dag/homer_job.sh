@@ -1,8 +1,7 @@
 #!/bin/bash
 # usage: <sample_dir>
 source /Local/bfe_reizel/anaconda3/bin/activate dmrs_pipeline_2022
-export PATH=$PATH:/Local/bfe_reizel/anaconda3/envs/ovation_rrbs_pipeline_2022/bin
-#TODO: add bedtools to dmrs_pipeline_2022
+
 function main()
 {
     cd $1
