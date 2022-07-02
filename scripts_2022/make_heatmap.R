@@ -23,7 +23,7 @@ main = function(scores_bed_file, sample_names=NULL, include_samples_by_name=NULL
   
   col <- colorRampPalette(c("blue", "yellow"))(256)
   png(file=output_file, width=1000, height=1000, res=150)
-  pheatmap(meth_matrix, cutree_cols=2, color=col, cluster_rows=FALSE, main=title)
+  pheatmap(meth_matrix, cutree_cols=2, color=col, cluster_rows=FALSE, main=str_c(title, "\n n=", nrow(meth_matrix)))
   dev.off()
 }
 
