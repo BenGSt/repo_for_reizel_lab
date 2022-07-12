@@ -92,6 +92,7 @@ make_tiles = function(meth_call_files_dir, pipeline, samp_ids,
 #' @param pipeline name of the alignment pipeline, it can be either "amp", "bismark","bismarkCoverage", "bismarkCytosineReport" or a list (default:'amp'). See methylkit documentation for more details.
 #' @param output_dir directory to save the results in
 #' @param known_genes_file for annotation
+#' @param meth_difference difference in percent for DMRs, default 25%
 #'
 #' @return
 #' @export methdiff files , bed files, figures
@@ -104,7 +105,7 @@ make_tiles = function(meth_call_files_dir, pipeline, samp_ids,
 #' setwd("C:/Users/bengs/Nextcloud/Tzachi_bioinformatics/Fah_regeneration")
 #' dir.create("figures")
 #' setwd("C:/Users/bengs/Nextcloud/Tzachi_bioinformatics/Fah_regeneration/figures")
-main = function(meth_call_files_dir, samp_ids, treatments, pipeline, output_dir, known_genes_file)
+main = function(meth_call_files_dir, samp_ids, treatments, pipeline, output_dir, known_genes_file, meth_difference)
 {
   if (! dir.exists(output_dir)){dir.create(output_dir)}
   setwd(output_dir)
@@ -127,11 +128,14 @@ main = function(meth_call_files_dir, samp_ids, treatments, pipeline, output_dir,
   
   
   tiles_raw_Cov10_unite_DMRs = calculateDiffMeth(tiles_raw_Cov10_unite)
+
+  if (is.null(meth_difference))
+    meth_difference=25
   # get hyper methylated bases
-  dmrs_25p_hyper = getMethylDiff(tiles_raw_Cov10_unite_DMRs,difference=25,
+  dmrs_25p_hyper = getMethylDiff(tiles_raw_Cov10_unite_DMRs,difference=meth_difference,
                                  qvalue=0.01,type="hyper")
   # get hypo methylated bases
-  dmrs_25p_hypo = getMethylDiff(tiles_raw_Cov10_unite_DMRs,difference=25,
+  dmrs_25p_hypo = getMethylDiff(tiles_raw_Cov10_unite_DMRs,difference=meth_difference,
                                 qvalue=0.01,type="hypo")
   # visualize the distribution of hypo/hyper-methylated bases/regions per chromosome
   png("meth_diff_per_chr.png")
@@ -221,6 +225,7 @@ p <- add_argument(p, "--treatments", help="vector with the condition of each sam
 p <- add_argument(p, "--pipeline", help="name of the alignment pipeline, it can be either amp, bismark,bismarkCoverage, bismarkCytosineReport or a list. See methylkit documentation for more details.", short="-p")
 p <- add_argument(p, "--output_dir", help="directory to save the results in", short="-o")
 p <- add_argument(p, "--known_genes_file", help="annotaion info e.g. mm10KnownGenes.bed, if none is given will be downloaded")
+p <- add_argument(p, "--meth_difference", help="difference in percent for DMRs, default 25%")
 p <- add_argument(p, "--install-packeges", help="install requirements")
 
 # Parse the command line arguments
