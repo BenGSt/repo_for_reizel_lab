@@ -2,11 +2,11 @@
 
 main()
 {
-  if [[ $# -lt 2 ]]; then
-    echo USAGE: $0
-    echo first manually edit dmr_jobs.args - then run this script from the directory you wish the output to be written to
-    exit 1
-  fi
+#  if [[ $# -lt 2 ]]; then
+#    echo USAGE: $0
+#    echo first manually edit dmr_jobs.args - then run this script from the directory you wish the output to be written to
+#    exit 1
+#  fi
 
   if [[ -f dmr_jobs.args ]]; then
     write_heatmap_jobs_args
