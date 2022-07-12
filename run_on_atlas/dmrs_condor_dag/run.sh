@@ -4,15 +4,27 @@ main()
 {
   if [[ $# -lt 2 ]]; then
     echo USAGE: $0
-    echo run from the directory you wish the output to be written to
+    echo first manually edit dmr_jobs.args - then run this script from the directory you wish the output to be written to
     exit 1
   fi
 
-  write_dmr_jobs_sub_file
-  make_dirs
+  if [[ -f dmr_jobs.args ]]; then
+    write_heatmap_jobs_args
+    write_homer_jobs_args
 
-  echo Submit the jobs by running: condor_submit_dag rrbs_jobs.dag
-  echo Good Luck!
+    write_dmr_jobs_sub_file
+    write_heatmap_jobs_sub_file
+    write_homer_jobs_sub_file
+    write_condor_dag
+
+    make_dirs
+
+    echo Submit the jobs by running: condor_submit_dag dmr_pipline_jobs.dag
+    echo Good Luck!
+  else
+    echo writing an example dmr_jobs.args, edit it then rerun this script.
+    write_dmr_jobs_args
+  fi
 }
 
 
@@ -32,9 +44,9 @@ write_dmr_jobs_args()
 
 write_heatmap_jobs_args()
 {
- echo 97_vs_91, /storage/bfe_reizel/bengst/analyzed_data/KKTR-TargetingMafAMotifWithTet/dmrs_01.07.2022/all_samples_100bp_tiles_each_run_as_separate_samples.bed \
-      97_vs_91 \
-      --sample_names 91E-97B-91D-91A-97G-97A-97C-97F-91B-97E-91C-91A_2-97G_2-97A_2-97E_2-91C_2 > heatmap_jobs.args
+  #format: <name_for_condor_logs>,  <path to all_samples_100bp_tiles.bed> <sample_dir> [args for make_heatmap.R]
+  all_samp_tiles=/storage/bfe_reizel/bengst/analyzed_data/KKTR-TargetingMafAMotifWithTet/dmrs_01.07.2022/all_samples_100bp_tiles_each_run_as_separate_samples.bed
+  cat dmr_jobs.args | awk -F , -v all_samp_tiles=$all_samp_tiles 'match($0, /--samp_ids ([^ ]*)/, array)  {print $1",",  all_samp_tiles, $1, "--sample_names " array[1]}' > heatmap_jobs.args
 
  echo edit heatmap_jobs.args if you want to select part of the samples \(see /scripts_2022/make_heatmap.R\)
 }
@@ -42,7 +54,9 @@ write_heatmap_jobs_args()
 
 write_homer_jobs_args()
 {
- echo 97_vs_91 > homer_jobs.args
+#format: sample_dir
+ cat dmr_jobs.args | awk -F , '{print $1}' > homer_jobs.args
+
 }
 
 
@@ -97,20 +111,14 @@ EOF
 }
 
 
-
 write_condor_dag()
 {
-  cat << EOF > rrbs_jobs.dag
-JOB trim_illumina trim_illumina_adaptors_jobs.sub
-JOB trim_ovation trim_diversity_adaptors_jobs.sub
-JOB align align_jobs.sub
-JOB meth_call meth_calling_jobs.sub
-JOB tiles make_tiles_jobs.sub
+  cat << EOF > dmr_pipline_jobs.dag
+JOB find_dmrs dmr_jobs.sub
+JOB heatmap heatmap_jobs.sub
+JOB homer  homer_jobs.sub
 
-PARENT trim_illumina  CHILD trim_ovation
-PARENT trim_ovation CHILD align
-PARENT align CHILD meth_call
-PARENT meth_call CHILD tiles
+PARENT find_dmrs  CHILD heatmap homer
 EOF
 }
 
