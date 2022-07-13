@@ -132,32 +132,32 @@ main = function(meth_call_files_dir, samp_ids, treatments, pipeline, output_dir,
   if (is.null(meth_difference))
     meth_difference=25
   # get hyper methylated bases
-  dmrs_25p_hyper = getMethylDiff(tiles_raw_Cov10_unite_DMRs,difference=meth_difference,
+  dmrs_hyper = getMethylDiff(tiles_raw_Cov10_unite_DMRs,difference=meth_difference,
                                  qvalue=0.01,type="hyper")
   # get hypo methylated bases
-  dmrs_25p_hypo = getMethylDiff(tiles_raw_Cov10_unite_DMRs,difference=meth_difference,
+  dmrs_hypo = getMethylDiff(tiles_raw_Cov10_unite_DMRs,difference=meth_difference,
                                 qvalue=0.01,type="hypo")
   # visualize the distribution of hypo/hyper-methylated bases/regions per chromosome
   png("meth_diff_per_chr.png")
   diffMethPerChr(tiles_raw_Cov10_unite_DMRs,plot=TRUE,qvalue.cutoff=0.01,
-                 meth.cutoff=25)
+                 meth.cutoff=meth_difference)
   dev.off()
   
   
   #write methDiff files
   write.table(tiles_raw_Cov10_unite_DMRs, str_c(output_dir,"/dmrs.tsv"),sep="\t")
-  write.table(dmrs_25p_hyper, str_c(output_dir,"/dmrs_25p_hyper.tsv"),sep="\t")
-  write.table(dmrs_25p_hypo, str_c(output_dir,"/dmrs_25p_hypo.tsv"),sep="\t")
+  write.table(dmrs_hyper, str_c(output_dir, "/dmrs", meth_difference, "p_hyper.tsv"),sep="\t")
+  write.table(dmrs_hypo, str_c(output_dir, "/dmrs", meth_difference, "p_hypo.tsv"),sep="\t")
   
   #write bed files (only chr start end)
-  write.table(getData(dmrs_25p_hyper)[,1:3], str_c(output_dir,"/dmrs_25p_hyper.bed"),sep="\t", row.names = FALSE, col.names = FALSE, quote = FALSE)
-  write.table(getData(dmrs_25p_hypo)[,1:3], str_c(output_dir,"/dmrs_25p_hypo.bed"),sep="\t",  row.names = FALSE , col.names = FALSE, quote = FALSE)
+  write.table(getData(dmrs_hyper)[,1:3], str_c(output_dir, "/dmrs", meth_difference, "p_hyper.bed"),sep="\t", row.names = FALSE, col.names = FALSE, quote = FALSE)
+  write.table(getData(dmrs_hypo)[,1:3], str_c(output_dir, "/dmrs", meth_difference, "p_hypo.bed"),sep="\t",  row.names = FALSE , col.names = FALSE, quote = FALSE)
   write.table(getData(tiles_raw_Cov10_unite)[,1:3], str_c(output_dir,"/all_100bp_tiles_united.bed"),sep="\t",  row.names = FALSE , col.names = FALSE, quote = FALSE)
   #bg for great
   name = str_split(output_dir, "/")[[1]] %>% tail(n=1)
-  write.table(rbind(getData(dmrs_25p_hyper)[,1:3], getData(dmrs_25p_hypo)[,1:3], sample_n(getData(tiles_raw_Cov10_unite)[,1:3], 3000)) %>% unique(), str_c(output_dir,"/", name,"_dmrs_plus_random_3000_100bp_tiles.bed") ,sep="\t",  row.names = FALSE , col.names = FALSE, quote = FALSE)
-  write.table(rbind(getData(dmrs_25p_hyper)[,1:3], getData(dmrs_25p_hypo)[,1:3], sample_n(getData(tiles_raw_Cov10_unite)[,1:3], 5000)) %>% unique(), str_c(output_dir,"/", name, "_dmrs_plus_random_5000_100bp_tiles.bed"),sep="\t",  row.names = FALSE , col.names = FALSE, quote = FALSE)
-  write.table(rbind(getData(dmrs_25p_hyper)[,1:3], getData(dmrs_25p_hypo)[,1:3], sample_n(getData(tiles_raw_Cov10_unite)[,1:3], 50000)) %>% unique(), str_c(output_dir,"/", name,"_dmrs_plus_random_50000_100bp_tiles.bed"),sep="\t",  row.names = FALSE , col.names = FALSE, quote = FALSE)
+  write.table(rbind(getData(dmrs_hyper)[,1:3], getData(dmrs_hypo)[,1:3], sample_n(getData(tiles_raw_Cov10_unite)[,1:3], 3000)) %>% unique(), str_c(output_dir,"/", name,"_dmrs_plus_random_3000_100bp_tiles.bed") ,sep="\t",  row.names = FALSE , col.names = FALSE, quote = FALSE)
+  write.table(rbind(getData(dmrs_hyper)[,1:3], getData(dmrs_hypo)[,1:3], sample_n(getData(tiles_raw_Cov10_unite)[,1:3], 5000)) %>% unique(), str_c(output_dir,"/", name, "_dmrs_plus_random_5000_100bp_tiles.bed"),sep="\t",  row.names = FALSE , col.names = FALSE, quote = FALSE)
+  write.table(rbind(getData(dmrs_hyper)[,1:3], getData(dmrs_hypo)[,1:3], sample_n(getData(tiles_raw_Cov10_unite)[,1:3], 50000)) %>% unique(), str_c(output_dir,"/", name,"_dmrs_plus_random_50000_100bp_tiles.bed"),sep="\t",  row.names = FALSE , col.names = FALSE, quote = FALSE)
   
   
   if (is.null(known_genes_file))
@@ -174,21 +174,21 @@ main = function(meth_call_files_dir, samp_ids, treatments, pipeline, output_dir,
   
   #annotate DMRs
   gene.obj=readTranscriptFeatures(bed_path)
-  dmrs_25p_hyper_annotation=annotateWithGeneParts(as(dmrs_25p_hyper,"GRanges"),gene.obj)
-  dmrs_25p_hypo_annotation=annotateWithGeneParts(as(dmrs_25p_hypo,"GRanges"),gene.obj)
+  dmrs_hyper_annotation=annotateWithGeneParts(as(dmrs_hyper,"GRanges"),gene.obj)
+  dmrs_hypo_annotation=annotateWithGeneParts(as(dmrs_hypo,"GRanges"),gene.obj)
   
   
   png(file="hypo_annotationn.png",width=1000,height=1000,res=150)
-  plotTargetAnnotation(dmrs_25p_hypo_annotation,precedence=TRUE, main="DMRs 25% hypo annotationn") 
+  plotTargetAnnotation(dmrs_hypo_annotation,precedence=TRUE, main=str_c("DMRs", meth_difference, "% hypo annotationn"))
   dev.off()
   
   png(file="hyper_annotationn.png",width=1000,height=1000,res=150)
-  plotTargetAnnotation(dmrs_25p_hyper_annotation,precedence=TRUE, main="DMRs 25% hyper annotationn") 
+  plotTargetAnnotation(dmrs_hyper_annotation,precedence=TRUE, main=str_c("DMRs", meth_difference, "% hyper annotationn"))
   dev.off()
   
   #Gene Ontology analysis via GREAT
   #TODO: ask tzachi about great params, use bg?
-  great_job = submitGreatJob(as(dmrs_25p_hypo, "GRanges"), species = "mm10")
+  great_job = submitGreatJob(as(dmrs_hypo, "GRanges"), species = "mm10")
   tb = getEnrichmentTables(great_job, download_by = "tsv")
   
   png(file="RegionGeneAssociationGraphs.png",width=10000,height=2500,res=1000)
