@@ -13,15 +13,17 @@ function main() #args : <path to all_samples_100bp_tiles.bed> <sample_dir>
     cd $2
     mkdir heatmaps
     meth_scores_file=$1
-    for dmrs in dmrs_25p_hyper.bed dmrs_25p_hypo.bed;  do
+    for dmrs in $(ls| grep -P 'dmrs_[0-9]*p_hyper.bed|dmrs_[0-9]*p_hypo.bed');  do
         samp_meth_scores=heatmaps/meth_scores_${dmrs}
         head -1 $meth_scores_file > $samp_meth_scores
         bedtools intersect -wa -a $meth_scores_file -b $dmrs >> $samp_meth_scores
-        #TODO: I'm making 100bp tile scroes twice. Once in the rrbs pipline and once again in find_dmrs_methylkit.R
-        #    choose one for better efficiency
+        #TODO: this intersection ends up with less tiles than in $dmrs.
+        # is it because of the discarding of tiles with less than 10X cov?
+        # it shouldn't be because find_dmrs_methylkit.R is supposed to filter all CpGs with less than 10x.
+        # what 100bp tiles show up in $dmrs but not in $meth_scores_file ?
 
-	echo make png figures
- 	Rscript /srv01/technion/bengst/scripts/repo_for_reizel_lab/scripts_2022/make_heatmap.R $3 $4 $5 $6 --scores_bed_file $samp_meth_scores --output_file $(echo $samp_meth_scores| sed 's/.bed/.png/')
+	      echo make png figures
+ 	      Rscript /srv01/technion/bengst/scripts/repo_for_reizel_lab/scripts_2022/make_heatmap.R $3 $4 $5 $6 --scores_bed_file $samp_meth_scores --output_file $(echo $samp_meth_scores| sed 's/.bed/.png/')
     done
 }
 
