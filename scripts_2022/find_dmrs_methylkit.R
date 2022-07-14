@@ -146,12 +146,12 @@ main = function(meth_call_files_dir, samp_ids, treatments, pipeline, output_dir,
   
   #write methDiff files
   write.table(tiles_raw_Cov10_unite_DMRs, str_c(output_dir,"/dmrs.tsv"),sep="\t")
-  write.table(dmrs_hyper, str_c(output_dir, "/dmrs", meth_difference, "p_hyper.tsv"),sep="\t")
-  write.table(dmrs_hypo, str_c(output_dir, "/dmrs", meth_difference, "p_hypo.tsv"),sep="\t")
+  write.table(dmrs_hyper, str_c(output_dir, "/dmrs_", meth_difference, "p_hyper.tsv"),sep="\t")
+  write.table(dmrs_hypo, str_c(output_dir, "/dmrs_", meth_difference, "p_hypo.tsv"),sep="\t")
   
   #write bed files (only chr start end)
-  write.table(getData(dmrs_hyper)[,1:3], str_c(output_dir, "/dmrs", meth_difference, "p_hyper.bed"),sep="\t", row.names = FALSE, col.names = FALSE, quote = FALSE)
-  write.table(getData(dmrs_hypo)[,1:3], str_c(output_dir, "/dmrs", meth_difference, "p_hypo.bed"),sep="\t",  row.names = FALSE , col.names = FALSE, quote = FALSE)
+  write.table(getData(dmrs_hyper)[,1:3], str_c(output_dir, "/dmrs_", meth_difference, "p_hyper.bed"),sep="\t", row.names = FALSE, col.names = FALSE, quote = FALSE)
+  write.table(getData(dmrs_hypo)[,1:3], str_c(output_dir, "/dmrs_", meth_difference, "p_hypo.bed"),sep="\t",  row.names = FALSE , col.names = FALSE, quote = FALSE)
   write.table(getData(tiles_raw_Cov10_unite)[,1:3], str_c(output_dir,"/all_100bp_tiles_united.bed"),sep="\t",  row.names = FALSE , col.names = FALSE, quote = FALSE)
   #bg for great
   name = str_split(output_dir, "/")[[1]] %>% tail(n=1)
