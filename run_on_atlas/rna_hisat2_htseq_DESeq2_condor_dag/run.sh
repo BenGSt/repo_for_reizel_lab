@@ -12,7 +12,7 @@ main()
   write_condor_dag
   mkdir logs
 
-  echo Submit the jobs by running: condor_submit_dag rrbs_jobs.dag
+  echo Submit the jobs by running: condor_submit_dag rna_seq_jobs.dag
   echo Good Luck!
   #TODO: deseq2
   #TODO: single end read option
@@ -54,7 +54,7 @@ EOF
 
 write_condor_dag()
 {
-    cat << EOF > rrbs_jobs.dag
+    cat << EOF > rna_seq_jobs.dag
 JOB align_hisat2 hisat2_jobs.sub
 JOB count_reads_htseq htseq_jobs.sub
 
