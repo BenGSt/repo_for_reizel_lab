@@ -61,3 +61,5 @@ JOB count_reads_htseq htseq_jobs.sub
 PARENT align_hisat2  CHILD count_reads_htseq
 EOF
 }
+
+main "$@"
