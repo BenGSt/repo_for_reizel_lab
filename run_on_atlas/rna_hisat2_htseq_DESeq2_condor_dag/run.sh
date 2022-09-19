@@ -23,7 +23,7 @@ write_condor_submition_files()
   raw_dir=$1
   cat << EOF > hisat2_jobs.sub
 Initialdir = $(pwd)
-executable = hisat2_job.sh
+executable = /srv01/technion/bengst/scripts/repo_for_reizel_lab/run_on_atlas/rna_hisat2_htseq_DESeq2_condor_dag/hisat2_job.sh
 Arguments = \$(args)
 request_cpus = 10
 RequestMemory = 8GB
@@ -38,7 +38,7 @@ EOF
 
   cat << EOF > htseq_jobs.sub
 Initialdir = $(pwd)
-executable = htseq_job.sh
+executable = /srv01/technion/bengst/scripts/repo_for_reizel_lab/run_on_atlas/rna_hisat2_htseq_DESeq2_condor_dag/htseq_job.sh
 Arguments = \$(args)
 request_cpus = 1
 RequestMemory = 4GB
