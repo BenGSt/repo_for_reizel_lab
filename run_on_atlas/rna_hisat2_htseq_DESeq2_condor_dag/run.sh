@@ -2,7 +2,7 @@
 
 main()
 {
-  if [[ $# -lt 2 ]]; then
+  if [[ $# -lt 1 ]]; then
     echo USAGE: $0  \<\raw_data_dir\>
     echo raw_data_dir should contain a dir for each sample containing it\'s fastq files.
     echo Run from the directory you wish the output to be written to.
