@@ -3,7 +3,11 @@ r1=$1
 r2=$2
 output_file=$3
 summary_file=$4 # {}_hisat2.summary.txt
-hisat2_idx=/storage/bfe_reizel/bengst/genomic_reference_data/hg38/analysisSet/chromosomes_hisat2_index/hisat2-index
+#human
+#hisat2_idx=/storage/bfe_reizel/bengst/genomic_reference_data/hg38/analysisSet/chromosomes_hisat2_index/hisat2-index
+
+#mouse
+hisat2_idx=/storage/bfe_reizel/bengst/genomic_reference_data/from_huji/mm10/Sequence/whole_genome_fasta_hisat2_index/hisat2-index
 
 source /Local/bfe_reizel/anaconda3/bin/activate rna-seq_hisat2_htseq_deseq2_2022
 mkdir -p $(dirname $summary_file)
