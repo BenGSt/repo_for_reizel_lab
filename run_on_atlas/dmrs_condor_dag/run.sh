@@ -71,7 +71,7 @@ write_heatmap_jobs_args()
   cat dmr_jobs.args | awk -F , -v all_samp_tiles=$all_samp_tiles 'match($0, /--samp_ids ([^ ]*)/, array)  match($0, /--output_dir ([^ ]*)/, array2) {print $1",",  all_samp_tiles, array2[1], "--sample_names " array[1]}' > heatmap_jobs.args
  #echo edit heatmap_jobs.args to set the path to all_samples_100bp_tiles.bed. And if you want to select part of the samples \(see /scripts_2022/make_heatmap.R\)
 
-}}
+}
 
 
 write_homer_jobs_args()
