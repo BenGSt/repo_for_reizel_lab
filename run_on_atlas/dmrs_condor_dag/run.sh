@@ -53,6 +53,9 @@ write_dmr_jobs_args()
  --meth_difference 25 > dmr_jobs.args
 
  echo You\'re going to have to manually edit dmr_jobs.args
+ echo format: \<name_for_condor_logs\>, \<args for find_dmrs_methylkit.R\>
+ echo Note that usually this is run as part of the rrbs pipline, and the name_for_condor_logs is the name of the output_dir.
+ echo For other use cases, if name_for_condor_logs is not the name of the output_dir - an additional dir named name_for_condor_logs will be created with a condor_logs sub directory.
 }
 
 
