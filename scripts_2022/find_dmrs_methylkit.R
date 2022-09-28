@@ -179,11 +179,11 @@ main = function(meth_call_files_dir, samp_ids, treatments, pipeline, output_dir,
   
   
   png(file="hypo_annotationn.png",width=1000,height=1000,res=150)
-  plotTargetAnnotation(dmrs_hypo_annotation,precedence=TRUE, main=str_c("DMRs", meth_difference, "% hypo annotationn"))
+  plotTargetAnnotation(dmrs_hypo_annotation,precedence=TRUE, main=str_c("DMRs ", meth_difference, "% hypo annotationn"))
   dev.off()
   
   png(file="hyper_annotationn.png",width=1000,height=1000,res=150)
-  plotTargetAnnotation(dmrs_hyper_annotation,precedence=TRUE, main=str_c("DMRs", meth_difference, "% hyper annotationn"))
+  plotTargetAnnotation(dmrs_hyper_annotation,precedence=TRUE, main=str_c("DMRs ", meth_difference, "% hyper annotationn"))
   dev.off()
   
   #Gene Ontology analysis via GREAT
