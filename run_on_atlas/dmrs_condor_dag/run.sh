@@ -11,7 +11,7 @@
 ###
 main()
 {
-  if [[ $# -lt 2 ]]; then
+  if [[ $# -lt 1 ]]; then
     echo USAGE: $0 \<all_samples_100bp_tiles.bed\>
     exit 1
   fi
