@@ -8,7 +8,7 @@
 source /Local/bfe_reizel/anaconda3/bin/activate dmrs_pipeline_2022
 
 
-function main() #args : <path to all_samples_100bp_tiles.bed> <sample_dir>
+function main() #args : <path to all_samples_100bp_tiles.bed> <sample_dir - where output of dmr_job is>
 {
     cd $2
     mkdir heatmaps
