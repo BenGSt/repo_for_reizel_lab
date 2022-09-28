@@ -17,7 +17,7 @@ main()
 #    exit 1
 #  fi
 
-  if [[ -f dmr_jobs.args heatmap_jobs.args]]; then
+  if [[ -f dmr_jobs.args ]] && [[ -f heatmap_jobs.args ]]; then
     write_homer_jobs_args
 
     write_dmr_jobs_sub_file
