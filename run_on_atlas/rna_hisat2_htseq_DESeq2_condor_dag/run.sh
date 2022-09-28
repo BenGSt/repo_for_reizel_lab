@@ -2,13 +2,23 @@
 
 main()
 {
-  if [[ $# -lt 1 ]]; then
-    echo USAGE: $0  \<\raw_data_dir\>
+ if [[ $# -lt 2 ]]; then
+    echo USAGE: $0 \<1 for single end or 2 for piared end\> \<\raw_data_dir\>
     echo raw_data_dir should contain a dir for each sample containing it\'s fastq files.
     echo Run from the directory you wish the output to be written to.
     exit 1
   fi
-  write_condor_submition_files $1
+
+  if [[ $1 -eq 1 ]]; then
+    single_end=1
+  elif [[ $1 -eq 2 ]]; then
+    single_end=0
+  else
+    echo USAGE: $0 \<1 for single end or 2 for piared end\> \<\raw_data_dir\>
+    exit 1
+  fi
+
+  write_condor_submition_files $2
   write_condor_dag
   mkdir logs
 
@@ -31,10 +41,20 @@ universe = vanilla
 log = logs/\$(name)_hisat2.log
 output = logs/\$(name)_hisat2.out
 error = logs/\$(name)_hisat2.out
-queue name, args from (
+EOF
+  if [[ ! $single_end ]]; then
+    cat << EOF >> hisat2_jobs.sub
+    queue name, args from (
 $( for samp_dir in $(find $raw_dir/* -type d); do echo $samp_dir | awk -F / '{printf $NF", "}'; find $samp_dir | grep -E 'R1|R2'| sort | awk '{printf $0" "}' ; echo $samp_dir | awk -F / '{print "./"$NF"/"$NF".hisat2_output.bam ./"$NF"/"$NF".hisat2.summary.txt "}'  ; done)
 )
 EOF
+  else #if single end
+    cat << EOF >> hisat2_jobs.sub
+    queue name, args from (
+$( for samp_dir in $(find $raw_dir/* -type d); do echo $samp_dir | awk -F / '{printf $NF", "}'; find $samp_dir | grep -E '.fq.gz|.fastq.gz'| sort | awk '{printf $0" "}' ; echo $samp_dir | awk -F / '{print "./"$NF"/"$NF".hisat2_output.bam ./"$NF"/"$NF".hisat2.summary.txt "}'  ; done)
+)
+EOF
+  fi
 
   cat << EOF > htseq_jobs.sub
 Initialdir = $(pwd)

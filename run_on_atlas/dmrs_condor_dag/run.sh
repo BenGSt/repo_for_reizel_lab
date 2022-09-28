@@ -36,7 +36,8 @@ write_dmr_jobs_args()
  --treatments 1-1-0-0 \
  --pipeline bismarkCoverage \
  --output_dir /storage/bfe_reizel/bengst/analyzed_data/Nadav_betaRepl/56n_vs_57n \
- --known_genes_file /storage/bfe_reizel/bengst/genomic_reference_data/mm10KnownGenes.bed > dmr_jobs.args
+ --known_genes_file /storage/bfe_reizel/bengst/genomic_reference_data/mm10KnownGenes.bed \
+ --meth_difference 25 > dmr_jobs.args
 
  echo You\'re going to have to manually edit dmr_jobs.args
 }
@@ -48,7 +49,7 @@ write_heatmap_jobs_args()
   all_samp_tiles=/storage/bfe_reizel/bengst/analyzed_data/KKTR-TargetingMafAMotifWithTet/dmrs_01.07.2022/all_samples_100bp_tiles_each_run_as_separate_samples.bed
   cat dmr_jobs.args | awk -F , -v all_samp_tiles=$all_samp_tiles 'match($0, /--samp_ids ([^ ]*)/, array)  {print $1",",  all_samp_tiles, $1, "--sample_names " array[1]}' > heatmap_jobs.args
 
- echo edit heatmap_jobs.args if you want to select part of the samples \(see /scripts_2022/make_heatmap.R\)
+ echo edit heatmap_jobs.args to set the path to all_samples_100bp_tiles.bed. And if you want to select part of the samples \(see /scripts_2022/make_heatmap.R\)
 }
 
 
