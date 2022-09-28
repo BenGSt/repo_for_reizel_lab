@@ -2,11 +2,11 @@
 
 
 #How to run:
-# mkdir dmrs
-# run once
-# edit dmr_jobs.args
-# run 2nd time
-# edit heatmap_jobs.args - make sure
+# make sure you have the cov files you need in a dir
+# run run.sh once
+# edit dmr_jobs.args, heatmap_jobs.args - make sure heatmap_jobs.args sample_dir is output dir of dmr_job
+# run run.sh 2nd time
+# submit
 #
 ###
 main()
