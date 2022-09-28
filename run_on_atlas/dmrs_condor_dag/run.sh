@@ -31,8 +31,13 @@ main()
     echo Good Luck!
   else
     echo Writing example dmr_jobs.args, heatmap_jobs.args files. Edit them, then rerun this script.
+    echo
+    echo you can use the following if running many dmr jobs from one dir
+    echo cat dmr_jobs.args \| awk -F , -v all_samp_tiles=$all_samp_tiles 'match($0, /--samp_ids ([^ ]*)/, array)  {print $1",",  all_samp_tiles, $1, "--sample_names " array[1]}' \> heatmap_jobs.args
     write_dmr_jobs_args
     write_heatmap_jobs_args
+    echo
+    echo
 
   fi
 }
