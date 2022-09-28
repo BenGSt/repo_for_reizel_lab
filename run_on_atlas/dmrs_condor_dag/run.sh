@@ -11,14 +11,15 @@
 ###
 main()
 {
-#  if [[ $# -lt 2 ]]; then
-#    echo USAGE: $0
-#    echo first manually edit dmr_jobs.args - then run this script from the directory you wish the output to be written to
-#    exit 1
-#  fi
+  if [[ $# -lt 2 ]]; then
+    echo USAGE: $0 \<all_samples_100bp_tiles.bed\>
+    exit 1
+  fi
 
-  if [[ -f dmr_jobs.args ]] && [[ -f heatmap_jobs.args ]]; then
+  all_samples_100bp_tiles=$1
+  if [[ -f dmr_jobs.args ]]; then
     write_homer_jobs_args
+    write_heatmap_jobs_args "$all_samples_100bp_tiles"
 
     write_dmr_jobs_sub_file
     write_heatmap_jobs_sub_file
@@ -29,16 +30,13 @@ main()
 
     echo Submit the jobs by running: condor_submit_dag dmr_pipline_jobs.dag
     echo Good Luck!
+    echo
   else
-    echo Writing example dmr_jobs.args, heatmap_jobs.args files. Edit them, then rerun this script.
+    echo Writing example dmr_jobs.args file. Edit it, one line per job, then rerun this script.
     echo
-    echo you can use the following if running many dmr jobs from one dir
-    echo cat dmr_jobs.args \| awk -F , -v all_samp_tiles=$all_samp_tiles 'match($0, /--samp_ids ([^ ]*)/, array)  {print $1",",  all_samp_tiles, $1, "--sample_names " array[1]}' \> heatmap_jobs.args
     write_dmr_jobs_args
-    write_heatmap_jobs_args
     echo
     echo
-
   fi
 }
 
@@ -61,11 +59,10 @@ write_dmr_jobs_args()
 write_heatmap_jobs_args()
 {
   #format: <name_for_condor_logs>,  <path to all_samples_100bp_tiles.bed> <sample_dir - output dir of dmr_job> [args for make_heatmap.R]
-  all_samp_tiles=/storage/bfe_reizel/bengst/analyzed_data/KKTR-TargetingMafAMotifWithTet/dmrs_01.07.2022/all_samples_100bp_tiles_each_run_as_separate_samples.bed
-  cat dmr_jobs.args | awk -F , -v all_samp_tiles=$all_samp_tiles 'match($0, /--samp_ids ([^ ]*)/, array)  {print $1",",  all_samp_tiles, $1, "--sample_names " array[1]}' > heatmap_jobs.args
-
- echo edit heatmap_jobs.args to set the path to all_samples_100bp_tiles.bed. And if you want to select part of the samples \(see /scripts_2022/make_heatmap.R\)
- echo  format: \<name_for_condor_logs\>,  \<path to all_samples_100bp_tiles.bed\> \<sample_dir - output dir of dmr_job\> [args for make_heatmap.R]
+  all_samp_tiles=$1
+  # cat dmr_jobs.args | awk -F , -v all_samp_tiles=$all_samp_tiles 'match($0, /--samp_ids ([^ ]*)/, array)  {print $1",",  all_samp_tiles, $1, "--sample_names " array[1]}' > heatmap_jobs.args
+  cat dmr_jobs.args | awk -F , -v all_samp_tiles=$all_samp_tiles 'match($0, /--samp_ids ([^ ]*)/, array)  match($0, /--output_dir ([^ ]*)/, array2) {print $1",",  all_samp_tiles, array2[1], "--sample_names " array[1]}' > heatmap_jobs.args
+ #echo edit heatmap_jobs.args to set the path to all_samples_100bp_tiles.bed. And if you want to select part of the samples \(see /scripts_2022/make_heatmap.R\)
 }
 
 
