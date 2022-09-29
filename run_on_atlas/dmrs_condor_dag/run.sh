@@ -76,7 +76,7 @@ write_heatmap_jobs_args()
 write_homer_jobs_args()
 {
 #format: sample_dir
- cat dmr_jobs.args | awk -F , 'match($0, /--output_dir ([^ ]*)/, array2){print array2[1]}' > homer_jobs.args
+ awk -F , 'match($0, /--output_dir ([^ ]*)/, array2){print array2[1]}' dmr_jobs.args  > homer_jobs.args
 }
 
 
