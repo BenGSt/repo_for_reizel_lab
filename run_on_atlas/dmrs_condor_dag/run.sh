@@ -61,7 +61,7 @@ write_dmr_jobs_args()
 
 write_heatmap_jobs_args()
 {
-  ecgo writing heatmap_jobs.args
+  echo writing heatmap_jobs.args
   echo heatmap_jobs.args format: \<name_for_condor_logs\>,  \<path to all_samples_100bp_tiles.bed\> \<sample_dir - output dir of dmr_job\> [args for make_heatmap.R]
   echo If all_samples_100bp_tiles.bed include more samples than you want to show in your heatmap you must edit heatmap_jobs.args
   echo  use: --sample_names \<ordered names of samples in all_samples_100bp_tiles.bed\> --include_samples_by_name \<samples to inclide\>
