@@ -108,7 +108,7 @@ make_tiles = function(meth_call_files_dir, pipeline, samp_ids,
 main = function(meth_call_files_dir, samp_ids, treatments, pipeline, output_dir, known_genes_file, meth_difference)
 {
   print("wd:") #debug
-  getwd() #debug
+  print(getwd()) #debug
 
   if (! dir.exists(output_dir)){dir.create(output_dir)}
   setwd(output_dir)
