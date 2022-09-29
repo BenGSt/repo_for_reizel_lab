@@ -107,14 +107,9 @@ make_tiles = function(meth_call_files_dir, pipeline, samp_ids,
 #' setwd("C:/Users/bengs/Nextcloud/Tzachi_bioinformatics/Fah_regeneration/figures")
 main = function(meth_call_files_dir, samp_ids, treatments, pipeline, output_dir, known_genes_file, meth_difference)
 {
-  print("wd:") #debug
-  print(getwd()) #debug
-
   if (! dir.exists(output_dir)){dir.create(output_dir)}
   setwd(output_dir)
   if (! dir.exists("figures")){dir.create("figures")}
-  print(str_c("set wd: ./figures")) #debug
-  #setwd(str_c(output_dir, "/figures"))
   setwd("./figures")
 
   tiles_raw_Cov10_unite=make_tiles(meth_call_files_dir, pipeline, samp_ids,
@@ -243,6 +238,6 @@ samp_ids = strsplit(argv$samp_ids,'-')[[1]]
 # treatments = strsplit(argv$treatments,' +')[[1]] %>% as.numeric
 # samp_ids = strsplit(argv$samp_ids,' +')[[1]]
 
-main(argv$meth_call_files_dir, samp_ids, treatments, argv$pipeline, argv$output_dir, argv$known_genes_file,
+main(normalizePath(argv$meth_call_files_dir), samp_ids, treatments, argv$pipeline, normalizePath(argv$output_dir), argv$known_genes_file,
      as.numeric(argv$meth_difference))
-
+#TODO: test if normalizePath() works well
