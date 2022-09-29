@@ -113,9 +113,10 @@ main = function(meth_call_files_dir, samp_ids, treatments, pipeline, output_dir,
   if (! dir.exists(output_dir)){dir.create(output_dir)}
   setwd(output_dir)
   if (! dir.exists("figures")){dir.create("figures")}
-  print(str_c("set wd: ",output_dir, "/figures")) #debug
-  setwd(str_c(output_dir, "/figures"))
-  
+  print(str_c("set wd: ./figures")) #debug
+  #setwd(str_c(output_dir, "/figures"))
+  setwd("./figures")
+
   tiles_raw_Cov10_unite=make_tiles(meth_call_files_dir, pipeline, samp_ids,
                                    treatments)
   
