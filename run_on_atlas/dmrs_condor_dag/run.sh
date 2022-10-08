@@ -92,7 +92,14 @@ write_heatmap_jobs_args()
 write_homer_jobs_args()
 {
 #format: sample_dir
- awk -F , 'match($0, /--output_dir ([^ ]*)/, array2){print array2[1]}' dmr_jobs.args  > homer_jobs.args
+ #Note: at this point running homer jobs from locations other that the parent directory is not supported by this script because of condor_log location.
+
+ awk -F , 'match($0, /--output_dir ([^ ]*)/, array2){print array2[1]}' dmr_jobs.args | sed -E 's/\.\/|\/$//g'  > homer_jobs.args
+ echo writing homer_jobs.args which sholud only contain the sample dir names, without prefix ./ or trailing /
+ echo
+ echo make sure ot looks right. cat homer_jobs.args:
+ cat homer_jobs.args
+ echo
 }
 
 
