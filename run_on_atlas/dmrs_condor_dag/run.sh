@@ -1,18 +1,5 @@
 #!/bin/bash
 
-
-#Easy way to run:
-# mkdir e.g. dmrs
-# make sure you have the cov files you need in a dir for each comparison
-# run run.sh once
-# edit dmr_jobs.args - make the condor name the same as the ouput_dir (should work without this but more messy)
-#   Example dmr_jobs.args :
-#     Young_vs_Old_25p, --meth_call_files_dir /storage/bfe_reizel/bengst/analyzed_data/further_look_at_Renegeration_for_ISF_grant/new_dmrs/Young_vs_Old_cov_files --samp_ids Young1-Old1-Young2-Old2 --treatments 1-0-1-0 --pipeline bismarkCoverage --output_dir ./Young_vs_Old_25p/ --known_genes_file /storage/bfe_reizel/bengst/genomic_reference_data/mm10KnownGenes.bed --meth_difference 25
-#     Young_vs_YoungYoung_30p, --meth_call_files_dir /storage/bfe_reizel/bengst/analyzed_data/further_look_at_Renegeration_for_ISF_grant/new_dmrs/Young_vs_YoungYoung_cov_files --samp_ids YoungYoung1-YoungYoung2-Young1-Young2 --treatments 0-0-1-1 --pipeline bismarkCoverage --output_dir ./Young_vs_YoungYoung_30p/ --known_genes_file /storage/bfe_reizel/bengst/genomic_reference_data/mm10KnownGenes.bed --meth_difference 30
-# run run.sh 2nd time
-# submit
-#
-###
 main()
 {
   if [[ $# -lt 1 ]]; then
