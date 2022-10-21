@@ -240,7 +240,10 @@ samp_ids = strsplit(argv$samp_ids,'-')[[1]]
 # treatments = strsplit(argv$treatments,' +')[[1]] %>% as.numeric
 # samp_ids = strsplit(argv$samp_ids,' +')[[1]]
 
-print(argv$pipeline) #debug
+if (str_detect(argv$pipeline,"list"))
+{
+    argv$pipeline = eval(parse(text=argv$pipeline))
+}
 
 main(normalizePath(argv$meth_call_files_dir), samp_ids, treatments, argv$pipeline, normalizePath(argv$output_dir), argv$known_genes_file,
      as.numeric(argv$meth_difference))
