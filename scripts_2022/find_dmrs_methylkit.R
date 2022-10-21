@@ -27,7 +27,7 @@ install_packages = function()
 read_meth_call_files = function(meth_call_files_dir, pipeline_, samp_ids, treatments)
 {
   meth_call_files = list.files(path=meth_call_files_dir,
-                               pattern="*.cov.gz",
+                               pattern="*.cov.gz|*.cov",
                                full.names=TRUE
   )
   methyl_raw_list = methRead(as.list(meth_call_files),
