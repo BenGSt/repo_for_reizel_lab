@@ -209,13 +209,13 @@ main = function(meth_call_files_dir, samp_ids, treatments, pipeline, output_dir,
 # 
 # if (argv$install-packeges) {install_packages()}
 
-library(argparser, quietly=T)
-library(methylKit, quietly=TRUE)
-library(GenomicFeatures, quietly=T) # for getting annotation info
-library(genomation, quietly=T) #for annotating 
-library(rGREAT, quietly=T)
-library(dplyr, quietly=T)
-library(stringr, quietly=T)
+suppressMessages(library(argparser))
+suppressMessages(library(methylKit))
+suppressMessages(library(GenomicFeatures)) # for getting annotation info
+suppressMessages(library(genomation)) #for annotating
+suppressMessages(library(rGREAT))
+suppressMessages(library(dplyr))
+suppressMessages(library(stringr))
 
 # Create a parser
 p <- arg_parser("Find DMRs with methylKit")
