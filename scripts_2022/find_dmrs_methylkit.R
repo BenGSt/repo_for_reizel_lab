@@ -240,6 +240,8 @@ samp_ids = strsplit(argv$samp_ids,'-')[[1]]
 # treatments = strsplit(argv$treatments,' +')[[1]] %>% as.numeric
 # samp_ids = strsplit(argv$samp_ids,' +')[[1]]
 
+print(argv$pipeline) #debug
+
 main(normalizePath(argv$meth_call_files_dir), samp_ids, treatments, argv$pipeline, normalizePath(argv$output_dir), argv$known_genes_file,
      as.numeric(argv$meth_difference))
 #TODO: test if normalizePath() works well
