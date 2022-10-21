@@ -19,7 +19,6 @@ install_packages = function()
   install.packages("RMariaDB", dependencies = TRUE) # needed for makeTxDbFromUCSC from "GenomicFeatures"
   BiocManager::install("genomation", dependencies = TRUE)
   BiocManager::install("rGREAT", dependencies = TRUE)
-  
 }
 
 
@@ -40,8 +39,6 @@ read_meth_call_files = function(meth_call_files_dir, pipeline_, samp_ids, treatm
                              mincov=10
                              
   )
-  
-  
   return(methyl_raw_list)
 }
 
@@ -80,6 +77,8 @@ make_tiles = function(meth_call_files_dir, pipeline, samp_ids,
   # By default, unite function produces bases/regions covered in all samples.
   # That requirement can be relaxed using ???min.per.group??? option in unite function.
   tiles_raw_Cov10_unite=unite(tiles_raw, destrand=FALSE)
+
+  return(tiles_raw_Cov10_unite)
 }
 
 
@@ -110,9 +109,11 @@ main = function(meth_call_files_dir, samp_ids, treatments, pipeline, output_dir,
   tiles_raw_Cov10_unite=make_tiles(meth_call_files_dir, pipeline, samp_ids,
                                    treatments)
   
-  if (! dir.exists(output_dir)){dir.create(output_dir)}
+  if (! dir.exists(output_dir))
+    dir.create(output_dir)
   setwd(output_dir)
-  if (! dir.exists("figures")){dir.create("figures")}
+  if (! dir.exists("figures"))
+    dir.create("figures")
   setwd("./figures")
   
   png(file="correlation_matrix.png",width=1000,height=1000)
@@ -125,8 +126,7 @@ main = function(meth_call_files_dir, samp_ids, treatments, pipeline, output_dir,
   png(file="pca.png",width=1500,height=1000,res=100)
   PCASamples(tiles_raw_Cov10_unite)
   dev.off()
-  
-  
+
   tiles_raw_Cov10_unite_DMRs = calculateDiffMeth(tiles_raw_Cov10_unite)
 
   if (is.null(meth_difference))
@@ -142,8 +142,7 @@ main = function(meth_call_files_dir, samp_ids, treatments, pipeline, output_dir,
   diffMethPerChr(tiles_raw_Cov10_unite_DMRs,plot=TRUE,qvalue.cutoff=0.01,
                  meth.cutoff=meth_difference)
   dev.off()
-  
-  
+
   #write methDiff files
   write.table(tiles_raw_Cov10_unite_DMRs, str_c(output_dir,"/dmrs.tsv"),sep="\t")
   write.table(dmrs_hyper, str_c(output_dir, "/dmrs_", meth_difference, "p_hyper.tsv"),sep="\t")
@@ -172,14 +171,12 @@ main = function(meth_call_files_dir, samp_ids, treatments, pipeline, output_dir,
   }
   else 
     bed_path = known_genes_file
-  
-  
+
   #annotate DMRs
   gene.obj=readTranscriptFeatures(bed_path)
   dmrs_hyper_annotation=annotateWithGeneParts(as(dmrs_hyper,"GRanges"),gene.obj)
   dmrs_hypo_annotation=annotateWithGeneParts(as(dmrs_hypo,"GRanges"),gene.obj)
-  
-  
+
   png(file="hypo_annotationn.png",width=1000,height=1000,res=150)
   plotTargetAnnotation(dmrs_hypo_annotation,precedence=TRUE, main=str_c("DMRs ", meth_difference, "% hypo annotationn"))
   dev.off()
@@ -196,8 +193,6 @@ main = function(meth_call_files_dir, samp_ids, treatments, pipeline, output_dir,
   png(file="RegionGeneAssociationGraphs.png",width=10000,height=2500,res=1000)
   res = plotRegionGeneAssociationGraphs(great_job)
   dev.off()
-  
-  
 }
 
 
@@ -241,9 +236,7 @@ samp_ids = strsplit(argv$samp_ids,'-')[[1]]
 # samp_ids = strsplit(argv$samp_ids,' +')[[1]]
 
 if (str_detect(argv$pipeline,"list"))
-{
     argv$pipeline = eval(parse(text=argv$pipeline))
-}
 
 main(normalizePath(argv$meth_call_files_dir), samp_ids, treatments, argv$pipeline, normalizePath(argv$output_dir), argv$known_genes_file,
      as.numeric(argv$meth_difference))
