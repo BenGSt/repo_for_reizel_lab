@@ -1,7 +1,5 @@
 #!/usr/bin/env Rscript
 
-
-
 install_packages = function()
 {
   if (!require("argparser", quietly = TRUE))
@@ -22,7 +20,6 @@ install_packages = function()
 }
 
 
-
 read_meth_call_files = function(meth_call_files_dir, pipeline_, samp_ids, treatments)
 {
   meth_call_files = list.files(path=meth_call_files_dir,
@@ -41,7 +38,6 @@ read_meth_call_files = function(meth_call_files_dir, pipeline_, samp_ids, treatm
   )
   return(methyl_raw_list)
 }
-
 
 
 filter_bases = function(methyl_raw_list)
@@ -81,6 +77,7 @@ make_tiles = function(meth_call_files_dir, pipeline, samp_ids,
   return(tiles_raw_Cov10_unite)
 }
 
+
 write_meth_scores = function(methylBase.obj, output_file )
 {
     table = percMethylation(methylBase.obj, rowids=TRUE)
@@ -91,6 +88,7 @@ write_meth_scores = function(methylBase.obj, output_file )
     write.table(table / 100, output_file, append=TRUE, sep="\t",
                 row.names=TRUE, col.names=FALSE, quote=FALSE)
 }
+
 
 #' Finding DMRs with methylKit
 #'
@@ -172,8 +170,7 @@ main = function(meth_call_files_dir, samp_ids, treatments, pipeline, output_dir,
   write.table(rbind(getData(dmrs_hyper)[,1:3], getData(dmrs_hypo)[,1:3], sample_n(getData(tiles_raw_Cov10_unite)[,1:3], 3000)) %>% unique(), str_c(output_dir,"/", name,"_dmrs_plus_random_3000_100bp_tiles.bed") ,sep="\t",  row.names = FALSE , col.names = FALSE, quote = FALSE)
   write.table(rbind(getData(dmrs_hyper)[,1:3], getData(dmrs_hypo)[,1:3], sample_n(getData(tiles_raw_Cov10_unite)[,1:3], 5000)) %>% unique(), str_c(output_dir,"/", name, "_dmrs_plus_random_5000_100bp_tiles.bed"),sep="\t",  row.names = FALSE , col.names = FALSE, quote = FALSE)
   write.table(rbind(getData(dmrs_hyper)[,1:3], getData(dmrs_hypo)[,1:3], sample_n(getData(tiles_raw_Cov10_unite)[,1:3], 50000)) %>% unique(), str_c(output_dir,"/", name,"_dmrs_plus_random_50000_100bp_tiles.bed"),sep="\t",  row.names = FALSE , col.names = FALSE, quote = FALSE)
-  
-  
+
   if (is.null(known_genes_file))
   {
     #get annotation info
@@ -190,12 +187,12 @@ main = function(meth_call_files_dir, samp_ids, treatments, pipeline, output_dir,
   dmrs_hyper_annotation=annotateWithGeneParts(as(dmrs_hyper,"GRanges"),gene.obj)
   dmrs_hypo_annotation=annotateWithGeneParts(as(dmrs_hypo,"GRanges"),gene.obj)
 
-  png(file="hypo_annotationn.png",width=1000,height=1000,res=150)
-  plotTargetAnnotation(dmrs_hypo_annotation,precedence=TRUE, main=str_c("DMRs ", meth_difference, "% hypo annotationn"))
+  png(file="hypo_annotation.png",width=1000,height=1000,res=150)
+  plotTargetAnnotation(dmrs_hypo_annotation,precedence=TRUE, main=str_c("DMRs ", meth_difference, "% hypo annotation"))
   dev.off()
   
-  png(file="hyper_annotationn.png",width=1000,height=1000,res=150)
-  plotTargetAnnotation(dmrs_hyper_annotation,precedence=TRUE, main=str_c("DMRs ", meth_difference, "% hyper annotationn"))
+  png(file="hyper_annotation.png",width=1000,height=1000,res=150)
+  plotTargetAnnotation(dmrs_hyper_annotation,precedence=TRUE, main=str_c("DMRs ", meth_difference, "% hyper annotation"))
   dev.off()
   
   #Gene Ontology analysis via GREAT
@@ -209,14 +206,6 @@ main = function(meth_call_files_dir, samp_ids, treatments, pipeline, output_dir,
 }
 
 
-
-###__main__##
-# install_packages()
-# if (!require("argparser", quietly = TRUE))
-#   install.packages("argparser")
-# 
-# if (argv$install-packeges) {install_packages()}
-
 suppressMessages(library(argparser))
 suppressMessages(library(methylKit))
 suppressMessages(library(GenomicFeatures)) # for getting annotation info
@@ -227,18 +216,14 @@ suppressMessages(library(stringr))
 
 # Create a parser
 p <- arg_parser("Find DMRs with methylKit")
-
-# Add command line arguments
 p <- add_argument(p, "--meth_call_files_dir",  help="directory where the .cov files are (all will be used)", short="-m")
-p <- add_argument(p, "--samp_ids", help="vector with the names of the samples seperated by \"-\" (must match the order of the .cov files)", short="-s")
-p <- add_argument(p, "--treatments", help="vector with the condition of each sample (0 or 1) seperated by \"-\" the dmrs are found as the difference between  1 - 0 groups (1 - treated , 0 - control)", short="-t")
+p <- add_argument(p, "--samp_ids", help="vector with the names of the samples separated by \"-\" (must match the order of the .cov files)", short="-s")
+p <- add_argument(p, "--treatments", help="vector with the condition of each sample (0 or 1) separated by \"-\" the dmrs are found as the difference between  1 - 0 groups (1 - treated , 0 - control)", short="-t")
 p <- add_argument(p, "--pipeline", help="name of the alignment pipeline, it can be either amp, bismark,bismarkCoverage, bismarkCytosineReport or a list. See methylkit documentation for more details.", short="-p")
 p <- add_argument(p, "--output_dir", help="directory to save the results in", short="-o")
-p <- add_argument(p, "--known_genes_file", help="annotaion info e.g. mm10KnownGenes.bed, if none is given will be downloaded")
+p <- add_argument(p, "--known_genes_file", help="annotation info e.g. mm10KnownGenes.bed, if none is given will be downloaded")
 p <- add_argument(p, "--meth_difference", help="difference in percent for DMRs, default 25%")
-p <- add_argument(p, "--install-packeges", help="install requirements")
-
-# Parse the command line arguments
+#TODO: p <- add_argument(p, "--install-packages", help="install requirements")
 argv <- parse_args(p)
 
 # to solve problem on condor multiple jobs will be using "-" instead of whitespace
@@ -248,6 +233,7 @@ samp_ids = strsplit(argv$samp_ids,'-')[[1]]
 # treatments = strsplit(argv$treatments,' +')[[1]] %>% as.numeric
 # samp_ids = strsplit(argv$samp_ids,' +')[[1]]
 
+#allow list(...) as pipline input
 if (str_detect(argv$pipeline,"list"))
     argv$pipeline = eval(parse(text=argv$pipeline))
 
