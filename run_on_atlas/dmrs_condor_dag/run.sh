@@ -195,7 +195,7 @@ RequestMemory = 1GB
 universe = vanilla
 queue name,args from (
 $(echo $output_dir| awk -F / '{printf $NF}'), \
-$(realpath $all_samples_100bp_tiles) \
+$all_samples_100bp_tiles \
 $output_dir \
 --sample_names $samp_ids
 )
