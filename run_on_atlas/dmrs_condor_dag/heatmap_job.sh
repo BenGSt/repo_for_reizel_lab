@@ -10,9 +10,9 @@ source /Local/bfe_reizel/anaconda3/bin/activate dmrs_pipeline_2022
 
 function main() #args : <path to all_samples_100bp_tiles.bed> <sample_dir - where output of dmr_job is>
 {
+    meth_scores_file=$(realpath $1)
     cd $2
     mkdir heatmaps
-    meth_scores_file=$1
     for dmrs in $(ls| grep -P 'dmrs_[0-9]*p_hyper.bed|dmrs_[0-9]*p_hypo.bed');  do
         samp_meth_scores=heatmaps/meth_scores_${dmrs}
         head -1 $meth_scores_file > $samp_meth_scores
