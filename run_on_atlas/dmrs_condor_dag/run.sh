@@ -239,13 +239,32 @@ make_dirs()
   awk -F , '{if ($0==")") next; if (start) print "mkdir -p "$1"/condor_logs"} {if ($0=="queue name,args from (")  start=1;}' dmr_jobs.sub | bash
 }
 
+
 edit()
 {
+  #TODO: if args are only one line before edit() this works.
+  # make it work if there is more than one line before edit() as well. for example in case of running edit() more than once.
+
   #heatmap args
+  heatmap_args=$(\
   cat dmr_jobs.sub |\
   awk  '{if ($0==")") next; if (start) print $0} {if ($0=="queue name,args from (")  start=1;}'|\
-  awk -F , -v all_samp_tiles=$all_samples_100bp_tiles 'match($0, /--samp_ids ([^ ]*)/, array)  match($0, /--output_dir ([^ ]*)/, array2) {print $1",",  all_samp_tiles, array2[1], "--sample_names " array[1]}'
+  awk -F , -v all_samp_tiles=$all_samples_100bp_tiles 'match($0, /--samp_ids ([^ ]*)/, array)  match($0, /--output_dir ([^ ]*)/, array2) {print $1",",  all_samp_tiles, array2[1], "--sample_names " array[1]}'\
+  )
+  cat heatmap_jobs.sub |awk -v heatmap_args="$heatmap_args" '{if (start) {print heatmap_args; start = 0} else {print $0} {if ($0=="queue name,args from (")  start=1}}'  > temp
+  mv temp heatmap_jobs.sub
+
+  #homer args
+  homer_args=$(\
+  cat dmr_jobs.sub |\
+  awk  '{if ($0==")") next; if (start) print $0} {if ($0=="queue name,args from (")  start=1;}'|\
+  awk -F , 'match($0, /--output_dir ([^ ]*)/, array2){print array2[1]}'| sed -E 's/\.\/|\/$//g'\
+  )
+  cat homer_jobs.sub |awk -v homer_args="$homer_args" '{if (start) {print homer_args; start = 0} else {print $0} {if ($0=="queue name,args from (")  start=1}}'  > temp
+  mv temp homer_jobs.sub
+
 }
+
 
 arg_parse()
 {
