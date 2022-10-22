@@ -152,7 +152,8 @@ main = function(meth_call_files_dir, samp_ids, treatments, pipeline, output_dir,
   write.table(getData(dmrs_hyper)[,1:3], str_c(output_dir, "/dmrs_", meth_difference, "p_hyper.bed"),sep="\t", row.names = FALSE, col.names = FALSE, quote = FALSE)
   write.table(getData(dmrs_hypo)[,1:3], str_c(output_dir, "/dmrs_", meth_difference, "p_hypo.bed"),sep="\t",  row.names = FALSE , col.names = FALSE, quote = FALSE)
   write.table(getData(tiles_raw_Cov10_unite)[,1:3], str_c(output_dir,"/all_100bp_tiles_united.bed"),sep="\t",  row.names = FALSE , col.names = FALSE, quote = FALSE)
-  write.table(getData(tiles_raw_Cov10_unite), str_c(output_dir,"/all_samps_100bp_tiles_meth_scores.bed"),sep="\t",  row.names = FALSE , col.names = TRUE, quote = FALSE)
+  #TODO: dos't work. get header with sample names percent meth and not cov c, t format
+  write.table(percMethylation(tiles_raw_Cov10_unite, rowids=TRUE), str_c(output_dir,"/all_samps_100bp_tiles_meth_scores.bed"),sep="\t",  row.names = FALSE , col.names = TRUE, quote = FALSE)
 
   #bg for great
   name = str_split(output_dir, "/")[[1]] %>% tail(n=1)
