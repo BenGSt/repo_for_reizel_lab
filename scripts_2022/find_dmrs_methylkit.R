@@ -81,6 +81,16 @@ make_tiles = function(meth_call_files_dir, pipeline, samp_ids,
   return(tiles_raw_Cov10_unite)
 }
 
+write_meth_scores = function(methylBase.obj, output_file )
+{
+    table = percMethylation(methylBase.obj, rowids=TRUE)
+    rownames(table) = str_replace_all(rownames(table), '\\.', '\t')
+    write.table(paste("#chr\tstart\tend", paste(colnames(table),collapse="\t"),sep="\t"),
+                output_file, sep="\t", row.names=FALSE , col.names=FALSE,
+                quote=FALSE)
+    write.table(table / 100, output_file, append=TRUE, sep="\t",
+                row.names=TRUE, col.names=FALSE, quote=FALSE)
+}
 
 #' Finding DMRs with methylKit
 #'
@@ -152,8 +162,10 @@ main = function(meth_call_files_dir, samp_ids, treatments, pipeline, output_dir,
   write.table(getData(dmrs_hyper)[,1:3], str_c(output_dir, "/dmrs_", meth_difference, "p_hyper.bed"),sep="\t", row.names = FALSE, col.names = FALSE, quote = FALSE)
   write.table(getData(dmrs_hypo)[,1:3], str_c(output_dir, "/dmrs_", meth_difference, "p_hypo.bed"),sep="\t",  row.names = FALSE , col.names = FALSE, quote = FALSE)
   write.table(getData(tiles_raw_Cov10_unite)[,1:3], str_c(output_dir,"/all_100bp_tiles_united.bed"),sep="\t",  row.names = FALSE , col.names = FALSE, quote = FALSE)
-  #TODO: dos't work. get header with sample names percent meth and not cov c, t format
-  write.table(percMethylation(tiles_raw_Cov10_unite, rowids=TRUE), str_c(output_dir,"/all_samps_100bp_tiles_meth_scores.bed"),sep="\t",  row.names = FALSE , col.names = TRUE, quote = FALSE)
+
+  #write all 100bp tiles meth scores (not only dmrs) that can be used for heatmaps and other applications instead of
+  # the 100bp tiles produced by the rrbs pipeline
+  write_meth_scores(tiles_raw_Cov10_unite, str_c(output_dir,"/all_samps_100bp_tiles_meth_scores.bed"))
 
   #bg for great
   name = str_split(output_dir, "/")[[1]] %>% tail(n=1)
