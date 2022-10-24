@@ -1,5 +1,9 @@
 #!/bin/bash
 
+#TODO: test --edit option
+#TODO: add example usage with preexisting all_samp_100bp_tiles.bed
+#TODO: complete documentation of each param
+
 help()
 {
   cat << EOF
@@ -71,88 +75,6 @@ main()
   echo Good Luck!
 }
 
-
-old_main()
-{
-  arg_parse "$@"
-
-  if [[ -f dmr_jobs.args ]]; then
-    write_homer_jobs_args
-
-    if $no_tiles ; then
-      write_heatmap_jobs_args "output_dir/all_samps_100bp_tiles_meth_scores.bed"
-    else
-      write_heatmap_jobs_args $all_samples_100bp_tiles
-    fi
-
-    write_dmr_jobs_sub_file
-    write_heatmap_jobs_sub_file
-    write_homer_jobs_sub_file
-    write_condor_dag
-
-    make_dirs
-
-    echo Submit the jobs by running: condor_submit_dag dmr_pipline_jobs.dag
-    echo Good Luck!
-    echo
-  else
-    echo Writing example dmr_jobs.args file. Edit it, one line per job, then rerun this script.
-    echo
-    write_dmr_jobs_args
-    echo
-    echo
-  fi
-}
-
-
-write_dmr_jobs_args()
-{
-#Example dmr_jobs.args :
-# Young_vs_Old_25p, --meth_call_files_dir /storage/bfe_reizel/bengst/analyzed_data/further_look_at_Renegeration_for_ISF_grant/new_dmrs/Young_vs_Old_cov_files --samp_ids Young1-Old1-Young2-Old2 --treatments 1-0-1-0 --pipeline bismarkCoverage --output_dir ./Young_vs_Old_25p/ --known_genes_file /storage/bfe_reizel/bengst/genomic_reference_data/mm10KnownGenes.bed --meth_difference 25
-
-
- echo $(echo $output_dir| awk -F / '{printf $NF}'), \
- --meth_call_files_dir $cov_files_dir \
- --samp_ids $samp_ids \
- --treatments $treatments \
- --pipeline $pipeline \
- --output_dir $output_dir \
- --known_genes_file $known_genes_file \
- --meth_difference $meth_difference > dmr_jobs.args
-
- echo You\'re going to have to manually edit dmr_jobs.args
- echo format: \<name_for_condor_logs\>, \<args for find_dmrs_methylkit.R\>
- echo Note that usually this is run as part of the rrbs pipline, and the name_for_condor_logs is the name of the output_dir.
- echo For other use cases, if name_for_condor_logs is not the name of the output_dir - an additional dir named name_for_condor_logs will be created with a condor_logs sub directory.
-}
-
-
-write_heatmap_jobs_args()
-{
-  echo writing heatmap_jobs.args
-  echo heatmap_jobs.args format: \<name_for_condor_logs\>,  \<path to all_samples_100bp_tiles.bed\> \<sample_dir - output dir of dmr_job\> [args for make_heatmap.R]
-  echo If all_samples_100bp_tiles.bed include more samples than you want to show in your heatmap you must edit heatmap_jobs.args
-  echo  use: --sample_names \<ordered names of samples in all_samples_100bp_tiles.bed\> --include_samples_by_name \<samples to inclide\>
-  echo e.g. --sample_names 56n-58n-56p-57n-54n-54p-55n --include_samples_by_name 54n-55n-56n-57n
-  all_samp_tiles=$1
-  # cat dmr_jobs.args | awk -F , -v all_samp_tiles=$all_samp_tiles 'match($0, /--samp_ids ([^ ]*)/, array)  {print $1",",  all_samp_tiles, $1, "--sample_names " array[1]}' > heatmap_jobs.args
-  cat dmr_jobs.args | awk -F , -v all_samp_tiles=$all_samp_tiles 'match($0, /--samp_ids ([^ ]*)/, array)  match($0, /--output_dir ([^ ]*)/, array2) {print $1",",  all_samp_tiles, array2[1], "--sample_names " array[1]}' > heatmap_jobs.args
- #echo edit heatmap_jobs.args to set the path to all_samples_100bp_tiles.bed. And if you want to select part of the samples \(see /scripts_2022/make_heatmap.R\)
-}
-
-
-write_homer_jobs_args()
-{
-#format: sample_dir
- #Note: at this point running homer jobs from locations other that the parent directory is not supported by this script because of condor_log location.
-
- awk -F , 'match($0, /--output_dir ([^ ]*)/, array2){print array2[1]}' dmr_jobs.args | sed -E 's/\.\/|\/$//g'  > homer_jobs.args
- echo writing homer_jobs.args which sholud only contain the sample dir names, without prefix ./ or trailing /
- echo
- echo make sure it looks right. cat homer_jobs.args:
- cat homer_jobs.args
- echo
-}
 
 
 write_dmr_jobs_sub_file()
@@ -242,8 +164,12 @@ make_dirs()
 
 edit()
 {
-  #TODO: if args are only one line before edit() this works.
-  # make it work if there is more than one line before edit() as well. for example in case of running edit() more than once.
+
+  #delete previous args
+  cat heatmap_jobs.sub | awk  '{if ($0==")") start=0; if (!start) print $0} {if ($0=="queue name,args from (")  start=1;}' > temp
+  cat temp | awk -v heatmap_args="$heatmap_args" '{if ($0=="queue name,args from (") {print $0; print heatmap_args} else {print $0}}'
+  rm temp
+
 
   #heatmap args
   heatmap_args=$(\
@@ -251,8 +177,11 @@ edit()
   awk  '{if ($0==")") next; if (start) print $0} {if ($0=="queue name,args from (")  start=1;}'|\
   awk -F , -v all_samp_tiles=$all_samples_100bp_tiles 'match($0, /--samp_ids ([^ ]*)/, array)  match($0, /--output_dir ([^ ]*)/, array2) {print $1",",  all_samp_tiles, array2[1], "--sample_names " array[1]}'\
   )
-  cat heatmap_jobs.sub |awk -v heatmap_args="$heatmap_args" '{if (start) {print heatmap_args; start = 0} else {print $0} {if ($0=="queue name,args from (")  start=1}}'  > temp
-  mv temp heatmap_jobs.sub
+  #delete previous args
+  cat heatmap_jobs.sub | awk  '{if ($0==")") start=0; if (!start) print $0} {if ($0=="queue name,args from (")  start=1;}' > temp
+  #write new args
+  cat temp | awk -v heatmap_args="$heatmap_args" '{if ($0=="queue name,args from (") {print $0; print heatmap_args} else {print $0}}' > heatmap_jobs.sub
+  rm temp
 
   #homer args
   homer_args=$(\
@@ -260,8 +189,10 @@ edit()
   awk  '{if ($0==")") next; if (start) print $0} {if ($0=="queue name,args from (")  start=1;}'|\
   awk -F , 'match($0, /--output_dir ([^ ]*)/, array2){print array2[1]}'| sed -E 's/\.\/|\/$//g'\
   )
-  cat homer_jobs.sub |awk -v homer_args="$homer_args" '{if (start) {print homer_args; start = 0} else {print $0} {if ($0=="queue name,args from (")  start=1}}'  > temp
-  mv temp homer_jobs.sub
+  #delete previous args
+  cat homer_jobs.sub | awk  '{if ($0==")") start=0; if (!start) print $0} {if ($0=="queue name from (")  start=1;}' > temp
+  cat temp | awk -v homer_args="$homer_args" '{if ($0=="queue name from (") {print $0; print homer_args} else {print $0}}' > homer_jobs.sub
+  rm temp
 
 }
 
