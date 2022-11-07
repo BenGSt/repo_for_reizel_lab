@@ -1,0 +1,32 @@
+name: ovation_rrbs_pipeline_2022
+channels:
+  - bioconda
+  - defaults
+dependencies:
+  - cutadapt
+  - fastqc
+  - trim-galore
+  - bowtie2
+  - samtools
+  - bismark
+  - bedtools
+prefix: /Local/bfe_reizel/anaconda3/envs/ovation_rrbs_pipeline_2022
+
+#ORIGINAL VERSIONS  
+#  - cutadapt=2.6
+#  - fastqc=0.11.9
+#  - trim-galore=0.6.7
+#  - bowtie2=2.3.5.1
+#  - samtools=1.13
+#  - bismark=0.23.1
+#  - bedtools=2.30.0
+  
+# python2 can be part of the env, currently using /bin/python2, David's preference.
+
+# nugen diversity trimming script - pyhton2 script
+# https://github.com/nugentechnologies/NuMetRRBS.git
+# /Local/bfe_reizel/anaconda3/envs/ovation_rrbs_pipeline_2022/bin/trimRRBSdiversityAdaptCustomers.py
+
+# tecan nudup tool for pcr duplicates - pyhton2 script
+# https://github.com/tecangenomics/nudup.git
+# /Local/bfe_reizel/anaconda3/envs/ovation_rrbs_pipeline_2022/bin/nudup.py
