@@ -1,0 +1,17 @@
+name: rna_hisat2_htseq_deseq2
+channels:
+  - bioconda
+  - conda-forge
+  - defaults
+dependencies:
+  - hisat2
+  - htseq
+  - samtools
+  - r-base
+  - bioconductor-deseq2
+  - bioconductor-reportingtools
+  - bioconductor-enhancedvolcano
+  - bioconductor-org.hs.eg.db
+  - r-argparser
+
+#07.11.2022

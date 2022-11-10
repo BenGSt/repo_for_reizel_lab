@@ -5,7 +5,9 @@ main()
  if [[ $# -lt 2 ]]; then
     echo USAGE: $0 \<1 for single end or 2 for piared end\> \<\raw_data_dir\>
     echo raw_data_dir should contain a dir for each sample containing it\'s fastq files.
+    echo biological replicates of the same condition should be in dirs named the same except for tailing numbers e.g. cntrl1 cntrl2.
     echo Run from the directory you wish the output to be written to.
+    echo
     exit 1
   fi
 
