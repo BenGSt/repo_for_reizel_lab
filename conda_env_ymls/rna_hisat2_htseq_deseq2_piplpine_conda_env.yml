@@ -1,4 +1,4 @@
-name: rna_hisat2_htseq_deseq2
+name: rna_hisat2_htseq_deseq2_2022_v2
 channels:
   - bioconda
   - conda-forge
@@ -12,6 +12,7 @@ dependencies:
   - bioconductor-reportingtools
   - bioconductor-enhancedvolcano
   - bioconductor-org.hs.eg.db
+  - bioconductor-org.mm.eg.db
   - r-argparser
 
 #07.11.2022
