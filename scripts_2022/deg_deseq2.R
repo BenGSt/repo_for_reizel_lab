@@ -183,9 +183,13 @@ if (is.na(argv$volcano_plot_title))
     argv$volcano_plot_title = paste(contrast[2], "vs.", contrast[3])
 }
 
+#debug
+contrast = eval(parse(text=argv$contrast))
+print(paste("contrast: ", contrast)
+
 main(
     htseq_out_dir = argv$htseq_output_dir,
-    report_dir = normalizePath(argv$report_dir),
+    report_dir = argv$report_dir,
     padj_cutoff = argv$padj_cutoff,
     log2_fc_cutoff = argv$log2_fc_cutoff,
     contrast = eval(parse(text=argv$contrast)),
