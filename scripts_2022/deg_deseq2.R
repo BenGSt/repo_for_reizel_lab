@@ -185,7 +185,7 @@ if (is.na(argv$volcano_plot_title))
 
 #debug
 contrast = eval(parse(text=argv$contrast))
-print(paste("contrast: ", contrast)
+print(paste("contrast: ", contrast))
 
 main(
     htseq_out_dir = argv$htseq_output_dir,
