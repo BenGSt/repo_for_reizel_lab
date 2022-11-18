@@ -53,26 +53,26 @@ buildDESeqDataSet = function(sample_table, htseq_out_dir)
   return(dds)
 }
 
-dirname = function(path)
-{
-  split = strsplit(path,"/")[[1]]
-  dirname = split[[length(split)]]
-  return(dirname)
-}
+# dirname = function(path)
+# {
+#   split = strsplit(path,"/")[[1]]
+#   dirname = split[[length(split)]]
+#   return(dirname)
+# }
 
 
 buildHtmlReport = function(dds, report_dir, pvalue_cutoff=0.01, contrast=NULL)
 {
   # NOTE: pvalueCutoff here refers to adjusted pvalue in report
-  report_dirname = dirname(report_dir)
-  setwd("../")
+#   report_dirname = dirname(report_dir)
+#   setwd("../")
 
   colData(dds)$conditions <- dds$condition
   test = strsplit(results(dds, contrast=contrast)@elementMetadata@listData$description[2],":")[[1]][2]
   report <- HTMLReport(shortName = 'deg_analysis_with_deseq2',
                            title = paste('RNA-seq analysis of differential expression using DESeq2\n',
                                           test, 'padj_cutoff=', pvalue_cutoff),
-                           reportDirectory=report_dirname)
+                           reportDirectory=report_dir)
 
   publish(dds, report, pvalueCutoff=pvalue_cutoff,
           n=N_GENES_REPORT,
@@ -80,7 +80,7 @@ buildHtmlReport = function(dds, report_dir, pvalue_cutoff=0.01, contrast=NULL)
           annotation.db="org.Hs.eg.db",
           keytype = GTF_USED_BY_HTSEQ ,
           contrast=contrast,
-          reportDir=report_dirname)
+          reportDir=report_dir)
 
   finish(report)
   on.exit(setwd(report_dir))
@@ -184,9 +184,6 @@ if (is.na(argv$volcano_plot_title))
     argv$volcano_plot_title = paste(contrast[2], "vs.", contrast[3])
 }
 
-#debug
-contrast = eval(parse(text=argv$contrast))
-print(paste("contrast: ", contrast))
 
 main(
     htseq_out_dir = argv$htseq_output_dir,
