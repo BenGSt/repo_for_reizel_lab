@@ -76,14 +76,14 @@ EOF
 
   cat << EOF > deseq2_job.sub
 Initialdir = $(pwd)
-executable = /srv01/technion/bengst/scripts/repo_for_reizel_lab/scripts_2022/deg_deseq2.R
+executable = /srv01/technion/bengst/scripts/repo_for_reizel_lab/run_on_atlas/rna_hisat2_htseq_DESeq2_condor_dag/deseq2_job.sh
 Arguments = \$(args)
 request_cpus = 1
 RequestMemory = 4GB
 universe = vanilla
-log = logs/\deseq2.log
-output = logs/\deseq2.out
-error = logs/\deseq2.out
+log = logs/deseq2.log
+output = logs/deseq2.out
+error = logs/deseq2.out
 queue args from (
 --htseq_output_dir ./htseq_output --report_dir ./deseq2_deg_results --padj_cutoff 0.01 --log2_fc_cutoff 1 --contrast  \"c(\\\"condition\\\",\\\"F\\\",\\\"I\\\")\" --csv ./deseq2_deg_results/deseq2_results.csv
 )
