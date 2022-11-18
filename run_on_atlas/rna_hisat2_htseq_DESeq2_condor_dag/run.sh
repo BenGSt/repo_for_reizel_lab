@@ -85,7 +85,7 @@ log = logs/deseq2.log
 output = logs/deseq2.out
 error = logs/deseq2.out
 queue args from (
---htseq_output_dir ./htseq_output --report_dir deseq2_deg_results --padj_cutoff 0.01 --log2_fc_cutoff 1 --contrast  c(\"condition\",\"F\",\"I\") --csv deseq2_results.csv
+--htseq_output_dir ./htseq_output --report_dir ./deseq2_deg_results --padj_cutoff 0.01 --log2_fc_cutoff 1 --contrast  c(\"condition\",\"F\",\"I\") --csv ./deseq2_results.csv
 )
 EOF
 
