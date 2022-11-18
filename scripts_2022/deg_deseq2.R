@@ -6,6 +6,7 @@ suppressMessages(library("org.Hs.eg.db"))
 suppressMessages(library(argparser))
 
 GTF_USED_BY_HTSEQ = 'ENSEMBL' # keytype argument for "org.Hs.eg.db"
+N_GENES_REPORT = 500 # number of most significantly differentialy expressed genes to report in the html report
 
 #' MakeSampleTable
 #' Make a table summarizing all the htseq-count output files
@@ -74,7 +75,7 @@ buildHtmlReport = function(dds, report_dir, pvalue_cutoff=0.01, contrast=NULL)
                            reportDirectory=report_dirname)
 
   publish(dds, report, pvalueCutoff=pvalue_cutoff,
-          n=20000,
+          n=N_GENES_REPORT,
           factor = colData(dds)$conditions,
           annotation.db="org.Hs.eg.db",
           keytype = GTF_USED_BY_HTSEQ ,
