@@ -73,7 +73,9 @@ $( for samp_dir in $(find $raw_dir/* -type d); do echo $samp_dir | awk -F / '{pr
 )
 EOF
 
-
+#2 conditions for deg, assuming each fastq dir follows the pattern: NAME[0-9].*
+condition_1=`ls  $raw_dir/ | sed 's/\(^.*\)[0-9].*$/\1/' | uniq | awk 'NR==1'`
+condition_2=`ls  $raw_dir/ | sed 's/\(^.*\)[0-9].*$/\1/' | uniq | awk 'NR==2'`
   cat << EOF > deseq2_job.sub
 Initialdir = $(pwd)
 executable = /srv01/technion/bengst/scripts/repo_for_reizel_lab/run_on_atlas/rna_hisat2_htseq_DESeq2_condor_dag/deseq2_job.sh
@@ -85,7 +87,7 @@ log = logs/deseq2.log
 output = logs/deseq2.out
 error = logs/deseq2.out
 queue args from (
---htseq_output_dir ./htseq_output --report_dir ./deseq2_deg_results --padj_cutoff 0.01 --log2_fc_cutoff 1 --contrast  c(\"condition\",\"F\",\"I\") --csv ./deseq2_results.csv
+--htseq_output_dir ./htseq_output --report_dir ./deseq2_deg_results --padj_cutoff 0.01 --log2_fc_cutoff 1 --contrast  c(\"condition\",\"$condition_1\",\"$condition_2\") --csv ./deseq2_results.csv
 )
 EOF
 
@@ -96,8 +98,10 @@ write_condor_dag()
     cat << EOF > rna_seq_jobs.dag
 JOB align_hisat2 hisat2_jobs.sub
 JOB count_reads_htseq htseq_jobs.sub
+JOB find_deg_deseq2 deseq2_job.sub
 
 PARENT align_hisat2  CHILD count_reads_htseq
+PARENT count_reads_htseq  CHILD find_deg_deseq2
 EOF
 }
 
