@@ -27,6 +27,7 @@ main()
     echo single end #debug
   elif [[ $1 -eq 2 ]]; then
     single_end=0
+    echo paired_end #debug
   else
     help
     exit 1
