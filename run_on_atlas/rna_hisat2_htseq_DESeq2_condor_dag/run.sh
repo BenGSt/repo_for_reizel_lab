@@ -1,13 +1,24 @@
 #!/bin/bash
 
+help()
+{
+    echo Run The RNA-seq deg pipeline:
+    echo USAGE: $(echo $0 | awk -F / '{print$NF}') \<1 for single end or 2 for piared end\> \<\raw_data_dir\>
+    echo raw_data_dir should contain a dir for each sample containing it\'s fastq files.
+    echo Biological replicates of the same condition should be in dirs named the same except for tailing numbers e.g. cntrl1 cntrl2.
+    echo Run from the directory you wish the output to be written to.
+    echo
+    echo Possibly edit the submission files \(you can do this before running the pipeline or after, running additional jobs\).
+    echo Single end mode isn\'t set up yet. contact me if you need this feature. Ben
+    echo products: volcano plot, html report, csv.
+
+}}
+
+
 main()
 {
  if [[ $# -lt 2 ]]; then
-    echo USAGE: $0 \<1 for single end or 2 for piared end\> \<\raw_data_dir\>
-    echo raw_data_dir should contain a dir for each sample containing it\'s fastq files.
-    echo biological replicates of the same condition should be in dirs named the same except for tailing numbers e.g. cntrl1 cntrl2.
-    echo Run from the directory you wish the output to be written to.
-    echo
+    help
     exit 1
   fi
 
@@ -16,11 +27,7 @@ main()
   elif [[ $1 -eq 2 ]]; then
     single_end=0
   else
-    echo
-    echo USAGE: $(echo $0 | awk -F / '{print$NF}') \<1 for single end or 2 for piared end\> \<\raw_data_dir\>
-    echo arrange the fastq files in directories. <raw_data_dir> should contain a dir for each sample containing it\'s fastq files
-    echo Single end mode isn\'t set up yet. contact me if you need this feature. Ben
-    echo
+    help
     exit 1
   fi
 
@@ -30,7 +37,6 @@ main()
 
   echo Submit the jobs by running: condor_submit_dag rna_seq_jobs.dag
   echo Good Luck!
-  #TODO: deseq2
   #TODO: single end read option
 }
 
