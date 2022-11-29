@@ -16,7 +16,11 @@ main()
   elif [[ $1 -eq 2 ]]; then
     single_end=0
   else
-    echo USAGE: $0 \<1 for single end or 2 for piared end\> \<\raw_data_dir\>
+    echo
+    echo USAGE: $(echo $0 | awk -F / '{print$NF}') \<1 for single end or 2 for piared end\> \<\raw_data_dir\>
+    echo arrange the fastq files in directories. <raw_data_dir> should contain a dir for each sample containing it\'s fastq files
+    echo Single end mode isn\'t set up yet. contact me if you need this feature. Ben
+    echo
     exit 1
   fi
 
