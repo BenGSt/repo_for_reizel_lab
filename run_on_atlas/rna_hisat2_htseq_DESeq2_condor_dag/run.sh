@@ -24,6 +24,7 @@ main()
 
   if [[ $1 -eq 1 ]]; then
     single_end=1
+    echo single end #debug
   elif [[ $1 -eq 2 ]]; then
     single_end=0
   else
@@ -57,7 +58,7 @@ EOF
   if [[ ! $single_end ]]; then
     cat << EOF >> hisat2_jobs.sub
     queue name, args from (
-$( for samp_dir in $(find $raw_dir/* -type d); do echo $samp_dir | awk -F / '{printf $NF", "}'; find $samp_dir | grep -E 'R1|R2'| sort | awk '{printf $0" "}' ; echo $samp_dir | awk -F / '{print "./"$NF"/"$NF".hisat2_output.bam ./"$NF"/"$NF".hisat2.summary.txt "}'  ; done)
+$( for samp_dir in $(find $raw_dir/* -type d); do echo $samp_dir | awk -F / '{printf $NF", "}'; find $samp_dir | grep -E '_1|_2|R1|R2'| sort | awk '{printf $0" "}' ; echo $samp_dir | awk -F / '{print "./"$NF"/"$NF".hisat2_output.bam ./"$NF"/"$NF".hisat2.summary.txt "}'  ; done)
 )
 EOF
   else #if single end
