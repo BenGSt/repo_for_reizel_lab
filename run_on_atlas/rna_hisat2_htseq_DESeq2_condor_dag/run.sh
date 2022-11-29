@@ -12,7 +12,7 @@ help()
     echo Single end mode isn\'t set up yet. contact me if you need this feature. Ben
     echo products: volcano plot, html report, csv.
 
-}}
+}
 
 
 main()
