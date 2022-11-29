@@ -56,19 +56,19 @@ log = logs/\$(name)_hisat2.log
 output = logs/\$(name)_hisat2.out
 error = logs/\$(name)_hisat2.out
 EOF
-  if [[ $single_end -eq 0 ]]; then
-    cat << EOF >> hisat2_jobs.sub
-    queue name, args from (
-$( for samp_dir in $(find $raw_dir/* -type d); do echo $samp_dir | awk -F / '{printf $NF", "}'; find $samp_dir | grep -E '_1|_2|R1|R2'| sort | awk '{printf $0" "}' ; echo $samp_dir | awk -F / '{print "./"$NF"/"$NF".hisat2_output.bam ./"$NF"/"$NF".hisat2.summary.txt "}'  ; done)
-)
-EOF
-  else #if single end
+#  if [[ $single_end -eq 0 ]]; then
+#    cat << EOF >> hisat2_jobs.sub
+#    queue name, args from (
+#$( for samp_dir in $(find $raw_dir/* -type d); do echo $samp_dir | awk -F / '{printf $NF", "}'; find $samp_dir | grep -E '_1|_2|R1|R2'| sort | awk '{printf $0" "}' ; echo $samp_dir | awk -F / '{print "./"$NF"/"$NF".hisat2_output.bam ./"$NF"/"$NF".hisat2.summary.txt "}'  ; done)
+#)
+#EOF
+#  else #if single end
     cat << EOF >> hisat2_jobs.sub
     queue name, args from (
 $( for samp_dir in $(find $raw_dir/* -type d); do echo $samp_dir | awk -F / '{printf $NF", "}'; find $samp_dir | grep -E '.fq.gz|.fastq.gz'| sort | awk '{printf $0" "}' ; echo $samp_dir | awk -F / '{print "./"$NF"/"$NF".hisat2_output.bam ./"$NF"/"$NF".hisat2.summary.txt "}'  ; done)
 )
 EOF
-  fi
+#  fi
 
   cat << EOF > htseq_jobs.sub
 Initialdir = $(pwd)
