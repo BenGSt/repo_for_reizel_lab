@@ -1,0 +1,4 @@
+#TODO: create anoter RRBS_env with bsmap, bsmapz
+#TODO: check about duplication removal with nugen
+
+

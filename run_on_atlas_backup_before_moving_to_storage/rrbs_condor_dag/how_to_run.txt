@@ -1,0 +1,37 @@
+How to run the RRBS pipline on Atlas cluster
+--------------------------------------------
+1. for paired end reads put each pair of fastq files in a directory under a name you choose for the sample.
+    #TODO: In this version the same should be done for single end reads, this way you can name the samples at this stage.
+     # although I may change this to just using the files without a directory for each file.
+    e.g.
+    find ~/storage/raw_data/KKTR-TargetingMafAMotifWithTet/paired_end_reads/
+
+    storage/raw_data/KKTR-TargetingMafAMotifWithTet/paired_end_reads/
+    storage/raw_data/KKTR-TargetingMafAMotifWithTet/paired_end_reads/FGC1866_s_4_GCACTA
+    storage/raw_data/KKTR-TargetingMafAMotifWithTet/paired_end_reads/FGC1866_s_4_GCACTA/FGC1866_s_4_2_GCACTA.fastq.gz
+    storage/raw_data/KKTR-TargetingMafAMotifWithTet/paired_end_reads/FGC1866_s_4_GCACTA/FGC1866_s_4_1_GCACTA.fastq.gz
+    storage/raw_data/KKTR-TargetingMafAMotifWithTet/paired_end_reads/FGC1866_s_4_GGAGAA
+    storage/raw_data/KKTR-TargetingMafAMotifWithTet/paired_end_reads/FGC1866_s_4_GGAGAA/FGC1866_s_4_2_GGAGAA.fastq.gz
+    storage/raw_data/KKTR-TargetingMafAMotifWithTet/paired_end_reads/FGC1866_s_4_GGAGAA/FGC1866_s_4_1_GGAGAA.fastq.gz
+    storage/raw_data/KKTR-TargetingMafAMotifWithTet/paired_end_reads/FGC1866_s_4_TGGTGA
+    storage/raw_data/KKTR-TargetingMafAMotifWithTet/paired_end_reads/FGC1866_s_4_TGGTGA/FGC1866_s_4_1_TGGTGA.fastq.gz
+    storage/raw_data/KKTR-TargetingMafAMotifWithTet/paired_end_reads/FGC1866_s_4_TGGTGA/FGC1866_s_4_2_TGGTGA.fastq.gz
+    storage/raw_data/KKTR-TargetingMafAMotifWithTet/paired_end_reads/GC1866_s_4_GTCGTA
+    storage/raw_data/KKTR-TargetingMafAMotifWithTet/paired_end_reads/GC1866_s_4_GTCGTA/FGC1866_s_4_1_GTCGTA.fastq.gz
+    storage/raw_data/KKTR-TargetingMafAMotifWithTet/paired_end_reads/GC1866_s_4_GTCGTA/FGC1866_s_4_2_GTCGTA.fastq.gz
+    storage/raw_data/KKTR-TargetingMafAMotifWithTet/paired_end_reads/FGC1866_s_4_GTGCTT
+    storage/raw_data/KKTR-TargetingMafAMotifWithTet/paired_end_reads/FGC1866_s_4_GTGCTT/FGC1866_s_4_2_GTGCTT.fastq.gz
+    storage/raw_data/KKTR-TargetingMafAMotifWithTet/paired_end_reads/FGC1866_s_4_GTGCTT/FGC1866_s_4_1_GTGCTT.fastq.gz
+    storage/raw_data/KKTR-TargetingMafAMotifWithTet/paired_end_reads/FGC1866_s_4_AACCAG
+    storage/raw_data/KKTR-TargetingMafAMotifWithTet/paired_end_reads/FGC1866_s_4_AACCAG/FGC1866_s_4_1_AACCAG.fastq.gz
+    storage/raw_data/KKTR-TargetingMafAMotifWithTet/paired_end_reads/FGC1866_s_4_AACCAG/FGC1866_s_4_2_AACCAG.fastq.gz
+
+2. cd to where you want the results to be written.
+    e.g. cd storage/analyzed_data/KKTR-TargetingMafAMotifWithTet/test_rrbs_dag_3
+
+3. run the pre-submission script run.sh, this will generate all the configuration files needed to run the job
+   on Atlas's ht_condor system.
+    e.g. /srv01/technion/bengst/scripts/repo_for_reizel_lab/run_on_atlas/rrbs_condor_dag/run.sh 2 ~/storage/raw_data/KKTR-TargetingMafAMotifWithTet/paired_end_reads/
+
+4. submit the jobs
+    condor_submit_dag rrbs_jobs.dag
