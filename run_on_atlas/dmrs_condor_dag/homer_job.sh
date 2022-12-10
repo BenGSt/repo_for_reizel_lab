@@ -10,7 +10,7 @@ function main()
     for dmrs in $(ls| grep -P 'dmrs_[0-9]*p_hyper.bed|dmrs_[0-9]*p_hypo.bed'); do
         # old version using great bg - remove after testing - 30.09.2022
         #/srv01/technion/bengst/scripts/repo_for_reizel_lab/scripts_2022/homer.sh $dmrs $1_dmrs_plus_random_50000_100bp_tiles.bed
-        /srv01/technion/bengst/scripts/repo_for_reizel_lab/scripts_2022/homer.sh $dmrs random_50000_100bp_tiles_for_homer_bg.bed
+       $REPO_FOR_REIZEL_LAB/scripts_2022/homer.sh $dmrs random_50000_100bp_tiles_for_homer_bg.bed
     done
 }
 main "$@"

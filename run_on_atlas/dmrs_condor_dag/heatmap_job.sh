@@ -23,7 +23,7 @@ function main() #args : <path to all_samples_100bp_tiles.bed> <sample_dir - wher
         # what 100bp tiles show up in $dmrs but not in $meth_scores_file ?
 
 	      echo make png figures
- 	      Rscript /srv01/technion/bengst/scripts/repo_for_reizel_lab/scripts_2022/make_heatmap.R $3 $4 $5 $6 --scores_bed_file $samp_meth_scores --output_file $(echo $samp_meth_scores| sed 's/.bed/.png/')
+ 	      Rscript $REPO_FOR_REIZEL_LAB/scripts_2022/make_heatmap.R $3 $4 $5 $6 --scores_bed_file $samp_meth_scores --output_file $(echo $samp_meth_scores| sed 's/.bed/.png/')
     done
 }
 

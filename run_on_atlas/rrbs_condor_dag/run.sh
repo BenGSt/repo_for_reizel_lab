@@ -2,6 +2,8 @@
 
 main()
 {
+  REPO_FOR_REIZEL_LAB=/storage/bfe_reizel/bengst/repo_for_reizel_lab
+
   if [[ $# -lt 2 ]]; then
     echo USAGE: $0 \<1 for single end or 2 for piared end\> \<\raw_data_dir\>
     echo run from the directory you wish the output to be written to
@@ -31,7 +33,7 @@ write_rrbs_jobs_args() # <1 for single end or 2 for piared end> <raw_data_dir>
 
 write_condor_submition_files()
 {
-PATH_TO_EXECUTABLES=/srv01/technion/bengst/scripts/repo_for_reizel_lab/run_on_atlas/rrbs_condor_dag
+PATH_TO_EXECUTABLES=$REPO_FOR_REIZEL_LAB/run_on_atlas/rrbs_condor_dag
 submission_file_names=(
                 trim_illumina_adaptors_jobs.sub \
                 trim_diversity_adaptors_jobs.sub \

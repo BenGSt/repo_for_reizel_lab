@@ -31,7 +31,7 @@ How to run the RRBS pipline on Atlas cluster
 
 3. run the pre-submission script run.sh, this will generate all the configuration files needed to run the job
    on Atlas's ht_condor system.
-    e.g. /srv01/technion/bengst/scripts/repo_for_reizel_lab/run_on_atlas/rrbs_condor_dag/run.sh 2 ~/storage/raw_data/KKTR-TargetingMafAMotifWithTet/paired_end_reads/
+    e.g. $REPO_FOR_REIZEL_LAB/run_on_atlas/rrbs_condor_dag/run.sh 2 ~/storage/raw_data/KKTR-TargetingMafAMotifWithTet/paired_end_reads/
 
 4. submit the jobs
     condor_submit_dag rrbs_jobs.dag

@@ -17,6 +17,8 @@ help()
 
 main()
 {
+ REPO_FOR_REIZEL_LAB=/storage/bfe_reizel/bengst/repo_for_reizel_lab
+
  if [[ $# -lt 2 ]]; then
     help
     exit 1
@@ -24,10 +26,8 @@ main()
 
   if [[ $1 -eq 1 ]]; then
     single_end=1
-    echo single end #debug
   elif [[ $1 -eq 2 ]]; then
     single_end=0
-    echo paired_end #debug
   else
     help
     exit 1
@@ -40,6 +40,7 @@ main()
   echo Submit the jobs by running: condor_submit_dag rna_seq_jobs.dag
   echo Good Luck!
   #TODO: single end read option
+
 }
 
 write_condor_submition_files()
@@ -47,7 +48,7 @@ write_condor_submition_files()
   raw_dir=$1
   cat << EOF > hisat2_jobs.sub
 Initialdir = $(pwd)
-executable = /srv01/technion/bengst/scripts/repo_for_reizel_lab/run_on_atlas/rna_hisat2_htseq_DESeq2_condor_dag/hisat2_job.sh
+executable = $REPO_FOR_REIZEL_LAB/run_on_atlas/rna_hisat2_htseq_DESeq2_condor_dag/hisat2_job.sh
 Arguments = \$(args)
 request_cpus = 10
 RequestMemory = 8GB
@@ -72,7 +73,7 @@ EOF
 
   cat << EOF > htseq_jobs.sub
 Initialdir = $(pwd)
-executable = /srv01/technion/bengst/scripts/repo_for_reizel_lab/run_on_atlas/rna_hisat2_htseq_DESeq2_condor_dag/htseq_job.sh
+executable = $REPO_FOR_REIZEL_LAB/run_on_atlas/rna_hisat2_htseq_DESeq2_condor_dag/htseq_job.sh
 Arguments = \$(args)
 request_cpus = 1
 RequestMemory = 4GB
@@ -89,8 +90,9 @@ EOF
 condition_1=`ls  $raw_dir/ | sed 's/\(^.*\)[0-9].*$/\1/' | uniq | awk 'NR==1'`
 condition_2=`ls  $raw_dir/ | sed 's/\(^.*\)[0-9].*$/\1/' | uniq | awk 'NR==2'`
   cat << EOF > deseq2_job.sub
+environment = REPO_FOR_REIZEL_LAB=$REPO_FOR_REIZEL_LAB
 Initialdir = $(pwd)
-executable = /srv01/technion/bengst/scripts/repo_for_reizel_lab/run_on_atlas/rna_hisat2_htseq_DESeq2_condor_dag/deseq2_job.sh
+executable = $REPO_FOR_REIZEL_LAB/run_on_atlas/rna_hisat2_htseq_DESeq2_condor_dag/deseq2_job.sh
 Arguments = \$(args)
 request_cpus = 1
 RequestMemory = 4GB

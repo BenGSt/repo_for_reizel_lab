@@ -64,6 +64,8 @@ EOF
 
 main()
 {
+  REPO_FOR_REIZEL_LAB=/storage/bfe_reizel/bengst/repo_for_reizel_lab
+
   arg_parse "$@"
   write_dmr_jobs_sub_file
   write_heatmap_jobs_sub_file
@@ -80,7 +82,8 @@ main()
 write_dmr_jobs_sub_file()
 {
     cat << EOF > dmr_jobs.sub
-executable = /srv01/technion/bengst/scripts/repo_for_reizel_lab/run_on_atlas/dmrs_condor_dag/dmr_job.sh
+environment = REPO_FOR_REIZEL_LAB=$REPO_FOR_REIZEL_LAB
+executable = $REPO_FOR_REIZEL_LAB/run_on_atlas/dmrs_condor_dag/dmr_job.sh
 log = ./\$(name)/condor_logs/dmrs_\$(name).log
 output = ./\$(name)/condor_logs/dmrs_\$(name).out
 error = ./\$(name)/condor_logs/dmrs_\$(name).out
@@ -106,7 +109,8 @@ EOF
 write_heatmap_jobs_sub_file()
 {
   cat << EOF > heatmap_jobs.sub
-executable = /srv01/technion/bengst/scripts/repo_for_reizel_lab/run_on_atlas/dmrs_condor_dag/heatmap_job.sh
+environment = REPO_FOR_REIZEL_LAB=$REPO_FOR_REIZEL_LAB
+executable = $REPO_FOR_REIZEL_LAB/run_on_atlas/dmrs_condor_dag/heatmap_job.sh
 log = ./\$(name)/condor_logs/heatmap_\$(name).log
 output = ./\$(name)/condor_logs/heatmap_\$(name).out
 error = ./\$(name)/condor_logs/heatmap_\$(name).out
@@ -128,7 +132,8 @@ EOF
 write_homer_jobs_sub_file()
 {
   cat << EOF > homer_jobs.sub
-executable = /srv01/technion/bengst/scripts/repo_for_reizel_lab/run_on_atlas/dmrs_condor_dag/homer_job.sh
+environment = REPO_FOR_REIZEL_LAB=$REPO_FOR_REIZEL_LAB
+executable = $REPO_FOR_REIZEL_LAB/run_on_atlas/dmrs_condor_dag/homer_job.sh
 log = ./\$(name)/condor_logs/homer_\$(name).log
 output = ./\$(name)/condor_logs/homer_\$(name).out
 error = ./\$(name)/condor_logs/homer_\$(name).out
