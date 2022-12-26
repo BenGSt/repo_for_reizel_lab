@@ -13,8 +13,8 @@ help()
 	resources: $N_N_CORES cores, $MEM RAM
 
 	-output-dir
-	-keep-bam #TODO
-	-keep-trimmed-fq #TODO
+	-keep-bam
+	-keep-trimmed-fq
 EOF
 }
 
@@ -40,7 +40,7 @@ main()
 	echo
 
 	time methylation_calling
-#  cleanup
+  cleanup
 
 	echo
 	echo
@@ -60,8 +60,8 @@ main()
 methylation_calling()
 {
   alignment_output=$(find . -name '*bismark*deduplicated*bam')
-  echo $alignment_output | grep 'pe' && paired="-p" || paired=""
-  command=$(echo bismark_methylation_extractor --ignore_r2 2 $paired --multicore $N_PARALLEL_INSTANCES --gzip --bedGraph --buffer_size $BUFFER_SIZE --output methylation_extractor_output $alignment_output)
+  echo $alignment_output | grep 'pe' && paired="-p --ignore_r2 2" || paired=""
+  command=$(echo bismark_methylation_extractor $paired --multicore $N_PARALLEL_INSTANCES --gzip --bedGraph --buffer_size $BUFFER_SIZE --output methylation_extractor_output $alignment_output)
   echo $SCRIPT_NAME runnig: $command
 	$command
 }
@@ -72,7 +72,15 @@ cleanup()
   rm_bam="rm $alignment_output"
   rm_OT_OB="rm $(find ./ | grep -P 'OT|OB')"
   rm_fq="rm *.fq" #the non gz trimmed fq
-  echo cleanup:
+  if [[ $keep_bam -eq 0 ]]; then
+    $rm_bam
+  fi
+
+  if [[ $keep_trimmed_fq -eq 0 ]]; then
+    $rm_fq
+  fi
+
+  $rm_OT_OB
 }
 
 
@@ -80,10 +88,18 @@ arg_parse()
 {
   while [[ $# -gt 0 ]]; do
     case $1 in
-	-output-dir)
+      -output-dir)
         output_dir="$2"
-        shift # past argument
-        shift # past value
+        shift
+        shift
+        ;;
+      -keep-bam)
+        keep_bam=1
+        shift
+        ;;
+      -keep-trimmed-fq)
+        keep_trimmed_fq=1
+        shift
         ;;
       -*|--*)
         help

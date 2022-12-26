@@ -1,6 +1,9 @@
+#!/usr/bin/env bash
 
-main()
+
+main() #<sample_dir>
 {
+  sample_dir=$1
   source /Local/bfe_reizel/anaconda3/bin/activate ovation_rrbs_pipeline_2022
 	script_name=$(echo $0 | awk -F / '{print $NF}')
 
@@ -17,7 +20,9 @@ main()
 	echo
 	echo
 
-  time bismark_deduplicate "$@"
+  cd "$sample_dir" || exit 1
+  time bismark_deduplicate ./*bismark*bam
+  rm find . -name '*.bam' | grep -v deduplicated #delete bam with duplicates
 
 	echo
 	echo
@@ -31,3 +36,4 @@ main()
 	echo
 }
 
+main "$@"

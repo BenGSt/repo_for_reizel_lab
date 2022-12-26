@@ -5,8 +5,9 @@ REPO_FOR_REIZEL_LAB=/storage/bfe_reizel/bengst/repo_for_reizel_lab
 help()
 {
     echo Run The WGBS bismark pipeline:
-    echo USAGE: $(echo $0 | awk -F / '{print$NF}') \<1 for single end or 2 for piared end\> \<\raw_data_dir\>
+    echo USAGE: $(echo $0 | awk -F / '{print$NF}') \{-single-end or -piared-end\} -raw-datat-dir \<\raw_data_dir\> -genome <mm10 or hg38>\[-non-directional\]
     echo raw_data_dir should contain a dir for each sample containing it\'s fastq files.
+    echo -non-directional instructs Bismark to use all four alignment outputs \(OT, CTOT, OB, CTOB\).
     echo Run from the directory you wish the output to be written to.
     echo
     echo Possibly edit the submission files \(you can do this before running the pipeline or after, running additional jobs\).
@@ -17,23 +18,8 @@ help()
 
 main()
 {
-
-
- if [[ $# -lt 2 ]]; then
-    help
-    exit 1
-  fi
-
-  if [[ $1 -eq 1 ]]; then
-    single_end=1
-  elif [[ $1 -eq 2 ]]; then
-    single_end=0
-  else
-    help
-    exit 1
-  fi
-
-  write_condor_submition_files $2
+  arg_parse "$@"
+  write_condor_submition_files $raw_data_dir
   write_condor_dag
   mkdir logs
 
@@ -46,8 +32,6 @@ main()
 write_condor_submition_files() # <raw_dir>
 {
   raw_dir=$1
-
-
   cat << EOF > trim_jobs.sub
 Initialdir = $(pwd)
 executable = $REPO_FOR_REIZEL_LAB/run_on_atlas/bismark_wgbs/trim_illumina_adaptors.sh
@@ -59,7 +43,8 @@ log = logs/\$(name)_trim.log
 output = logs/\$(name)_trim.out
 error = logs/\$(name)_trim.out
 queue name, args from (
-$(   for sample_name in $(find $raw_dir -type d | awk -F / 'NR>1{print $NF}'|sort) ; do
+$(
+  for sample_name in $(find $raw_dir -type d | awk -F / 'NR>1{print $NF}'|sort) ; do
     if [[ $single_end -eq 1 ]]; then
       echo $sample_name, -output_dir $(pwd)/$sample_name -single-end -input_fastq_file $(realpath $raw_dir/$sample_name/*.fastq.gz)
     else
@@ -71,42 +56,89 @@ $(   for sample_name in $(find $raw_dir -type d | awk -F / 'NR>1{print $NF}'|sor
 EOF
 
 
-  cat << EOF > htseq_jobs.sub
+  cat << EOF > bismark_align_jobs.sub
 Initialdir = $(pwd)
-executable = $REPO_FOR_REIZEL_LAB/run_on_atlas/rna_hisat2_htseq_DESeq2_condor_dag/htseq_job.sh
+executable = $REPO_FOR_REIZEL_LAB/run_on_atlas/bismark_wgbs/bismark_align.sh
 Arguments = \$(args)
-request_cpus = 1
-RequestMemory = 4GB
+request_cpus = 10
+RequestMemory = 16GB
 universe = vanilla
-log = logs/\$(name)_htseq-count.log
-output = logs/\$(name)_htseq-count.out
-error = logs/\$(name)_htseq-count.out
+log = logs/\$(name)_bismark_align.log
+output = logs/\$(name)_bismark_align.out
+error = logs/\$(name)_bismark_align.out
 queue name, args from (
-$( for samp_dir in $(find $raw_dir/* -type d); do echo $samp_dir | awk -F / '{printf $NF", "}'; echo $samp_dir | awk -F / '{print "./"$NF"/"$NF".hisat2_output.bam ./"$NF"/"$NF".htseq-count_output.txt"}'  ; done)
+$(
+  for sample_name in $(find $raw_dir -type d | awk -F / 'NR>1{print $NF}'|sort) ; do
+      if [[ $single_end -eq 1 ]]; then
+        echo $sample_name, -output_dir $(pwd)/$sample_name -single-end $non_directional -genome $genome
+      else
+        echo $sample_name, -output_dir $(pwd)/$sample_name -paired-end $non_directional -genome $genome
+      fi
+  done
+)
 )
 EOF
 
-#2 conditions for deg, assuming each fastq dir follows the pattern: NAME[0-9].*
-condition_1=`ls  $raw_dir/ | sed 's/\(^.*\)[0-9].*$/\1/' | uniq | awk 'NR==1'`
-condition_2=`ls  $raw_dir/ | sed 's/\(^.*\)[0-9].*$/\1/' | uniq | awk 'NR==2'`
-  cat << EOF > deseq2_job.sub
-environment = REPO_FOR_REIZEL_LAB=$REPO_FOR_REIZEL_LAB
+
+  cat << EOF > deduplicate.sub
 Initialdir = $(pwd)
-executable = $REPO_FOR_REIZEL_LAB/run_on_atlas/rna_hisat2_htseq_DESeq2_condor_dag/deseq2_job.sh
+executable = $REPO_FOR_REIZEL_LAB/run_on_atlas/bismark_wgbs/deduplicate.sh
 Arguments = \$(args)
-request_cpus = 1
-RequestMemory = 4GB
+request_cpus = 2
+RequestMemory = 1GB
 universe = vanilla
-log = logs/deseq2.log
-output = logs/deseq2.out
-error = logs/deseq2.out
-queue args from (
---htseq_output_dir ./htseq_output --report_dir ./deseq2_deg_results --padj_cutoff 0.01 --log2_fc_cutoff 1 --contrast  c(\"condition\",\"$condition_1\",\"$condition_2\") --csv ./deseq2_results.csv
+log = logs/\$(name)_deduplicate.log
+output = logs/\$(name)_deduplicate .out
+error = logs/\$(name)_deduplicate.out
+queue name, args from (
+$(
+  for sample_name in $(find $raw_dir -type d | awk -F / 'NR>1{print $NF}'|sort) ; do
+        echo $sample_name, $(pwd)/$sample_name
+  done
+)
+)
+EOF
+
+  cat << EOF > methylation_calling_jobs.sub
+Initialdir = $(pwd)
+executable = $REPO_FOR_REIZEL_LAB/run_on_atlas/bismark_wgbs/methylation_calling.sh
+Arguments = \$(args)
+request_cpus = 10
+RequestMemory = 3GB
+universe = vanilla
+log = logs/\$(name)_methylation_calling.log
+output = logs/\$(name)_methylation_calling.out
+error = logs/\$(name)_methylation_calling.out
+queue name, args from (
+$(
+  for sample_name in $(find $raw_dir -type d | awk -F / 'NR>1{print $NF}'|sort) ; do
+        echo $sample_name, -output-dir $(pwd)/$sample_name $keep_bam $keep_trimmed_fq
+  done
+)
+)
+EOF
+
+  cat << EOF > make_tiles.sub
+Initialdir = $(pwd)
+executable = $REPO_FOR_REIZEL_LAB/run_on_atlas/bismark_wgbs/methylation_calling.sh
+Arguments = \$(args)
+request_cpus = 10
+RequestMemory = 3GB
+universe = vanilla
+log = logs/\$(name)_make_tiles.log
+output = logs/\$(name)_make_tiles.out
+error = logs/\$(name)_make_tiles.out
+queue name, args from (
+$(
+  for sample_name in $(find $raw_dir -type d | awk -F / 'NR>1{print $NF}'|sort) ; do
+        echo $sample_name, -output-dir $(pwd)/$sample_name -genome $genome
+  done
+)
 )
 EOF
 
 
-}}
+}
 
 write_condor_dag()
 {
@@ -118,6 +150,56 @@ JOB find_deg_deseq2 deseq2_job.sub
 PARENT align_hisat2  CHILD count_reads_htseq
 PARENT count_reads_htseq  CHILD find_deg_deseq2
 EOF
+}
+
+arg_parse()
+{
+  if [[ $# -eq 0 ]]; then
+    help
+    exit 1
+  fi
+  while [[ $# -gt 0 ]]; do
+    case $1 in
+     -single-end)
+        single_end=1
+        shift
+        ;;
+     -paired-end)
+        single_end=0
+        shift
+        ;;
+ 	  -non-directional)
+        non_directional="--non_directional"
+        shift
+        ;;
+ 	  -raw-data-dir)
+        raw_data_dir=$2
+        shift
+        shift
+        ;;
+    -keep-bam)
+        keep_bam="-keep-bam"
+        shift
+        ;;
+    -keep-trimmed-fq)
+        keep_trimmed_fq="-keep-trimmed-fq"
+        shift
+        ;;
+    -genome)
+        genome=$2
+        shift
+        shift
+        ;;
+     -*|--*)
+        help
+        exit 1
+        ;;
+     -h|--help)
+        help
+        exit 1
+        ;;
+    esac
+  done
 }
 
 main "$@"

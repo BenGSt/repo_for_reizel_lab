@@ -1,0 +1,97 @@
+#!/bin/bash
+
+GENOMIC_REFERENCE_LOCATION=/storage/bfe_reizel/bengst/genomic_reference_data
+
+help()
+{
+	cat << EOF
+	run after trim_illumina_adaptors.sh, trim_diversity_adaptors.sh, align_to_genome.sh, methylation_calling.sh
+	resources: 1 core, 3GB RAM
+
+	-output_dir
+	-genome <mm10 or hg38>
+EOF
+}
+
+
+main()
+{
+	cd $output_dir || exit 1
+	script_name=$(echo $0 | awk -F / '{print $NF}')
+
+	echo
+	echo
+	echo \#################################
+	echo \#################################
+	echo running: $script_name "$@"
+	echo date: $(date)
+	echo hostname: $(hostname)
+	echo pwd: $(pwd)
+	echo \#################################
+	echo \#################################
+	echo
+	echo
+
+	time combine_methylation_coverage_to_tiles 100 10 $genome #<tile_size> <min_coverage> <genome>
+
+}
+
+
+combine_methylation_coverage_to_tiles()
+{
+	#positional args: <tile_size> <min_coverage> <genome = mm10 or hg38>
+	# adapted from Adam's script:
+	# to make WholeGenome_100bpTiles.bed :
+	# cat mm9.chrom.sizes | grep -v -P 'X|Y|M' | awk '{OFS="\t"; for (i=1; i<=$2; i+=100) print $1,i,i+100-1}' > WholeGenome_100bpTiles.bed
+	# cat hg38.chrom.sizes  | awk '{OFS="\t"; for (i=1; i<=$2; i+=100) print $1,i,i+100-1}' > hg38_100bp_tiles.bed
+
+
+	tile_size=$1
+	min_coverage=$2
+	cd methylation_extractor_output/
+	meth_calling_output=$(ls |grep cov.gz)
+
+	mm10_tiles=${GENOMIC_REFERENCE_LOCATION}/mm10_whole_genome_${tile_size}bpTiles.bed
+	hg38_tiles=${GENOMIC_REFERENCE_LOCATION}/hg38/hg38_100bp_tiles.bed
+	if [[ $3 == "mm10" ]]; then
+	  tiles_file=$mm10_tiles
+	elif [[ $3 == "hg38" ]]; then
+	  tiles_file=$hg38_tiles
+  fi
+
+	# 100bp tiles variant 2: First calculate the tiles and then remove tiles with total coverage < 10
+	output_file=$(echo ${meth_calling_output} | awk -v tile_size=$tile_size -F "." '{print $1 "_" tile_size "bp_tiles.bed" }')
+	bedtools intersect -a $tiles_file -b ${meth_calling_output} -wa -wb | awk -v cov=${min_coverage} -v tileSize=${tile_size} 'BEGIN {OFS="\t"; Prev=-1} {if ($2 == Prev) {T=T+$8+$9; M=M+$8} else {if (Prev!=-1 && T>=cov) {print PrevChr,Prev,Prev+tileSize-1,M/T};T=$8+$9; M=$8;}; Prev=$2; PrevChr=$1}' > ../${output_file}
+
+	#to unite all tiles from different samples:
+	#bedtools unionbedg -names `du -a -L | grep Tiles | awk '{print $2}' | sort | awk -F'/' '{print $NF}' | awk -F'.' '{print $1}'` -header -filler NA -i `du -a -L | grep Tiles | awk '{print $2}' | sort` > 100bpTiles_Tiles_Cov10_Tissues.bed
+}
+
+arg_parse()
+{
+  while [[ $# -gt 0 ]]; do
+    case $1 in
+	-output-dir)
+        output_dir="$2"
+        shift
+        shift
+        ;;
+ 	-genome)
+        genome=$2
+        shift
+        shift
+        ;;
+      -*|--*)
+        help
+        exit 1
+        ;;
+      -h|--help)
+        help
+        exit 1
+        ;;
+    esac
+  done
+}
+
+
+main "$@"
