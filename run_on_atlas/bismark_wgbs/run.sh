@@ -6,6 +6,7 @@ help()
 {
     echo Run The WGBS bismark pipeline:
     echo USAGE: $(echo $0 | awk -F / '{print$NF}') \{-single-end or -paired-end\} -raw-data-dir \<\raw_data_dir\> -genome \<mm10 or hg38\>\[-non-directional\]
+    echo
     echo raw_data_dir should contain a dir for each sample containing it\'s fastq files.
     echo -non-directional instructs Bismark to use all four alignment outputs \(OT, CTOT, OB, CTOB\).
     echo Run from the directory you wish the output to be written to.
@@ -23,7 +24,7 @@ main()
   write_condor_dag
   mkdir logs
 
-  echo Submit the jobs by running: condor_submit_dag rna_seq_jobs.dag
+  echo Submit the jobs by running: condor_submit_dag bismark_wgbs.dag
   echo Good Luck!
   #TODO: single end read option
 
@@ -80,7 +81,7 @@ $(
 EOF
 
 
-  cat << EOF > deduplicate.sub
+  cat << EOF > deduplicate_jobs.sub
 Initialdir = $(pwd)
 executable = $REPO_FOR_REIZEL_LAB/run_on_atlas/bismark_wgbs/deduplicate.sh
 Arguments = \$(args)
@@ -120,9 +121,9 @@ EOF
 
   cat << EOF > make_tiles.sub
 Initialdir = $(pwd)
-executable = $REPO_FOR_REIZEL_LAB/run_on_atlas/bismark_wgbs/methylation_calling.sh
+executable = $REPO_FOR_REIZEL_LAB/run_on_atlas/bismark_wgbs/make_tiles.sh
 Arguments = \$(args)
-request_cpus = 10
+request_cpus = 1
 RequestMemory = 3GB
 universe = vanilla
 log = logs/\$(name)_make_tiles.log
@@ -142,13 +143,17 @@ EOF
 
 write_condor_dag()
 {
-    cat << EOF > rna_seq_jobs.dag
-JOB align_hisat2 hisat2_jobs.sub
-JOB count_reads_htseq htseq_jobs.sub
-JOB find_deg_deseq2 deseq2_job.sub
+    cat << EOF > bismark_wgbs.dag
+JOB trim_and_qc trim_jobs.sub
+JOB bismark_align bismark_align_jobs.sub
+JOB deduplicate deduplicate_jobs.sub
+JOB meth_call methylation_calling_jobs.sub
+JOB make_tiles make_tiles.sub
 
-PARENT align_hisat2  CHILD count_reads_htseq
-PARENT count_reads_htseq  CHILD find_deg_deseq2
+PARENT trim_and_qc  CHILD bismark_align
+PARENT bismark_align  CHILD deduplicate
+PARENT deduplicate  CHILD meth_call
+PARENT meth_call  CHILD make_tiles
 EOF
 }
 
