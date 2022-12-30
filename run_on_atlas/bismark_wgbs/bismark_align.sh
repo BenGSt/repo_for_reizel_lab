@@ -39,9 +39,9 @@ main()
 	echo
 	echo
 
-	if [[ $3 == "mm10" ]]; then
+	if [[ $genome == "mm10" ]]; then
 	  bismark_genome_location=/storage/bfe_reizel/bengst/genomic_reference_data/from_huji/mm10/Sequence/WholeGenomeFasta
-	elif [[ $3 == "hg38" ]]; then
+	elif [[ $genome == "hg38" ]]; then
 	  bismark_genome_location=/storage/bfe_reizel/bengst/genomic_reference_data/hg38/analysisSet/hg38.analysisSet.chroms/
 	else
 	  echo genome not recognized
