@@ -22,6 +22,7 @@ EOF
 
 main()
 {
+  source /Local/bfe_reizel/anaconda3/bin/activate ovation_rrbs_pipeline_2022
   arg_parse "$@"
 	cd "$output_dir" || exit 1
 	script_name=$(echo $0 | awk -F / '{print $NF}')
