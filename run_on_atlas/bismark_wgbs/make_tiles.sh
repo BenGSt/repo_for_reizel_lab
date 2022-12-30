@@ -71,12 +71,12 @@ arg_parse()
 {
   while [[ $# -gt 0 ]]; do
     case $1 in
-	-output-dir)
+	    -output-dir)
         output_dir="$2"
         shift
         shift
         ;;
- 	-genome)
+ 	    -genome)
         genome=$2
         shift
         shift

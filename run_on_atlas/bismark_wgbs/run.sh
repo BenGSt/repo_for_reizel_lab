@@ -47,9 +47,9 @@ queue name, args from (
 $(
   for sample_name in $(find $raw_dir -type d | awk -F / 'NR>1{print $NF}'|sort) ; do
     if [[ $single_end -eq 1 ]]; then
-      echo $sample_name, -output_dir $(pwd)/$sample_name -single-end -input_fastq_file $(realpath $raw_dir/$sample_name/*.fastq.gz)
+      echo $sample_name, -output-dir $(pwd)/$sample_name -single-end -input_fastq_file $(realpath $raw_dir/$sample_name/*.fastq.gz)
     else
-      echo $sample_name, -output_dir $(pwd)/$sample_name -paired-end -paired_input_fastq_files $(realpath $raw_dir/$sample_name/*.fastq.gz)
+      echo $sample_name, -output-dir $(pwd)/$sample_name -paired-end -paired_input_fastq_files $(realpath $raw_dir/$sample_name/*.fastq.gz)
     fi
   done
 )
@@ -71,9 +71,9 @@ queue name, args from (
 $(
   for sample_name in $(find $raw_dir -type d | awk -F / 'NR>1{print $NF}'|sort) ; do
       if [[ $single_end -eq 1 ]]; then
-        echo $sample_name, -output_dir $(pwd)/$sample_name -single-end $non_directional -genome $genome
+        echo $sample_name, -output-dir $(pwd)/$sample_name -single-end $non_directional -genome $genome
       else
-        echo $sample_name, -output_dir $(pwd)/$sample_name -paired-end $non_directional -genome $genome
+        echo $sample_name, -output-dir $(pwd)/$sample_name -paired-end $non_directional -genome $genome
       fi
   done
 )

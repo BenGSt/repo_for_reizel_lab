@@ -100,38 +100,38 @@ arg_parse()
 {
   while [[ $# -gt 0 ]]; do
     case $1 in
-     -single-end)
+      -single-end)
         read_type="single_end"
         shift
         ;;
-     -paired-end)
+      -paired-end)
         read_type="paired_end"
         shift
         ;;
-	-output-dir)
+      -output-dir)
         output_dir="$2"
         shift
         shift
         ;;
- 	-non-directional)
+      -non-directional)
         non_directional="--non_directional"
         shift
         ;;
-  -genome)
+      -genome)
         genome=$2
         shift
         shift
         ;;
-      -*|--*)
+        -*|--*)
         help
         exit 1
         ;;
-      -h|--help)
+        -h|--help)
         help
         exit 1
         ;;
     esac
-  done
+done
 }
 
 

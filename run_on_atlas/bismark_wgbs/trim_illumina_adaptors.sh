@@ -110,7 +110,7 @@ arg_parse()
         shift # past argument2
         shift # past value
         ;;
-	   -output_dir)
+	   -output-dir)
         output_dir="$2"
         shift # past argument
         shift # past value
