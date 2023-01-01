@@ -1,0 +1,14 @@
+name: wgbs_bismark_pipeline_2022
+channels:
+  - bioconda
+  - defaults
+dependencies:
+  - cutadapt
+  - fastqc
+  - trim-galore
+  - bowtie2
+  - samtools
+  - bismark
+  - perl-gdgraph
+  - bedtools
+prefix: /Local/bfe_reizel/anaconda3/envs/wgbs_bismark_pipeline_2022
