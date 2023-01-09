@@ -60,6 +60,7 @@ main()
 methylation_calling()
 {
   alignment_output=$(find . -name '*bismark*deduplicated*bam')
+  echo $alignment_output //debug
   echo $alignment_output | grep 'pe' && paired="-p --ignore_r2 2" || paired=""
   command=$(echo bismark_methylation_extractor $paired --multicore $N_PARALLEL_INSTANCES --gzip --bedGraph --buffer_size $BUFFER_SIZE --output methylation_extractor_output $alignment_output)
   echo $SCRIPT_NAME runnig: $command
