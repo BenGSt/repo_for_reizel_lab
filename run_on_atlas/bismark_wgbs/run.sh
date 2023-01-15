@@ -89,7 +89,7 @@ request_cpus = 2
 RequestMemory = 10GB
 universe = vanilla
 log = logs/\$(name)_deduplicate.log
-output = logs/\$(name)_deduplicate .out
+output = logs/\$(name)_deduplicate.out
 error = logs/\$(name)_deduplicate.out
 queue name, args from (
 $(
