@@ -1,0 +1,15 @@
+name: wgbs_bismark_pipeline_2023
+channels:
+  - bioconda
+  - defaults
+dependencies:
+  - cutadapt
+  - fastqc
+  - trim-galore
+  - bowtie2
+  - samtools
+  - bismark
+#  - perl-gdgraph #for m-bias plot directly with bismark - dosn't work GD::LINES missing. using multiqc instead //9.01.2023
+  - bedtools
+  - multiqc
+#prefix: /Local/bfe_reizel/anaconda3/envs/wgbs_bismark_pipeline_2023
