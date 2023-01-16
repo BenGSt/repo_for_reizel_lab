@@ -18,7 +18,7 @@ EOF
 
 main()
 {
-  source /Local/bfe_reizel/anaconda3/bin/activate ovation_rrbs_pipeline_2022
+  source /Local/bfe_reizel/anaconda3/bin/activate wgbs_bismark_pipeline_2023
 	arg_parse "$@"
 	mkdir -p $output_dir
   cd $output_dir

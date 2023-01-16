@@ -4,7 +4,7 @@
 main() #<sample_dir>
 {
   sample_dir=$1
-  source /Local/bfe_reizel/anaconda3/bin/activate ovation_rrbs_pipeline_2022
+  source /Local/bfe_reizel/anaconda3/bin/activate wgbs_bismark_pipeline_2023
 	script_name=$(echo $0 | awk -F / '{print $NF}')
 
 	echo
