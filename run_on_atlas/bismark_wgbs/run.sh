@@ -119,6 +119,23 @@ $(
 )
 EOF
 
+
+  cat << EOF > multiqc_job.sub
+Initialdir = $(pwd)
+executable = $REPO_FOR_REIZEL_LAB/run_on_atlas/bismark_wgbs/run_multiqc.sh
+Arguments = \$(args)
+request_cpus = 2
+RequestMemory = 3GB
+universe = vanilla
+log = logs/multiqc_job.log
+output = logs/multiqc_job.out
+error = logs/multiqc_job.out
+queue args from (
+$(pwd) --outdir multiqc
+)
+EOF
+
+
   cat << EOF > make_tiles.sub
 Initialdir = $(pwd)
 executable = $REPO_FOR_REIZEL_LAB/run_on_atlas/bismark_wgbs/make_tiles.sh
@@ -137,8 +154,6 @@ $(
 )
 )
 EOF
-
-
 }
 
 write_condor_dag()
@@ -148,12 +163,13 @@ JOB trim_and_qc trim_jobs.sub
 JOB bismark_align bismark_align_jobs.sub
 JOB deduplicate deduplicate_jobs.sub
 JOB meth_call methylation_calling_jobs.sub
+JOB multiqc multiqc_job.sub
 JOB make_tiles make_tiles.sub
 
 PARENT trim_and_qc  CHILD bismark_align
 PARENT bismark_align  CHILD deduplicate
 PARENT deduplicate  CHILD meth_call
-PARENT meth_call  CHILD make_tiles
+PARENT meth_call  CHILD multiqc make_tiles
 EOF
 }
 
