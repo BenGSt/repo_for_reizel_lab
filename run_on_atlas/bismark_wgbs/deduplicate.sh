@@ -22,7 +22,7 @@ main() #<sample_dir>
 
   cd "$sample_dir" || exit 1
   time deduplicate_bismark ./*bismark*bam
-  rm $(find . -name '*.bam' | grep -v deduplicated) #delete bam with duplicates
+  rm -v $(find . -name '*.bam' | grep -v deduplicated) #delete bam with duplicates
 
 	echo
 	echo
