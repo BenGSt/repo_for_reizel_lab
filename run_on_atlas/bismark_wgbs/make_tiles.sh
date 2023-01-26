@@ -18,7 +18,7 @@ main()
 {
   arg_parse "$@"
   source /Local/bfe_reizel/anaconda3/bin/activate wgbs_bismark_pipeline_2023
-	cd $output_dir || printf "error: output_dir=%s" $output_dir; exit 1
+	cd $output_dir || printf "error: output_dir=%s" $output_dir && exit 1
 	script_name=$(echo $0 | awk -F / '{print $NF}')
 
 	echo
