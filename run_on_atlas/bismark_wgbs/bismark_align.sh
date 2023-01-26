@@ -89,13 +89,6 @@ align_to_genome()
 }
 
 
-cleanup()
-{
-  cmd="rm $rename $rename_1 $rename_2"
-  echo cleanup: "$cmd"
-  $cmd
-
-}
 
 arg_parse()
 {
