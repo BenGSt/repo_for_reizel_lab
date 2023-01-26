@@ -124,8 +124,8 @@ EOF
 Initialdir = $(pwd)
 executable = $REPO_FOR_REIZEL_LAB/run_on_atlas/bismark_wgbs/run_multiqc.sh
 Arguments = \$(args)
-request_cpus = 2
-RequestMemory = 3GB
+request_cpus = 1
+RequestMemory = 500MB
 universe = vanilla
 log = logs/multiqc_job.log
 output = logs/multiqc_job.out
