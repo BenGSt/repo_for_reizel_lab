@@ -44,8 +44,7 @@ EOF
 
 main()
 {
-  echo num args: $# #debug
-  echo "$@" #debug
+  source /Local/bfe_reizel/anaconda3/bin/activate wgbs_bismark_pipeline_2023
 	arg_parse "$@"
 	mkdir -p $output_dir
   cd $output_dir || exit 1
@@ -115,6 +114,7 @@ arg_parse()
     help
     exit 1
   fi
+
   while [[ $# -gt 0 ]]; do
     case $1 in
      -h|--help)
