@@ -47,9 +47,9 @@ queue name, args from (
 $(
   for sample_name in $(find $raw_dir -type d | awk -F / 'NR>1{print $NF}'|sort) ; do
     if [[ $single_end -eq 1 ]]; then
-      echo $sample_name, -output-dir $(pwd)/$sample_name -single-end -input_fastq_file $(realpath $raw_dir/$sample_name/*.fastq.gz)
+      echo $sample_name, -output-dir $(pwd)/$sample_name  -input-fastq-file $(realpath $raw_dir/$sample_name/*.fastq.gz) $extra_trim_opts
     else
-      echo $sample_name, -output-dir $(pwd)/$sample_name -paired-end -paired_input_fastq_files $(realpath $raw_dir/$sample_name/*.fastq.gz)
+      echo $sample_name, -output-dir $(pwd)/$sample_name  -paired-input-fastq-files $(realpath $raw_dir/$sample_name/*.fastq.gz) $extra_trim_opts
     fi
   done
 )
@@ -113,7 +113,8 @@ error = logs/\$(name)_methylation_calling.out
 queue name, args from (
 $(
   for sample_name in $(find $raw_dir -type d | awk -F / 'NR>1{print $NF}'|sort) ; do
-        echo $sample_name, -output-dir $(pwd)/$sample_name $keep_bam $keep_trimmed_fq
+        echo $sample_name, -output-dir $(pwd)/$sample_name $ignore_r2
+        #TODO: $keep_bam $keep_trimmed_fq
   done
 )
 )
@@ -181,6 +182,10 @@ arg_parse()
   fi
   while [[ $# -gt 0 ]]; do
     case $1 in
+     -h|--help)
+        help
+        exit 1
+        ;;
      -single-end)
         single_end=1
         shift
@@ -211,11 +216,17 @@ arg_parse()
         shift
         shift
         ;;
-     -*|--*)
-        help
-        exit 1
+    -extra-trim-galore-options)
+        extra_trim_opts=$2;
+        shift
+        shift
         ;;
-     -h|--help)
+    -ignore_r2)
+        ignore_r2=$(echo --ignore_r2 "$2")
+        shift
+        shift
+        ;;
+    *)
         help
         exit 1
         ;;

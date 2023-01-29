@@ -9,19 +9,45 @@ help()
 	run first
 	resources: $N_CORES cores, $MEM RAM
 
-	-single-end or -paired-end
-	-input_fastq_file <sample.fq.gz> or -paired_input_fastq_files <sample_R1.fq.gz> <sample_R2.fq.gz>
-	-output_dir
+	-input-fastq-file <sample.fq.gz> or -paired-input-fastq-files <sample_R1.fq.gz> <sample_R2.fq.gz>
+	-output-dir
+
+	optional:
+	-extra-trim-galore-options "multiple quoted options"
+
+  handy extra options from trim_galore manual
+  =====================================
+  --clip_R1 <int>         Instructs Trim Galore to remove <int> bp from the 5' end of read 1 (or single-end
+                        reads). This may be useful if the qualities were very poor, or if there is some
+                        sort of unwanted bias at the 5' end. Default: OFF.
+
+  --clip_R2 <int>         Instructs Trim Galore to remove <int> bp from the 5' end of read 2 (paired-end reads
+                          only). This may be useful if the qualities were very poor, or if there is some sort
+                          of unwanted bias at the 5' end. For paired-end BS-Seq, it is recommended to remove
+                          the first few bp because the end-repair reaction may introduce a bias towards low
+                          methylation. Please refer to the M-bias plot section in the Bismark User Guide for
+                          some examples. Default: OFF.
+
+  --three_prime_clip_R1 <int>     Instructs Trim Galore to remove <int> bp from the 3' end of read 1 (or single-end
+                          reads) AFTER adapter/quality trimming has been performed. This may remove some unwanted
+                          bias from the 3' end that is not directly related to adapter sequence or basecall quality.
+                          Default: OFF.
+
+  --three_prime_clip_R2 <int>     Instructs Trim Galore to remove <int> bp from the 3' end of read 2 AFTER
+                          adapter/quality trimming has been performed. This may remove some unwanted bias from
+                          the 3' end that is not directly related to adapter sequence or basecall quality.
+                          Default: OFF.
+
 EOF
 }
 
 
 main()
 {
-  source /Local/bfe_reizel/anaconda3/bin/activate wgbs_bismark_pipeline_2023
+
 	arg_parse "$@"
 	mkdir -p $output_dir
-  cd $output_dir
+  cd $output_dir || exit 1
 	script_name=$(echo $0 | awk -F / '{print $NF}')
 
 	echo
@@ -65,7 +91,7 @@ trim_illumina_adapter_paired_end() #<R1> <R2>
 	#note from trim_galore manual
 		#It seems that --cores 4 could be a sweet spot, anything above has diminishing returns.
 		#--cores 4 would then be: 4 (read) + 4 (write) + 4 (Cutadapt) + 2 (extra Cutadapt) + 1 (Trim Galore) = 15, and so forth.
-	cmd="trim_galore --dont_gzip --paired $1 $2 --cores $N_CORES --fastqc"
+	cmd="trim_galore --dont_gzip --paired $1 $2 --cores $N_CORES --fastqc $extra"
 	echo runnig: $cmd
 	$cmd
 }
@@ -73,7 +99,7 @@ trim_illumina_adapter_paired_end() #<R1> <R2>
 
 trim_illumina_adapter_single_end() #<R1>
 {
-  cmd="trim_galore $1 --cores $N_CORES --fastqc"
+  cmd="trim_galore $1 --cores $N_CORES --fastqc $extra"
 	echo runnig: $cmd
 	$cmd
 }
@@ -90,36 +116,35 @@ arg_parse()
   fi
   while [[ $# -gt 0 ]]; do
     case $1 in
-     -single-end)
+     -h|--help)
+        help
+        exit 1
+        ;;
+     -input-fastq-file)
         read_type="single_end"
-        shift # past argument
-        ;;
-     -paired-end)
-        read_type="paired_end"
-        shift # past argument
-        ;;
-     -input_fastq_file)
         input_fastq="$2"
         shift # past argument
         shift # past value
         ;;
-     -paired_input_fastq_files)
+     -paired-input-fastq-files)
+        read_type="paired_end"
         input_fastq_1="$2"
-        shift # past argument
+        shift
         input_fastq_2="$2"
-        shift # past argument2
-        shift # past value
+        shift
+        shift
         ;;
 	   -output-dir)
         output_dir="$2"
-        shift # past argument
-        shift # past value
+        shift
+        shift
         ;;
-     -*|--*)
-        help
-        exit 1
+     -extra-trim-galore-options)
+        extra=$2;
+        shift
+        shift
         ;;
-     -h|--help)
+     *)
         help
         exit 1
         ;;

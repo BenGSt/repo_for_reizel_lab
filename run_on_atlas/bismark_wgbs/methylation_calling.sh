@@ -10,11 +10,20 @@ help()
 {
 	cat << EOF
 	run after trim_illumina_adaptors.sh, trim_diversity_adaptors.sh, align_to_genome.sh
-	resources: $N_N_CORES cores, $MEM RAM
+	resources: $N_CORES cores, $MEM RAM
 
 	-output-dir
 	-keep-bam
 	-keep-trimmed-fq
+
+	optional:
+	-ignore_r2 <int>
+	  from Bismark User Guide:
+	  ignore the first <int> bp from the 5' end of Read 2 of paired-end sequencing results only.
+	  Since the first couple of bases in Read 2 of BS-Seq experiments show a severe bias towards non-methylation
+	  as a result of end-repairing sonicated fragments with unmethylated cytosines (see M-bias plot),
+	  it is recommended that the first couple of bp of Read 2 are removed before starting downstream analysis.
+	  Please see the section on M-bias plots in the Bismark User Guide for more details.
 EOF
 }
 
@@ -61,8 +70,8 @@ methylation_calling()
 {
   alignment_output=$(find . -name '*bismark*deduplicated*bam')
   echo $alignment_output #debug
-  echo $alignment_output | grep 'pe' && paired="-p --ignore_r2 2" || paired=""
-  command=$(echo bismark_methylation_extractor $paired --multicore $N_PARALLEL_INSTANCES --gzip --bedGraph --buffer_size $BUFFER_SIZE --output methylation_extractor_output $alignment_output)
+  echo $alignment_output | grep 'pe' && paired="-p" || paired=""
+  command=$(echo bismark_methylation_extractor $paired $ignore_r2 --multicore $N_PARALLEL_INSTANCES --gzip --bedGraph --buffer_size $BUFFER_SIZE --output methylation_extractor_output $alignment_output)
   echo $SCRIPT_NAME runnig: $command
 	$command
 }
@@ -89,6 +98,10 @@ arg_parse()
 {
   while [[ $# -gt 0 ]]; do
     case $1 in
+      -h|--help)
+        help
+        exit 1
+        ;;
       -output-dir)
         output_dir="$2"
         shift
@@ -102,11 +115,12 @@ arg_parse()
         keep_trimmed_fq=1
         shift
         ;;
-      -*|--*)
-        help
-        exit 1
+      -ignore_r2)
+        ignore_r2=$(echo --ignore_r2 "$2")
+        shift
+        shift
         ;;
-      -h|--help)
+      *)
         help
         exit 1
         ;;
