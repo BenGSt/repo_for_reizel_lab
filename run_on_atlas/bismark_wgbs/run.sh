@@ -253,7 +253,7 @@ arg_parse()
         shift
         ;;
     -extra-trim-galore-options)
-        extra_trim_opts=$(echo -extra-trim-galore-options \""$2"\");
+        extra_trim_opts=$(echo -extra-trim-galore-options \\\""$2"\\\");
         shift
         shift
         ;;
