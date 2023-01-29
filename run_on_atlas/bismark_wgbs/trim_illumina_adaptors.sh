@@ -44,7 +44,7 @@ EOF
 
 main()
 {
-
+  echo "$@" #debug
 	arg_parse "$@"
 	mkdir -p $output_dir
   cd $output_dir || exit 1
