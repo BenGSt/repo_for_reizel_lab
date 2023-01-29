@@ -92,6 +92,7 @@ align_to_genome()
 
 arg_parse()
 {
+  echo "$@" #debug
   while [[ $# -gt 0 ]]; do
     case $1 in
       -single-end)
