@@ -44,6 +44,7 @@ EOF
 
 main()
 {
+  echo num args: $# #debug
   echo "$@" #debug
 	arg_parse "$@"
 	mkdir -p $output_dir
