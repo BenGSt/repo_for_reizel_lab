@@ -13,6 +13,42 @@ help()
     echo
     echo Possibly edit the submission files \(you can do this before running the pipeline or after, running additional jobs\).
     echo products: fastqc report, bismark covaregae file, [bam file containing alignments], [100 bp tiles with methylation levels]
+     cat << EOF
+optional:
+
+-ignore_r2 <int>
+  from Bismark User Guide:
+  ignore the first <int> bp from the 5' end of Read 2 of paired-end sequencing results only.
+  Since the first couple of bases in Read 2 of BS-Seq experiments show a severe bias towards non-methylation
+  as a result of end-repairing sonicated fragments with unmethylated cytosines (see M-bias plot),
+  it is recommended that the first couple of bp of Read 2 are removed before starting downstream analysis.
+  Please see the section on M-bias plots in the Bismark User Guide for more details.
+
+-extra-trim-galore-options "multiple quoted options"
+handy extra options from trim_galore manual:
+=====================================
+--clip_R1 <int>         Instructs Trim Galore to remove <int> bp from the 5' end of read 1 (or single-end
+                      reads). This may be useful if the qualities were very poor, or if there is some
+                      sort of unwanted bias at the 5' end. Default: OFF.
+
+--clip_R2 <int>         Instructs Trim Galore to remove <int> bp from the 5' end of read 2 (paired-end reads
+                        only). This may be useful if the qualities were very poor, or if there is some sort
+                        of unwanted bias at the 5' end. For paired-end BS-Seq, it is recommended to remove
+                        the first few bp because the end-repair reaction may introduce a bias towards low
+                        methylation. Please refer to the M-bias plot section in the Bismark User Guide for
+                        some examples. Default: OFF.
+
+--three_prime_clip_R1 <int>     Instructs Trim Galore to remove <int> bp from the 3' end of read 1 (or single-end
+                        reads) AFTER adapter/quality trimming has been performed. This may remove some unwanted
+                        bias from the 3' end that is not directly related to adapter sequence or basecall quality.
+                        Default: OFF.
+
+--three_prime_clip_R2 <int>     Instructs Trim Galore to remove <int> bp from the 3' end of read 2 AFTER
+                        adapter/quality trimming has been performed. This may remove some unwanted bias from
+                        the 3' end that is not directly related to adapter sequence or basecall quality.
+                        Default: OFF.
+
+EOF
 
 }
 
