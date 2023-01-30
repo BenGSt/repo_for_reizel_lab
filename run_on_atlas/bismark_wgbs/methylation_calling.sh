@@ -81,9 +81,9 @@ methylation_calling()
 
 cleanup()
 {
-  rm_bam="rm $alignment_output"
-  rm_OT_OB="rm $(find ./ | grep -P 'OT|OB')"
-  rm_fq="rm *.fq" #the non gz trimmed fq
+  rm_bam="rm -v $alignment_output"
+  rm_OT_OB="rm -v $(find ./ | grep -P 'OT|OB')"
+  rm_fq="rm -v *.fq" #the non gz trimmed fq
   if [[ $keep_bam -eq 0 ]]; then
     $rm_bam
   fi

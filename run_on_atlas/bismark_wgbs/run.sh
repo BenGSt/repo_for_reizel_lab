@@ -5,7 +5,7 @@ REPO_FOR_REIZEL_LAB=/storage/bfe_reizel/bengst/repo_for_reizel_lab
 help()
 {
     echo Run The WGBS bismark pipeline:
-    echo USAGE: $(echo $0 | awk -F / '{print$NF}') \{-single-end or -paired-end\} -raw-data-dir \<\raw_data_dir\> -genome \<mm10 or hg38\>\[-non-directional\]
+    echo USAGE: $(echo $0 | awk -F / '{print$NF}') \{-single-end or -paired-end\} -raw-data-dir \<raw_data_dir\> -genome \<mm10 or hg38\>\[-non-directional\]
     echo
     echo raw_data_dir should contain a dir for each sample containing it\'s fastq files.
     echo -non-directional instructs Bismark to use all four alignment outputs \(OT, CTOT, OB, CTOB\).
@@ -149,8 +149,27 @@ error = logs/\$(name)_methylation_calling.out
 queue name, args from (
 $(
   for sample_name in $(find $raw_dir -type d | awk -F / 'NR>1{print $NF}'|sort) ; do
-        echo $sample_name, -output-dir $(pwd)/$sample_name $ignore_r2
-        #TODO: $keep_bam $keep_trimmed_fq
+        echo $sample_name, -output-dir $(pwd)/$sample_name $ignore_r2 $keep_bam $keep_trimmed_fq
+  done
+)
+)
+EOF
+
+
+  cat << EOF > bam2nuc_jobs.sub
+Initialdir = $(pwd)
+executable = $REPO_FOR_REIZEL_LAB/run_on_atlas/bismark_wgbs/nucliotide_coverage_report.sh
+Arguments = \$(args)
+request_cpus = 2
+RequestMemory = 10GB
+universe = vanilla
+log = logs/\$(name)_bam2nuc.log
+output = logs/\$(name)_bam2nuc.out
+error = logs/\$(name)_bam2nuc.out
+queue name, args from (
+$(
+  for sample_name in $(find $raw_dir -type d | awk -F / 'NR>1{print $NF}'|sort) ; do
+        echo $sample_name, -output-dir $(pwd)/$sample_name  -genome $genome
   done
 )
 )
@@ -202,11 +221,13 @@ JOB deduplicate deduplicate_jobs.sub
 JOB meth_call methylation_calling_jobs.sub
 JOB multiqc multiqc_job.sub
 JOB make_tiles make_tiles.sub
+JOB bam2nuc bam2nuc_jobs.sub
 
 PARENT trim_and_qc  CHILD bismark_align
 PARENT bismark_align  CHILD deduplicate
-PARENT deduplicate  CHILD meth_call
+PARENT deduplicate  CHILD meth_call bam2nuc
 PARENT meth_call  CHILD multiqc make_tiles
+PARENT meth_call bam2nuc CHILD multiqc
 EOF
 }
 
