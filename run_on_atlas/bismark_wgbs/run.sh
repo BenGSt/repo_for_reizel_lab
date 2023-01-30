@@ -81,7 +81,7 @@ output = logs/\$(name)_trim.out
 error = logs/\$(name)_trim.out
 queue name, args from (
 $(
-  for sample_name in $(find $raw_dir -type d | awk -F / 'NR>1{print $NF}'|sort) ; do
+  for sample_name in $(find -L $raw_dir -type d | awk -F / 'NR>1{print $NF}'|sort) ; do
     if [[ $single_end -eq 1 ]]; then
       echo $sample_name,\" -output-dir $(pwd)/$sample_name  -input-fastq-file $(realpath $raw_dir/$sample_name/*.fastq.gz) $extra_trim_opts\"
     else
@@ -105,7 +105,7 @@ output = logs/\$(name)_bismark_align.out
 error = logs/\$(name)_bismark_align.out
 queue name, args from (
 $(
-  for sample_name in $(find $raw_dir -type d | awk -F / 'NR>1{print $NF}'|sort) ; do
+  for sample_name in $(find -L $raw_dir -type d | awk -F / 'NR>1{print $NF}'|sort) ; do
       if [[ $single_end -eq 1 ]]; then
         echo $sample_name, -output-dir $(pwd)/$sample_name -single-end $non_directional -genome $genome
       else
@@ -129,7 +129,7 @@ output = logs/\$(name)_deduplicate.out
 error = logs/\$(name)_deduplicate.out
 queue name, args from (
 $(
-  for sample_name in $(find $raw_dir -type d | awk -F / 'NR>1{print $NF}'|sort) ; do
+  for sample_name in $(find -L $raw_dir -type d | awk -F / 'NR>1{print $NF}'|sort) ; do
         echo $sample_name, $(pwd)/$sample_name
   done
 )
@@ -148,7 +148,7 @@ output = logs/\$(name)_methylation_calling.out
 error = logs/\$(name)_methylation_calling.out
 queue name, args from (
 $(
-  for sample_name in $(find $raw_dir -type d | awk -F / 'NR>1{print $NF}'|sort) ; do
+  for sample_name in $(find -L $raw_dir -type d | awk -F / 'NR>1{print $NF}'|sort) ; do
         echo $sample_name, -output-dir $(pwd)/$sample_name $ignore_r2 $keep_bam $keep_trimmed_fq
   done
 )
@@ -168,7 +168,7 @@ output = logs/\$(name)_bam2nuc.out
 error = logs/\$(name)_bam2nuc.out
 queue name, args from (
 $(
-  for sample_name in $(find $raw_dir -type d | awk -F / 'NR>1{print $NF}'|sort) ; do
+  for sample_name in $(find -L $raw_dir -type d | awk -F / 'NR>1{print $NF}'|sort) ; do
         echo $sample_name, -output-dir $(pwd)/$sample_name  -genome $genome
   done
 )
@@ -204,7 +204,7 @@ output = logs/\$(name)_make_tiles.out
 error = logs/\$(name)_make_tiles.out
 queue name, args from (
 $(
-  for sample_name in $(find $raw_dir -type d | awk -F / 'NR>1{print $NF}'|sort) ; do
+  for sample_name in $(find -L $raw_dir -type d | awk -F / 'NR>1{print $NF}'|sort) ; do
         echo $sample_name, -output-dir $(pwd)/$sample_name -genome $genome
   done
 )
