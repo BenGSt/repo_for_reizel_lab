@@ -226,7 +226,7 @@ JOB bam2nuc bam2nuc_jobs.sub
 PARENT trim_and_qc  CHILD bismark_align
 PARENT bismark_align  CHILD deduplicate
 PARENT deduplicate  CHILD meth_call bam2nuc
-PARENT meth_call  CHILD multiqc make_tiles
+PARENT meth_call  CHILD make_tiles
 PARENT meth_call bam2nuc CHILD multiqc
 EOF
 }
