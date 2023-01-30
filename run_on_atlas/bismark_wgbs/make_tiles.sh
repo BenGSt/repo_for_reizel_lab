@@ -6,7 +6,7 @@ help()
 {
 	cat << EOF
 	run after trim_illumina_adaptors.sh, trim_diversity_adaptors.sh, align_to_genome.sh, methylation_calling.sh
-	resources: 1 core, 3GB RAM
+	resources: 1 core, 30GB RAM
 
 	-output_dir
 	-genome <mm10 or hg38>

@@ -1,7 +1,7 @@
 #!/bin/bash
 
 N_CORES=10
-MEM=16GB
+MEM=30GB
 N_PARALLEL_INSTANCES=2 # ~5 cores per instance
 
 
