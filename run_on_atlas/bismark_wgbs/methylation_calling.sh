@@ -53,7 +53,7 @@ main()
 	time methylation_calling
 
 	#cleanup
-  rm -v "$(find ./ | grep -P 'OT|OB')"
+  rm -v $(find ./ | grep -P 'OT|OB')
 
 	echo
 	echo
