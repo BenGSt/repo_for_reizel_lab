@@ -47,6 +47,20 @@ main()
   fi
 
   bam2nuc --dir bam2nuc --genome_folder $bismark_genome_location ./*.bam
+
+  echo
+	echo
+	echo \#################################
+	echo \#################################
+	echo finished: $script_name "$@"
+	echo date: $(date)
+	echo hostname: $(hostname)
+	echo pwd: $(pwd)
+	echo \#################################
+	echo \#################################
+	echo
+	echo
+
 }
 
 
