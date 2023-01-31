@@ -53,9 +53,7 @@ main()
 	time methylation_calling
 
 	#cleanup
-  if [[ $keep_trimmed_fq -eq 0 ]]; then
-    rm -v "$(find ./ | grep -P 'OT|OB')"
-  fi
+  rm -v "$(find ./ | grep -P 'OT|OB')"
 
 	echo
 	echo
@@ -94,10 +92,6 @@ arg_parse()
       -output-dir)
         output_dir="$2"
         shift
-        shift
-        ;;
-      -keep-trimmed-fq)
-        keep_trimmed_fq=1
         shift
         ;;
       -ignore_r2)
