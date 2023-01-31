@@ -18,11 +18,7 @@ EOF
 
 main()
 {
-  source /Local/bfe_reizel/anaconda3/bin/activate wgbs_bismark_pipeline_2023
-  arg_parse "$@"
-	cd "$output_dir" || exit 1
 	script_name=$(echo $0 | awk -F / '{print $NF}')
-
 	echo
 	echo
 	echo \#################################
@@ -35,6 +31,11 @@ main()
 	echo \#################################
 	echo
 	echo
+
+  source /Local/bfe_reizel/anaconda3/bin/activate wgbs_bismark_pipeline_2023
+  arg_parse "$@"
+	cd "$output_dir" || exit 1
+	mkdir bam2nuc
 
   if [[ $genome == "mm10" ]]; then
       bismark_genome_location=/storage/bfe_reizel/bengst/genomic_reference_data/from_huji/mm10/Sequence/WholeGenomeFasta
