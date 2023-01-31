@@ -158,7 +158,7 @@ EOF
 
   cat << EOF > bam2nuc_jobs.sub
 Initialdir = $(pwd)
-executable = $REPO_FOR_REIZEL_LAB/run_on_atlas/bismark_wgbs/nucliotide_coverage_report.sh
+executable = $REPO_FOR_REIZEL_LAB/run_on_atlas/bismark_wgbs/nucleotide_coverage_report.sh
 Arguments = \$(args)
 request_cpus = 2
 RequestMemory = 10GB
