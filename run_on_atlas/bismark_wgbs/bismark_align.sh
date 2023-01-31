@@ -51,6 +51,12 @@ main()
 
 	time align_to_genome
 
+  #cleanup
+  rm_fq="rm -v *.fq" #the non gz trimmed fq
+  if [[ $keep_trimmed_fq -eq 0 ]]; then
+    $rm_fq
+  fi
+
 	echo
 	echo
 	echo \#################################

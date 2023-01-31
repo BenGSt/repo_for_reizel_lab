@@ -51,7 +51,11 @@ main()
 	echo
 
 	time methylation_calling
-#  cleanup
+
+	#cleanup
+  if [[ $keep_trimmed_fq -eq 0 ]]; then
+    rm -v "$(find ./ | grep -P 'OT|OB')"
+  fi
 
 	echo
 	echo
@@ -79,23 +83,6 @@ methylation_calling()
 }
 
 
-cleanup()
-{
-  rm_bam="rm -v $alignment_output"
-  rm_OT_OB="rm -v $(find ./ | grep -P 'OT|OB')"
-  rm_fq="rm -v *.fq" #the non gz trimmed fq
-  if [[ $keep_bam -eq 0 ]]; then
-    $rm_bam
-  fi
-
-  if [[ $keep_trimmed_fq -eq 0 ]]; then
-    $rm_fq
-  fi
-
-  $rm_OT_OB
-}
-
-
 arg_parse()
 {
   while [[ $# -gt 0 ]]; do
@@ -107,10 +94,6 @@ arg_parse()
       -output-dir)
         output_dir="$2"
         shift
-        shift
-        ;;
-      -keep-bam)
-        keep_bam=1
         shift
         ;;
       -keep-trimmed-fq)

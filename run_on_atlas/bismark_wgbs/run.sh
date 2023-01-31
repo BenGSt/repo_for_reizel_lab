@@ -149,7 +149,7 @@ error = logs/\$(name)_methylation_calling.out
 queue name, args from (
 $(
   for sample_name in $(find -L $raw_dir -type d | awk -F / 'NR>1{print $NF}'|sort) ; do
-        echo $sample_name, -output-dir $(pwd)/$sample_name $ignore_r2 $keep_bam $keep_trimmed_fq
+        echo $sample_name, -output-dir $(pwd)/$sample_name $ignore_r2  $keep_trimmed_fq
   done
 )
 )
@@ -187,9 +187,11 @@ log = logs/multiqc_job.log
 output = logs/multiqc_job.out
 error = logs/multiqc_job.out
 queue args from (
-$(pwd) --outdir multiqc
+\"$keep_bam -multiqc-args '$(pwd) --outdir multiqc'\"
 )
 EOF
+
+
 
 
   cat << EOF > make_tiles.sub
