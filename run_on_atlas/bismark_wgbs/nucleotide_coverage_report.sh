@@ -35,7 +35,7 @@ main()
   source /Local/bfe_reizel/anaconda3/bin/activate wgbs_bismark_pipeline_2023
   arg_parse "$@"
 	cd "$output_dir" || exit 1
-	mkdir bam2nuc
+
 
   if [[ $genome == "mm10" ]]; then
       bismark_genome_location=/storage/bfe_reizel/bengst/genomic_reference_data/from_huji/mm10/Sequence/WholeGenomeFasta
@@ -46,7 +46,8 @@ main()
       exit 1
   fi
 
-  bam2nuc --dir bam2nuc --genome_folder $bismark_genome_location ./*.bam
+  bam2nuc --genome_folder $bismark_genome_location ./*.bam
+  bismark2report --splitting_report methylation_extractor_output/*splitting_report.txt --mbias_report  methylation_extractor_output/*M-bias.txt
 
   echo
 	echo
