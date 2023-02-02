@@ -7,8 +7,6 @@ main()
     rm -v "$(find . -name "*.bam")"
   fi
   source /Local/bfe_reizel/anaconda3/bin/activate wgbs_bismark_pipeline_2023
-  echo \$@ = "$@"
-  echo multiqc_args = $multiqc_args
   multiqc $multiqc_args
 }
 
