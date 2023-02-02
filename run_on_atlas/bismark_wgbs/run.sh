@@ -136,6 +136,7 @@ $(
 )
 EOF
 
+
   cat << EOF > methylation_calling_jobs.sub
 Initialdir = $(pwd)
 executable = $REPO_FOR_REIZEL_LAB/run_on_atlas/bismark_wgbs/methylation_calling.sh
@@ -176,24 +177,6 @@ $(
 EOF
 
 
-  cat << EOF > multiqc_job.sub
-Initialdir = $(pwd)
-executable = $REPO_FOR_REIZEL_LAB/run_on_atlas/bismark_wgbs/run_multiqc.sh
-Arguments = \$(args)
-request_cpus = 1
-RequestMemory = 500MB
-universe = vanilla
-log = logs/multiqc_job.log
-output = logs/multiqc_job.out
-error = logs/multiqc_job.out
-queue args from (
-\"$keep_bam -multiqc-args '$(pwd) --outdir multiqc'\"
-)
-EOF
-
-
-
-
   cat << EOF > make_tiles.sub
 Initialdir = $(pwd)
 executable = $REPO_FOR_REIZEL_LAB/run_on_atlas/bismark_wgbs/make_tiles.sh
@@ -212,7 +195,24 @@ $(
 )
 )
 EOF
+
+
+  cat << EOF > multiqc_job.sub
+Initialdir = $(pwd)
+executable = $REPO_FOR_REIZEL_LAB/run_on_atlas/bismark_wgbs/run_multiqc.sh
+Arguments = \$(args)
+request_cpus = 1
+RequestMemory = 500MB
+universe = vanilla
+log = logs/multiqc_job.log
+output = logs/multiqc_job.out
+error = logs/multiqc_job.out
+queue args from (
+\"$keep_bam -multiqc-args '$(pwd) --outdir multiqc'\"
+)
+EOF
 }
+
 
 write_condor_dag()
 {
