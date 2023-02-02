@@ -50,8 +50,8 @@ combine_methylation_coverage_to_tiles()
 
 	tile_size=$1
 	min_coverage=$2
-	cd methylation_extractor_output/
-	meth_calling_output=$(ls |grep cov.gz)
+#	cd methylation_extractor_output/ #trying without this folder
+	meth_calling_output=$(find . -name "*.cov.gz")
 
 	mm10_tiles=${GENOMIC_REFERENCE_LOCATION}/mm10_whole_genome_${tile_size}bpTiles.bed
 	hg38_tiles=${GENOMIC_REFERENCE_LOCATION}/hg38/hg38_100bp_tiles.bed
@@ -63,7 +63,7 @@ combine_methylation_coverage_to_tiles()
 
 	# 100bp tiles variant 2: First calculate the tiles and then remove tiles with total coverage < 10
 	output_file=$(echo ${meth_calling_output} | awk -v tile_size=$tile_size -F "." '{print $1 "_" tile_size "bp_tiles.bed" }')
-	bedtools intersect -a $tiles_file -b ${meth_calling_output} -wa -wb | awk -v cov=${min_coverage} -v tileSize=${tile_size} 'BEGIN {OFS="\t"; Prev=-1} {if ($2 == Prev) {T=T+$8+$9; M=M+$8} else {if (Prev!=-1 && T>=cov) {print PrevChr,Prev,Prev+tileSize-1,M/T};T=$8+$9; M=$8;}; Prev=$2; PrevChr=$1}' > ../${output_file}
+	bedtools intersect -a $tiles_file -b ${meth_calling_output} -wa -wb | awk -v cov=${min_coverage} -v tileSize=${tile_size} 'BEGIN {OFS="\t"; Prev=-1} {if ($2 == Prev) {T=T+$8+$9; M=M+$8} else {if (Prev!=-1 && T>=cov) {print PrevChr,Prev,Prev+tileSize-1,M/T};T=$8+$9; M=$8;}; Prev=$2; PrevChr=$1}' > ${output_file}
 
 	#to unite all tiles from different samples:
 	#bedtools unionbedg -names `du -a -L | grep Tiles | awk '{print $2}' | sort | awk -F'/' '{print $NF}' | awk -F'.' '{print $1}'` -header -filler NA -i `du -a -L | grep Tiles | awk '{print $2}' | sort` > 100bpTiles_Tiles_Cov10_Tissues.bed
