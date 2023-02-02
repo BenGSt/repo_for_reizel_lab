@@ -2,6 +2,7 @@
 
 main()
 {
+  arg_parse "$@"
   if [[ $keep_bam -eq 0 ]]; then
     rm -v "$(find . -name "*.bam")"
   fi
