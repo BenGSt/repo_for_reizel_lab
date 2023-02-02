@@ -208,7 +208,7 @@ log = logs/multiqc_job.log
 output = logs/multiqc_job.out
 error = logs/multiqc_job.out
 queue args from (
-\"$keep_bam -multiqc-args '$(pwd) --outdir multiqc'\"
+"$keep_bam -multiqc-args '$(pwd) --outdir multiqc'"
 )
 EOF
 }
