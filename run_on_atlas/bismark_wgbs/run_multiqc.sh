@@ -20,7 +20,7 @@ arg_parse()
         exit 1
         ;;
       -multiqc-args)
-        multiqc_args="$2"
+        multiqc_args=$2
         shift
         shift
         ;;
