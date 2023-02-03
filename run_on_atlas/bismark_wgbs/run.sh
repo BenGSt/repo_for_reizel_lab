@@ -281,7 +281,7 @@ arg_parse()
         shift
         ;;
     -ignore_r2)
-        ignore_r2=$(echo --ignore_r2 "$2")
+        ignore_r2=$(echo -ignore_r2 "$2")
         shift
         shift
         ;;
