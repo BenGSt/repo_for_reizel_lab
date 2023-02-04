@@ -55,6 +55,7 @@ EOF
 
 main()
 {
+  echo $0 $@ > cmd.txt
   arg_parse "$@"
   write_condor_submition_files $raw_data_dir
   write_condor_dag
