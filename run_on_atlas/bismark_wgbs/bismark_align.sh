@@ -53,7 +53,7 @@ main()
 
   #cleanup
   rm_fq="rm -v *.fq" #the non gz trimmed fq
-  if [[ $keep_trimmed_fq -eq 0 ]]; then
+  if [[ $keep_trimmed_fq -eq 0 ]]; then #TODO: add this to args
     $rm_fq
   fi
 
