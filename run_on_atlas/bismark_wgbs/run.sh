@@ -55,7 +55,7 @@ EOF
 
 main()
 {
-  echo "$0" "$(printf "'%s'" "$@")" > cmd.txt
+  echo "$0" "$@" > cmd.txt #TODO: preserve quotes that may be in args
   arg_parse "$@"
   write_condor_submition_files $raw_data_dir
   write_condor_dag
