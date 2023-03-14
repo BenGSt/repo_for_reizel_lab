@@ -15,8 +15,8 @@ help()
   produces coverage report (only CpG for to include all Cytosines use option --CX)
 
 	-output-dir
-	-keep-bam
-	-keep-trimmed-fq
+	#TODO: -keep-bam
+
 
 	optional:
 	-ignore_r2 <int>

@@ -16,7 +16,7 @@ help()
 	-extra-trim-galore-options "multiple quoted options"
 
   handy extra options from trim_galore manual
-  =====================================
+  ===========================================
   --clip_R1 <int>         Instructs Trim Galore to remove <int> bp from the 5' end of read 1 (or single-end
                         reads). This may be useful if the qualities were very poor, or if there is some
                         sort of unwanted bias at the 5' end. Default: OFF.
@@ -99,7 +99,7 @@ trim_illumina_adapter_paired_end() #<R1> <R2>
 
 trim_illumina_adapter_single_end() #<R1>
 {
-  cmd="trim_galore $1 --cores $N_CORES --fastqc $extra"
+  cmd="trim_galore  $1 --dont_gzip --cores $N_CORES --fastqc $extra"
 	echo runnig: $cmd
 	$cmd
 }
