@@ -173,6 +173,24 @@ queue name, args from (
   $sample_name, -output-dir $(pwd)/$sample_name -genome $genome
 )
 EOF
+
+
+  cat <<EOF >bismark_wgbs_${sample_name}.dag
+JOB trim_and_qc trim_jobs_${sample_name}.sub
+JOB bismark_align bismark_align_jobs_${sample_name}.sub
+JOB deduplicate deduplicate_jobs_${sample_name}.sub
+JOB meth_call methylation_calling_jobs_${sample_name}.sub
+JOB multiqc multiqc_job_${sample_name}.sub
+JOB make_tiles make_tiles_${sample_name}.sub
+JOB bam2nuc bam2nuc_jobs_${sample_name}.sub
+
+PARENT trim_and_qc  CHILD bismark_align
+PARENT bismark_align  CHILD deduplicate
+PARENT deduplicate  CHILD meth_call bam2nuc
+PARENT meth_call  CHILD make_tiles
+PARENT meth_call bam2nuc CHILD multiqc
+EOF
+
   done
 
   cat <<EOF >multiqc_job.sub
@@ -192,23 +210,7 @@ EOF
 
 }
 
-write_condor_dag() {
-  cat <<EOF >bismark_wgbs.dag
-JOB trim_and_qc trim_jobs.sub
-JOB bismark_align bismark_align_jobs.sub
-JOB deduplicate deduplicate_jobs.sub
-JOB meth_call methylation_calling_jobs.sub
-JOB multiqc multiqc_job.sub
-JOB make_tiles make_tiles.sub
-JOB bam2nuc bam2nuc_jobs.sub
 
-PARENT trim_and_qc  CHILD bismark_align
-PARENT bismark_align  CHILD deduplicate
-PARENT deduplicate  CHILD meth_call bam2nuc
-PARENT meth_call  CHILD make_tiles
-PARENT meth_call bam2nuc CHILD multiqc
-EOF
-}
 
 arg_parse() {
   if [[ $# -eq 0 ]]; then
