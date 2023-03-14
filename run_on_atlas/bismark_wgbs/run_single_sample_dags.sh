@@ -56,10 +56,9 @@ main() {
   echo "$0" "$@" >cmd.txt #TODO: preserve quotes that may be in args
   arg_parse "$@"
   write_condor_submition_files $raw_data_dir
-  write_condor_dag
   mkdir logs
 
-  echo Submit the jobs by running: condor_submit_dag bismark_wgbs.dag
+  echo Submit the jobs by running: condor_submit_dag \*.dag
   echo Good Luck!
   #TODO: single end read option
 
