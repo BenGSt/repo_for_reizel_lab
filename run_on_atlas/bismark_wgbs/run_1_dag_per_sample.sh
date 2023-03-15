@@ -78,7 +78,7 @@ universe = vanilla
 log = logs/\$(name)_trim.log
 output = logs/\$(name)_trim.out
 error = logs/\$(name)_trim.out
-queue args from (
+queue name, args from (
 $(
       if [[ $single_end -eq 1 ]]; then
         echo $sample_name, \" -output-dir $(pwd)/$sample_name -input-fastq-file $(realpath $raw_dir/$sample_name/*.fastq.gz) $extra_trim_opts\"
