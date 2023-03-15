@@ -77,9 +77,9 @@ Arguments = \$(args)
 request_cpus = 8
 RequestMemory = 500MB
 universe = vanilla
-log = logs/\$(name)_trim.log
-output = logs/\$(name)_trim.out
-error = logs/\$(name)_trim.out
+log = $(realpath ../)/logs/\$(name)_trim.log
+output = $(realpath ../)/logs/\$(name)_trim.out
+error = $(realpath ../)/logs/\$(name)_trim.out
 queue name, args from (
 $(
       if [[ $single_end -eq 1 ]]; then
@@ -98,9 +98,9 @@ Arguments = \$(args)
 request_cpus = 10
 RequestMemory = 40GB
 universe = vanilla
-log = logs/\$(name)_bismark_align.log
-output = logs/\$(name)_bismark_align.out
-error = logs/\$(name)_bismark_align.out
+log = $(realpath ../)/logs/\$(name)_bismark_align.log
+output = $(realpath ../)/logs/\$(name)_bismark_align.out
+error = $(realpath ../)/logs/\$(name)_bismark_align.out
 queue name, args from (
 $(
 
@@ -120,9 +120,9 @@ Arguments = \$(args)
 request_cpus = 2
 RequestMemory = 20GB
 universe = vanilla
-log = logs/\$(name)_deduplicate.log
-output = logs/\$(name)_deduplicate.out
-error = logs/\$(name)_deduplicate.out
+log = $(realpath ../)/logs/\$(name)_deduplicate.log
+output = $(realpath ../)/logs/\$(name)_deduplicate.out
+error = $(realpath ../)/logs/\$(name)_deduplicate.out
 queue name, args from (
  $sample_name, $(realpath ../)/$sample_name
 )
@@ -135,9 +135,9 @@ Arguments = \$(args)
 request_cpus = 10
 RequestMemory = 3GB
 universe = vanilla
-log = logs/\$(name)_methylation_calling.log
-output = logs/\$(name)_methylation_calling.out
-error = logs/\$(name)_methylation_calling.out
+log = $(realpath ../)/logs/\$(name)_methylation_calling.log
+output = $(realpath ../)/logs/\$(name)_methylation_calling.out
+error = $(realpath ../)/logs/\$(name)_methylation_calling.out
 queue name, args from (
   $sample_name, -output-dir $(realpath ../)/$sample_name $ignore_r2 $keep_trimmed_fq
 
@@ -151,9 +151,9 @@ Arguments = \$(args)
 request_cpus = 2
 RequestMemory = 10GB
 universe = vanilla
-log = logs/\$(name)_bam2nuc.log
-output = logs/\$(name)_bam2nuc.out
-error = logs/\$(name)_bam2nuc.out
+log = $(realpath ../)/logs/\$(name)_bam2nuc.log
+output = $(realpath ../)/logs/\$(name)_bam2nuc.out
+error = $(realpath ../)/logs/\$(name)_bam2nuc.out
 queue name, args from (
   $sample_name, -output-dir $(realpath ../)/$sample_name -genome $genome
 )
@@ -166,9 +166,9 @@ Arguments = \$(args)
 request_cpus = 1
 RequestMemory = 30GB
 universe = vanilla
-log = logs/\$(name)_make_tiles.log
-output = logs/\$(name)_make_tiles.out
-error = logs/\$(name)_make_tiles.out
+log = $(realpath ../)/logs/\$(name)_make_tiles.log
+output = $(realpath ../)/logs/\$(name)_make_tiles.out
+error = $(realpath ../)/logs/\$(name)_make_tiles.out
 queue name, args from (
   $sample_name, -output-dir $(realpath ../)/$sample_name -genome $genome
 )
@@ -198,9 +198,9 @@ Arguments = \$(args)
 request_cpus = 1
 RequestMemory = 500MB
 universe = vanilla
-log = logs/multiqc_job.log
-output = logs/multiqc_job.out
-error = logs/multiqc_job.out
+log = $(realpath ../)/logs/multiqc_job.log
+output = $(realpath ../)/logs/multiqc_job.out
+error = $(realpath ../)/logs/multiqc_job.out
 queue args from (
   "$keep_bam -multiqc-args '$(realpath ../) --outdir multiqc'"
 )
