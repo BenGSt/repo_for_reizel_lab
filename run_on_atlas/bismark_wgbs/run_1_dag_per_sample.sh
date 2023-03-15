@@ -179,7 +179,6 @@ JOB trim_and_qc trim_jobs_${sample_name}.sub
 JOB bismark_align bismark_align_jobs_${sample_name}.sub
 JOB deduplicate deduplicate_jobs_${sample_name}.sub
 JOB meth_call methylation_calling_jobs_${sample_name}.sub
-JOB multiqc multiqc_job_${sample_name}.sub
 JOB make_tiles make_tiles_${sample_name}.sub
 JOB bam2nuc bam2nuc_jobs_${sample_name}.sub
 
@@ -187,7 +186,6 @@ PARENT trim_and_qc  CHILD bismark_align
 PARENT bismark_align  CHILD deduplicate
 PARENT deduplicate  CHILD meth_call bam2nuc
 PARENT meth_call  CHILD make_tiles
-PARENT meth_call bam2nuc CHILD multiqc
 EOF
 
   done
