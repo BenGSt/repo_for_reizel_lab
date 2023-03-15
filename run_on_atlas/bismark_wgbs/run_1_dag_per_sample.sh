@@ -174,12 +174,12 @@ EOF
 
 
   cat <<EOF >bismark_wgbs_${sample_name}.dag
-JOB trim_and_qc trim_jobs_${sample_name}.sub
-JOB bismark_align bismark_align_jobs_${sample_name}.sub
-JOB deduplicate deduplicate_jobs_${sample_name}.sub
-JOB meth_call methylation_calling_jobs_${sample_name}.sub
+JOB trim_and_qc trim_job_${sample_name}.sub
+JOB bismark_align bismark_align_job_${sample_name}.sub
+JOB deduplicate deduplicate_job_${sample_name}.sub
+JOB meth_call methylation_calling_jos_${sample_name}.sub
 JOB make_tiles make_tiles_${sample_name}.sub
-JOB bam2nuc bam2nuc_jobs_${sample_name}.sub
+JOB bam2nuc bam2nuc_job_${sample_name}.sub
 
 PARENT trim_and_qc  CHILD bismark_align
 PARENT bismark_align  CHILD deduplicate
