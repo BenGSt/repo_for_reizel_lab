@@ -66,10 +66,12 @@ main() {
 
 write_condor_submition_files() { # <raw_dir>
   raw_dir=$1
+
+  mkdir condor_submition_files
   for sample_name in $(find -L $raw_dir -type d | awk -F / 'NR>1{print $NF}' | sort); do
 
-    cat <<EOF >trim_job_${sample_name}.sub
-Initialdir = $(pwd)
+    cat <<EOF >condor_submition_files/trim_job_${sample_name}.sub
+Initialdir = $(realpath ../)
 executable = $REPO_FOR_REIZEL_LAB/run_on_atlas/bismark_wgbs/trim_illumina_adaptors.sh
 Arguments = \$(args)
 request_cpus = 8
@@ -89,8 +91,8 @@ $(
 )
 EOF
 
-    cat <<EOF >bismark_align_job_${sample_name}.sub
-Initialdir = $(pwd)
+    cat <<EOF >condor_submition_files/bismark_align_job_${sample_name}.sub
+Initialdir = $(realpath ../)
 executable = $REPO_FOR_REIZEL_LAB/run_on_atlas/bismark_wgbs/bismark_align.sh
 Arguments = \$(args)
 request_cpus = 10
@@ -103,16 +105,16 @@ queue name, args from (
 $(
 
       if [[ $single_end -eq 1 ]]; then
-        echo $sample_name, -output-dir $(pwd)/$sample_name -single-end $non_directional -genome $genome
+        echo $sample_name, -output-dir $(realpath ../)/$sample_name -single-end $non_directional -genome $genome
       else
-        echo $sample_name, -output-dir $(pwd)/$sample_name -paired-end $non_directional -genome $genome
+        echo $sample_name, -output-dir $(realpath ../)/$sample_name -paired-end $non_directional -genome $genome
       fi
     )
 )
 EOF
 
-    cat <<EOF >deduplicate_job_${sample_name}.sub
-Initialdir = $(pwd)
+    cat <<EOF >condor_submition_files/deduplicate_job_${sample_name}.sub
+Initialdir = $(realpath ../)
 executable = $REPO_FOR_REIZEL_LAB/run_on_atlas/bismark_wgbs/deduplicate.sh
 Arguments = \$(args)
 request_cpus = 2
@@ -122,12 +124,12 @@ log = logs/\$(name)_deduplicate.log
 output = logs/\$(name)_deduplicate.out
 error = logs/\$(name)_deduplicate.out
 queue name, args from (
- $sample_name, $(pwd)/$sample_name
+ $sample_name, $(realpath ../)/$sample_name
 )
 EOF
 
-    cat <<EOF >methylation_calling_job_${sample_name}.sub
-Initialdir = $(pwd)
+    cat <<EOF >condor_submition_files/methylation_calling_job_${sample_name}.sub
+Initialdir = $(realpath ../)
 executable = $REPO_FOR_REIZEL_LAB/run_on_atlas/bismark_wgbs/methylation_calling.sh
 Arguments = \$(args)
 request_cpus = 10
@@ -137,13 +139,13 @@ log = logs/\$(name)_methylation_calling.log
 output = logs/\$(name)_methylation_calling.out
 error = logs/\$(name)_methylation_calling.out
 queue name, args from (
-  $sample_name, -output-dir $(pwd)/$sample_name $ignore_r2 $keep_trimmed_fq
+  $sample_name, -output-dir $(realpath ../)/$sample_name $ignore_r2 $keep_trimmed_fq
 
 )
 EOF
 
-    cat <<EOF >bam2nuc_job_${sample_name}.sub
-Initialdir = $(pwd)
+    cat <<EOF >condor_submition_files/bam2nuc_job_${sample_name}.sub
+Initialdir = $(realpath ../)
 executable = $REPO_FOR_REIZEL_LAB/run_on_atlas/bismark_wgbs/nucleotide_coverage_report.sh
 Arguments = \$(args)
 request_cpus = 2
@@ -153,12 +155,12 @@ log = logs/\$(name)_bam2nuc.log
 output = logs/\$(name)_bam2nuc.out
 error = logs/\$(name)_bam2nuc.out
 queue name, args from (
-  $sample_name, -output-dir $(pwd)/$sample_name -genome $genome
+  $sample_name, -output-dir $(realpath ../)/$sample_name -genome $genome
 )
 EOF
 
-    cat <<EOF >make_tiles_${sample_name}.sub
-Initialdir = $(pwd)
+    cat <<EOF >condor_submition_files/make_tiles_${sample_name}.sub
+Initialdir = $(realpath ../)
 executable = $REPO_FOR_REIZEL_LAB/run_on_atlas/bismark_wgbs/make_tiles.sh
 Arguments = \$(args)
 request_cpus = 1
@@ -168,12 +170,12 @@ log = logs/\$(name)_make_tiles.log
 output = logs/\$(name)_make_tiles.out
 error = logs/\$(name)_make_tiles.out
 queue name, args from (
-  $sample_name, -output-dir $(pwd)/$sample_name -genome $genome
+  $sample_name, -output-dir $(realpath ../)/$sample_name -genome $genome
 )
 EOF
 
 
-  cat <<EOF >bismark_wgbs_${sample_name}.dag
+  cat <<EOF >condor_submition_files/bismark_wgbs_${sample_name}.dag
 JOB trim_and_qc trim_job_${sample_name}.sub
 JOB bismark_align bismark_align_job_${sample_name}.sub
 JOB deduplicate deduplicate_job_${sample_name}.sub
@@ -189,8 +191,8 @@ EOF
 
   done
 
-  cat <<EOF >multiqc_job.sub
-Initialdir = $(pwd)
+  cat <<EOF >condor_submition_files/multiqc_job.sub
+Initialdir = $(realpath ../)
 executable = $REPO_FOR_REIZEL_LAB/run_on_atlas/bismark_wgbs/run_multiqc.sh
 Arguments = \$(args)
 request_cpus = 1
@@ -200,7 +202,7 @@ log = logs/multiqc_job.log
 output = logs/multiqc_job.out
 error = logs/multiqc_job.out
 queue args from (
-  "$keep_bam -multiqc-args '$(pwd) --outdir multiqc'"
+  "$keep_bam -multiqc-args '$(realpath ../) --outdir multiqc'"
 )
 EOF
 
