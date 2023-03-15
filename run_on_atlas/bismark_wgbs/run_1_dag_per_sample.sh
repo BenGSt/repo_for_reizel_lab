@@ -71,15 +71,15 @@ write_condor_submition_files() { # <raw_dir>
   for sample_name in $(find -L $raw_dir -type d | awk -F / 'NR>1{print $NF}' | sort); do
 
     cat <<EOF >condor_submition_files/trim_job_${sample_name}.sub
-Initialdir = $(realpath ../)
+Initialdir = $(pwd)
 executable = $REPO_FOR_REIZEL_LAB/run_on_atlas/bismark_wgbs/trim_illumina_adaptors.sh
 Arguments = \$(args)
 request_cpus = 8
 RequestMemory = 500MB
 universe = vanilla
-log = $(realpath ../)/logs/\$(name)_trim.log
-output = $(realpath ../)/logs/\$(name)_trim.out
-error = $(realpath ../)/logs/\$(name)_trim.out
+log = $(pwd)/logs/\$(name)_trim.log
+output = $(pwd)/logs/\$(name)_trim.out
+error = $(pwd)/logs/\$(name)_trim.out
 queue name, args from (
 $(
       if [[ $single_end -eq 1 ]]; then
@@ -92,85 +92,85 @@ $(
 EOF
 
     cat <<EOF >condor_submition_files/bismark_align_job_${sample_name}.sub
-Initialdir = $(realpath ../)
+Initialdir = $(pwd)
 executable = $REPO_FOR_REIZEL_LAB/run_on_atlas/bismark_wgbs/bismark_align.sh
 Arguments = \$(args)
 request_cpus = 10
 RequestMemory = 40GB
 universe = vanilla
-log = $(realpath ../)/logs/\$(name)_bismark_align.log
-output = $(realpath ../)/logs/\$(name)_bismark_align.out
-error = $(realpath ../)/logs/\$(name)_bismark_align.out
+log = $(pwd)/logs/\$(name)_bismark_align.log
+output = $(pwd)/logs/\$(name)_bismark_align.out
+error = $(pwd)/logs/\$(name)_bismark_align.out
 queue name, args from (
 $(
 
       if [[ $single_end -eq 1 ]]; then
-        echo $sample_name, -output-dir $(realpath ../)/$sample_name -single-end $non_directional -genome $genome
+        echo $sample_name, -output-dir $(pwd)/$sample_name -single-end $non_directional -genome $genome
       else
-        echo $sample_name, -output-dir $(realpath ../)/$sample_name -paired-end $non_directional -genome $genome
+        echo $sample_name, -output-dir $(pwd)/$sample_name -paired-end $non_directional -genome $genome
       fi
     )
 )
 EOF
 
     cat <<EOF >condor_submition_files/deduplicate_job_${sample_name}.sub
-Initialdir = $(realpath ../)
+Initialdir = $(pwd)
 executable = $REPO_FOR_REIZEL_LAB/run_on_atlas/bismark_wgbs/deduplicate.sh
 Arguments = \$(args)
 request_cpus = 2
 RequestMemory = 20GB
 universe = vanilla
-log = $(realpath ../)/logs/\$(name)_deduplicate.log
-output = $(realpath ../)/logs/\$(name)_deduplicate.out
-error = $(realpath ../)/logs/\$(name)_deduplicate.out
+log = $(pwd)/logs/\$(name)_deduplicate.log
+output = $(pwd)/logs/\$(name)_deduplicate.out
+error = $(pwd)/logs/\$(name)_deduplicate.out
 queue name, args from (
- $sample_name, $(realpath ../)/$sample_name
+ $sample_name, $(pwd)/$sample_name
 )
 EOF
 
     cat <<EOF >condor_submition_files/methylation_calling_job_${sample_name}.sub
-Initialdir = $(realpath ../)
+Initialdir = $(pwd)
 executable = $REPO_FOR_REIZEL_LAB/run_on_atlas/bismark_wgbs/methylation_calling.sh
 Arguments = \$(args)
 request_cpus = 10
 RequestMemory = 3GB
 universe = vanilla
-log = $(realpath ../)/logs/\$(name)_methylation_calling.log
-output = $(realpath ../)/logs/\$(name)_methylation_calling.out
-error = $(realpath ../)/logs/\$(name)_methylation_calling.out
+log = $(pwd)/logs/\$(name)_methylation_calling.log
+output = $(pwd)/logs/\$(name)_methylation_calling.out
+error = $(pwd)/logs/\$(name)_methylation_calling.out
 queue name, args from (
-  $sample_name, -output-dir $(realpath ../)/$sample_name $ignore_r2 $keep_trimmed_fq
+  $sample_name, -output-dir $(pwd)/$sample_name $ignore_r2 $keep_trimmed_fq
 
 )
 EOF
 
     cat <<EOF >condor_submition_files/bam2nuc_job_${sample_name}.sub
-Initialdir = $(realpath ../)
+Initialdir = $(pwd)
 executable = $REPO_FOR_REIZEL_LAB/run_on_atlas/bismark_wgbs/nucleotide_coverage_report.sh
 Arguments = \$(args)
 request_cpus = 2
 RequestMemory = 10GB
 universe = vanilla
-log = $(realpath ../)/logs/\$(name)_bam2nuc.log
-output = $(realpath ../)/logs/\$(name)_bam2nuc.out
-error = $(realpath ../)/logs/\$(name)_bam2nuc.out
+log = $(pwd)/logs/\$(name)_bam2nuc.log
+output = $(pwd)/logs/\$(name)_bam2nuc.out
+error = $(pwd)/logs/\$(name)_bam2nuc.out
 queue name, args from (
-  $sample_name, -output-dir $(realpath ../)/$sample_name -genome $genome
+  $sample_name, -output-dir $(pwd)/$sample_name -genome $genome
 )
 EOF
 
     cat <<EOF >condor_submition_files/make_tiles_${sample_name}.sub
-Initialdir = $(realpath ../)
+Initialdir = $(pwd)
 executable = $REPO_FOR_REIZEL_LAB/run_on_atlas/bismark_wgbs/make_tiles.sh
 Arguments = \$(args)
 request_cpus = 1
 RequestMemory = 30GB
 universe = vanilla
-log = $(realpath ../)/logs/\$(name)_make_tiles.log
-output = $(realpath ../)/logs/\$(name)_make_tiles.out
-error = $(realpath ../)/logs/\$(name)_make_tiles.out
+log = $(pwd)/logs/\$(name)_make_tiles.log
+output = $(pwd)/logs/\$(name)_make_tiles.out
+error = $(pwd)/logs/\$(name)_make_tiles.out
 queue name, args from (
-  $sample_name, -output-dir $(realpath ../)/$sample_name -genome $genome
+  $sample_name, -output-dir $(pwd)/$sample_name -genome $genome
 )
 EOF
 
@@ -192,17 +192,17 @@ EOF
   done
 
   cat <<EOF >condor_submition_files/multiqc_job.sub
-Initialdir = $(realpath ../)
+Initialdir = $(pwd)
 executable = $REPO_FOR_REIZEL_LAB/run_on_atlas/bismark_wgbs/run_multiqc.sh
 Arguments = \$(args)
 request_cpus = 1
 RequestMemory = 500MB
 universe = vanilla
-log = $(realpath ../)/logs/multiqc_job.log
-output = $(realpath ../)/logs/multiqc_job.out
-error = $(realpath ../)/logs/multiqc_job.out
+log = $(pwd)/logs/multiqc_job.log
+output = $(pwd)/logs/multiqc_job.out
+error = $(pwd)/logs/multiqc_job.out
 queue args from (
-  "$keep_bam -multiqc-args '$(realpath ../) --outdir multiqc'"
+  "$keep_bam -multiqc-args '$(pwd) --outdir multiqc'"
 )
 EOF
 
