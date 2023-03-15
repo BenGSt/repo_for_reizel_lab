@@ -206,13 +206,16 @@ queue args from (
 )
 EOF
 
+  rm -f ./condor_submission_files/submit_all_bismark_wgbs.dag #incase rerunning the script without delete
+  sample_dags=$(realpath condor_submission_files/*.dag)
   touch ./condor_submission_files/submit_all_bismark_wgbs.dag
   i=1
-  for dag in condor_submission_files/*.dag; do
+  for dag in $sample_dags; do
     echo JOB sample_$i $dag >> condor_submission_files/submit_all_bismark_wgbs.dag
     ((i++))
   done
-  echo PARENT $(for ((k=1; k<=$i; k++)); do printf "%s " sample_$k; done) CHILD multiqc >> condor_submission_files/submit_all_bismark_wgbs.dag
+  echo JOB multiqc $(realpath ./condor_submission_files/multiqc_job.sub) >> condor_submission_files/submit_all_bismark_wgbs.dag
+  echo PARENT $(for ((k=1; k<$i; k++)); do printf "%s " sample_$k; done) CHILD multiqc >> condor_submission_files/submit_all_bismark_wgbs.dag
 
 }
 
