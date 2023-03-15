@@ -78,13 +78,12 @@ universe = vanilla
 log = logs/\$(name)_trim.log
 output = logs/\$(name)_trim.out
 error = logs/\$(name)_trim.out
-name = $sample_name
 queue args from (
 $(
       if [[ $single_end -eq 1 ]]; then
-        echo \" -output-dir $(pwd)/$sample_name -input-fastq-file $(realpath $raw_dir/$sample_name/*.fastq.gz) $extra_trim_opts\"
+        echo $sample_name, \" -output-dir $(pwd)/$sample_name -input-fastq-file $(realpath $raw_dir/$sample_name/*.fastq.gz) $extra_trim_opts\"
       else
-        echo \" -output-dir $(pwd)/$sample_name -paired-input-fastq-files $(realpath $raw_dir/$sample_name/*.fastq.gz) $extra_trim_opts\"
+        echo $sample_name, \" -output-dir $(pwd)/$sample_name -paired-input-fastq-files $(realpath $raw_dir/$sample_name/*.fastq.gz) $extra_trim_opts\"
       fi
     )
 )
