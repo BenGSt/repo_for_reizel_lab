@@ -211,7 +211,7 @@ EOF
   touch ./condor_submission_files/submit_all_bismark_wgbs.dag
   i=1
   for dag in $sample_dags; do
-    echo JOB sample_$i $dag >> condor_submission_files/submit_all_bismark_wgbs.dag
+    echo SUBDAG EXTERNAL sample_$i $dag >> condor_submission_files/submit_all_bismark_wgbs.dag
     ((i++))
   done
   echo JOB multiqc $(realpath ./condor_submission_files/multiqc_job.sub) >> condor_submission_files/submit_all_bismark_wgbs.dag
