@@ -55,7 +55,7 @@ EOF
 main() {
   echo "$0" "$@" >cmd.txt #TODO: preserve quotes that may be in args
   arg_parse "$@"
-  write_condor_submition_files $raw_data_dir
+  write_condor_submission_files $raw_data_dir
   mkdir logs
 
   echo Submit the jobs by running: condor_submit_dag \*.dag
@@ -64,13 +64,13 @@ main() {
 
 }
 
-write_condor_submition_files() { # <raw_dir>
+write_condor_submission_files() { # <raw_dir>
   raw_dir=$1
 
-  mkdir condor_submition_files
+  mkdir condor_submission_files
   for sample_name in $(find -L $raw_dir -type d | awk -F / 'NR>1{print $NF}' | sort); do
 
-    cat <<EOF >condor_submition_files/trim_job_${sample_name}.sub
+    cat << EOF >condor_submission_files/trim_job_${sample_name}.sub
 Initialdir = $(pwd)
 executable = $REPO_FOR_REIZEL_LAB/run_on_atlas/bismark_wgbs/trim_illumina_adaptors.sh
 Arguments = \$(args)
@@ -91,7 +91,7 @@ $(
 )
 EOF
 
-    cat <<EOF >condor_submition_files/bismark_align_job_${sample_name}.sub
+    cat << EOF >condor_submission_files/bismark_align_job_${sample_name}.sub
 Initialdir = $(pwd)
 executable = $REPO_FOR_REIZEL_LAB/run_on_atlas/bismark_wgbs/bismark_align.sh
 Arguments = \$(args)
@@ -113,7 +113,7 @@ $(
 )
 EOF
 
-    cat <<EOF >condor_submition_files/deduplicate_job_${sample_name}.sub
+    cat << EOF >condor_submission_files/deduplicate_job_${sample_name}.sub
 Initialdir = $(pwd)
 executable = $REPO_FOR_REIZEL_LAB/run_on_atlas/bismark_wgbs/deduplicate.sh
 Arguments = \$(args)
@@ -128,7 +128,7 @@ queue name, args from (
 )
 EOF
 
-    cat <<EOF >condor_submition_files/methylation_calling_job_${sample_name}.sub
+    cat << EOF >condor_submission_files/methylation_calling_job_${sample_name}.sub
 Initialdir = $(pwd)
 executable = $REPO_FOR_REIZEL_LAB/run_on_atlas/bismark_wgbs/methylation_calling.sh
 Arguments = \$(args)
@@ -144,7 +144,7 @@ queue name, args from (
 )
 EOF
 
-    cat <<EOF >condor_submition_files/bam2nuc_job_${sample_name}.sub
+    cat << EOF >condor_submission_files/bam2nuc_job_${sample_name}.sub
 Initialdir = $(pwd)
 executable = $REPO_FOR_REIZEL_LAB/run_on_atlas/bismark_wgbs/nucleotide_coverage_report.sh
 Arguments = \$(args)
@@ -159,7 +159,7 @@ queue name, args from (
 )
 EOF
 
-    cat <<EOF >condor_submition_files/make_tiles_${sample_name}.sub
+    cat << EOF >condor_submission_files/make_tiles_${sample_name}.sub
 Initialdir = $(pwd)
 executable = $REPO_FOR_REIZEL_LAB/run_on_atlas/bismark_wgbs/make_tiles.sh
 Arguments = \$(args)
@@ -175,13 +175,13 @@ queue name, args from (
 EOF
 
 
-  cat <<EOF >condor_submition_files/bismark_wgbs_${sample_name}.dag
-JOB trim_and_qc trim_job_${sample_name}.sub
-JOB bismark_align bismark_align_job_${sample_name}.sub
-JOB deduplicate deduplicate_job_${sample_name}.sub
-JOB meth_call methylation_calling_jos_${sample_name}.sub
-JOB make_tiles make_tiles_${sample_name}.sub
-JOB bam2nuc bam2nuc_job_${sample_name}.sub
+  cat << EOF >condor_submission_files/bismark_wgbs_${sample_name}.dag
+JOB trim_and_qc $(realpath ./condor_submission_files/trim_job_${sample_name}.sub)
+JOB bismark_align $(realpath ./condor_submission_files/bismark_align_job_${sample_name}.sub)
+JOB deduplicate $(realpath ./condor_submission_files/deduplicate_job_${sample_name}.sub)
+JOB meth_call $(realpath ./condor_submission_files/methylation_calling_jos_${sample_name}.sub)
+JOB make_tiles $(realpath ./condor_submission_files/make_tiles_${sample_name}.sub)
+JOB bam2nuc $(realpath ./condor_submission_files/bam2nuc_job_${sample_name}.sub)
 
 PARENT trim_and_qc  CHILD bismark_align
 PARENT bismark_align  CHILD deduplicate
@@ -191,7 +191,7 @@ EOF
 
   done
 
-  cat <<EOF >condor_submition_files/multiqc_job.sub
+  cat << EOF > condor_submission_files/multiqc_job.sub
 Initialdir = $(pwd)
 executable = $REPO_FOR_REIZEL_LAB/run_on_atlas/bismark_wgbs/run_multiqc.sh
 Arguments = \$(args)
@@ -206,8 +206,15 @@ queue args from (
 )
 EOF
 
-}
+  touch ./condor_submission_files/submit_all_bismark_wgbs.dag
+  i=1
+  for dag in condor_submission_files/*.dag; do
+    echo JOB sample_$i $dag >> condor_submission_files/submit_all_bismark_wgbs.dag
+    ((i++))
+  done
+  echo PARENT $(for ((k=1; k<=$i; k++)); do printf "%s " sample_$k; done) CHILD multiqc >> condor_submission_files/submit_all_bismark_wgbs.dag
 
+}
 
 
 arg_parse() {
