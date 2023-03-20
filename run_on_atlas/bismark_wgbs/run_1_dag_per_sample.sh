@@ -53,7 +53,9 @@ EOF
 }
 
 main() {
-  echo "$0" "$@" >cmd.txt #TODO: preserve quotes that may be in args
+  echo \# the command used to prepare the jobs, note that parentheses are lost > cmd.txt
+  echo \# and need to be added to rerun: -extra-trim-galore-options \"multiple quoted options\" > cmd.txt
+  echo "$0" "$@" >> cmd.txt #TODO: preserve quotes that may be in args
   arg_parse "$@"
   write_condor_submission_files $raw_data_dir
   mkdir logs
@@ -212,7 +214,7 @@ EOF
   i=1
   for dag in $sample_dags; do
     echo SUBDAG EXTERNAL sample_$i $dag >> condor_submission_files/submit_all_bismark_wgbs.dag
-    echo PRIORITY $i
+    echo PRIORITY $i >> condor_submission_files/submit_all_bismark_wgbs.dag
     echo
     ((i++))
   done
