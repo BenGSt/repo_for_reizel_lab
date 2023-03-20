@@ -179,7 +179,7 @@ EOF
 JOB trim_and_qc $(realpath ./condor_submission_files/trim_job_${sample_name}.sub)
 JOB bismark_align $(realpath ./condor_submission_files/bismark_align_job_${sample_name}.sub)
 JOB deduplicate $(realpath ./condor_submission_files/deduplicate_job_${sample_name}.sub)
-JOB meth_call $(realpath ./condor_submission_files/methylation_calling_jos_${sample_name}.sub)
+JOB meth_call $(realpath ./condor_submission_files/methylation_calling_job_${sample_name}.sub)
 JOB make_tiles $(realpath ./condor_submission_files/make_tiles_${sample_name}.sub)
 JOB bam2nuc $(realpath ./condor_submission_files/bam2nuc_job_${sample_name}.sub)
 
