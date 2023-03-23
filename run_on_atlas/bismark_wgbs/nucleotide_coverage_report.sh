@@ -47,7 +47,7 @@ main()
   fi
 
   bam2nuc --genome_folder $bismark_genome_location ./*.bam
-  bismark2report --splitting_report methylation_extractor_output/*splitting_report.txt --mbias_report  methylation_extractor_output/*M-bias.txt
+  bismark2report --splitting_report *splitting_report.txt --mbias_report  *M-bias.txt
 
   echo
 	echo
