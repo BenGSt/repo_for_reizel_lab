@@ -213,7 +213,7 @@ EOF
   touch ./condor_submission_files/submit_all_bismark_wgbs.dag
   i=1
   for dag in $sample_dags; do
-    echo SUBDAG EXTERNAL sample_$i $dag >> condor_submission_files/submit_all_bismark_wgbs.dag
+    echo SUBDAG EXTERNAL $(echo $dag | sed 's/.*wgbs_\(.*\).dag/\1/') $dag >> condor_submission_files/submit_all_bismark_wgbs.dag
     echo PRIORITY $i >> condor_submission_files/submit_all_bismark_wgbs.dag #TODO: as of 20.3.23 still needs testing.
     echo >> condor_submission_files/submit_all_bismark_wgbs.dag
     ((i++))
