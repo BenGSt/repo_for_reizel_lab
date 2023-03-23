@@ -53,7 +53,7 @@ EOF
 }
 
 main() {
-  echo \# the command used to prepare the jobs, note that parentheses are lost >> cmd.txt
+  echo \# the command used to prepare the jobs. Note that parentheses are lost > cmd.txt
   echo \# and need to be added to rerun: -extra-trim-galore-options \"multiple quoted options\" >> cmd.txt
   echo "$0" "$@" >> cmd.txt #TODO: preserve quotes that may be in args
   arg_parse "$@"
