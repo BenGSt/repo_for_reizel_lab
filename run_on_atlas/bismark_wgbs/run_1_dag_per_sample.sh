@@ -214,7 +214,7 @@ EOF
   i=0
   for dag in $sample_dags; do
     echo SUBDAG EXTERNAL ${sample_names[$i]} $dag >> condor_submission_files/submit_all_bismark_wgbs.dag
-    echo PRIORITY $i >> condor_submission_files/submit_all_bismark_wgbs.dag #TODO: as of 20.3.23 still needs testing.
+    echo PRIORITY ${sample_names[$i]} $i >> condor_submission_files/submit_all_bismark_wgbs.dag #TODO: as of 20.3.23 still needs testing.
     echo >> condor_submission_files/submit_all_bismark_wgbs.dag
     ((i++))
   done
