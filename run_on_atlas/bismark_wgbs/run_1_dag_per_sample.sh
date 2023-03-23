@@ -68,10 +68,10 @@ main() {
 
 write_condor_submission_files() { # <raw_dir>
   raw_dir=$1
-
+  sample_names=()
   mkdir condor_submission_files
   for sample_name in $(find -L $raw_dir -type d | awk -F / 'NR>1{print $NF}' | sort); do
-
+    sample_names+=($sample_name)
     cat << EOF >condor_submission_files/trim_job_${sample_name}.sub
 Initialdir = $(pwd)
 executable = $REPO_FOR_REIZEL_LAB/run_on_atlas/bismark_wgbs/trim_illumina_adaptors.sh
@@ -211,15 +211,15 @@ EOF
   rm -f ./condor_submission_files/submit_all_bismark_wgbs.dag #incase rerunning the script without delete
   sample_dags=$(realpath condor_submission_files/*.dag)
   touch ./condor_submission_files/submit_all_bismark_wgbs.dag
-  i=1
+  i=0
   for dag in $sample_dags; do
-    echo SUBDAG EXTERNAL $(echo $dag | sed 's/.*wgbs_\(.*\).dag/\1/') $dag >> condor_submission_files/submit_all_bismark_wgbs.dag
+    echo SUBDAG EXTERNAL ${sample_names[$i]} $dag >> condor_submission_files/submit_all_bismark_wgbs.dag
     echo PRIORITY $i >> condor_submission_files/submit_all_bismark_wgbs.dag #TODO: as of 20.3.23 still needs testing.
     echo >> condor_submission_files/submit_all_bismark_wgbs.dag
     ((i++))
   done
   echo JOB multiqc $(realpath ./condor_submission_files/multiqc_job.sub) >> condor_submission_files/submit_all_bismark_wgbs.dag
-  echo PARENT $(for ((k=1; k<$i; k++)); do printf "%s " sample_$k; done) CHILD multiqc >> condor_submission_files/submit_all_bismark_wgbs.dag
+  echo PARENT $(for ((k=0; k<=$i; k++)); do printf "%s " ${sample_names[$k]}; done) CHILD multiqc >> condor_submission_files/submit_all_bismark_wgbs.dag
 
 }
 
