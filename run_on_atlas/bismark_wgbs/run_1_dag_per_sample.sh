@@ -60,7 +60,7 @@ main() {
   write_condor_submission_files $raw_data_dir
   mkdir logs
 
-  echo Submit the jobs by running: condor_submit_dag \*.dag
+  echo Submit the jobs by running: condor_submit_dag ./condor_submission_files/submit_all_bismark_wgbs.dag
   echo Good Luck!
   #TODO: single end read option
 
