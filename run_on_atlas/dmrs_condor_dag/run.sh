@@ -4,9 +4,8 @@
 #TODO: add example usage with preexisting all_samp_100bp_tiles.bed
 #TODO: complete documentation of each param
 
-help()
-{
-  cat << EOF
+help() {
+  cat <<EOF
 # basic usage:
 # mkdir e.g. dmrs
 # make sure you have the cov files you need in a dir for each comparison
@@ -61,9 +60,7 @@ only dmr_jobs.sub and rerun this script with the --edit flag.
 EOF
 }
 
-
-main()
-{
+main() {
   REPO_FOR_REIZEL_LAB=/storage/bfe_reizel/bengst/repo_for_reizel_lab
 
   arg_parse "$@"
@@ -77,11 +74,8 @@ main()
   echo Good Luck!
 }
 
-
-
-write_dmr_jobs_sub_file()
-{
-    cat << EOF > dmr_jobs.sub
+write_dmr_jobs_sub_file() {
+  cat <<EOF >dmr_jobs.sub
 environment = REPO_FOR_REIZEL_LAB=$REPO_FOR_REIZEL_LAB
 executable = $REPO_FOR_REIZEL_LAB/run_on_atlas/dmrs_condor_dag/dmr_job.sh
 log = ./\$(name)/condor_logs/dmrs_\$(name).log
@@ -93,7 +87,7 @@ Arguments = \$(args)
 RequestMemory = 8GB
 universe = vanilla
 queue name,args from (
-$(echo $output_dir| awk -F / '{printf $NF}'), \
+$(echo $output_dir | awk -F / '{printf $NF}'), \
  --meth_call_files_dir $cov_files_dir \
  --samp_ids $samp_ids \
  --treatments $treatments \
@@ -105,10 +99,8 @@ $(echo $output_dir| awk -F / '{printf $NF}'), \
 EOF
 }
 
-
-write_heatmap_jobs_sub_file()
-{
-  cat << EOF > heatmap_jobs.sub
+write_heatmap_jobs_sub_file() {
+  cat <<EOF >heatmap_jobs.sub
 environment = REPO_FOR_REIZEL_LAB=$REPO_FOR_REIZEL_LAB
 executable = $REPO_FOR_REIZEL_LAB/run_on_atlas/dmrs_condor_dag/heatmap_job.sh
 log = ./\$(name)/condor_logs/heatmap_\$(name).log
@@ -120,7 +112,7 @@ Arguments = \$(args)
 RequestMemory = 1GB
 universe = vanilla
 queue name,args from (
-$(echo $output_dir| awk -F / '{printf $NF}'), \
+$(echo $output_dir | awk -F / '{printf $NF}'), \
 $all_samples_100bp_tiles \
 $output_dir \
 --sample_names $samp_ids
@@ -128,10 +120,8 @@ $output_dir \
 EOF
 }
 
-
-write_homer_jobs_sub_file()
-{
-  cat << EOF > homer_jobs.sub
+write_homer_jobs_sub_file() {
+  cat <<EOF >homer_jobs.sub
 environment = REPO_FOR_REIZEL_LAB=$REPO_FOR_REIZEL_LAB
 executable = $REPO_FOR_REIZEL_LAB/run_on_atlas/dmrs_condor_dag/homer_job.sh
 log = ./\$(name)/condor_logs/homer_\$(name).log
@@ -143,15 +133,13 @@ Arguments = \$(name)
 RequestMemory = 4GB
 universe = vanilla
 queue name from (
-$(echo $output_dir| awk -F / '{printf $NF}'| sed -E 's/\.\/|\/$//g')
+$(echo $output_dir | awk -F / '{printf $NF}' | sed -E 's/\.\/|\/$//g')
 )
 EOF
 }
 
-
-write_condor_dag()
-{
-  cat << EOF > dmr_pipline_jobs.dag
+write_condor_dag() {
+  cat <<EOF >dmr_pipline_jobs.dag
 JOB find_dmrs dmr_jobs.sub
 JOB heatmap heatmap_jobs.sub
 JOB homer  homer_jobs.sub
@@ -160,116 +148,114 @@ PARENT find_dmrs  CHILD heatmap homer
 EOF
 }
 
-
-make_dirs()
-{
+make_dirs() {
   awk -F , '{if ($0==")") next; if (start) print "mkdir -p "$1"/condor_logs"} {if ($0=="queue name,args from (")  start=1;}' dmr_jobs.sub | bash
 }
 
-
-edit()
-{
+edit() {
 
   #delete previous args
-  cat heatmap_jobs.sub | awk  '{if ($0==")") start=0; if (!start) print $0} {if ($0=="queue name,args from (")  start=1;}' > temp
+  cat heatmap_jobs.sub | awk '{if ($0==")") start=0; if (!start) print $0} {if ($0=="queue name,args from (")  start=1;}' >temp
   cat temp | awk -v heatmap_args="$heatmap_args" '{if ($0=="queue name,args from (") {print $0; print heatmap_args} else {print $0}}'
   rm temp
 
-
   #heatmap args
-  heatmap_args=$(\
-  cat dmr_jobs.sub |\
-  awk  '{if ($0==")") next; if (start) print $0} {if ($0=="queue name,args from (")  start=1;}'|\
-  awk -F , -v all_samp_tiles=$all_samples_100bp_tiles 'match($0, /--samp_ids ([^ ]*)/, array)  match($0, /--output_dir ([^ ]*)/, array2) {print $1",",  all_samp_tiles, array2[1], "--sample_names " array[1]}'\
+  heatmap_args=$(
+    cat dmr_jobs.sub |
+      awk '{if ($0==")") next; if (start) print $0} {if ($0=="queue name,args from (")  start=1;}' |
+      awk -F , -v all_samp_tiles=$all_samples_100bp_tiles 'match($0, /--samp_ids ([^ ]*)/, array)  match($0, /--output_dir ([^ ]*)/, array2) {print $1",",  all_samp_tiles, array2[1], "--sample_names " array[1]}'
   )
   #delete previous args
-  cat heatmap_jobs.sub | awk  '{if ($0==")") start=0; if (!start) print $0} {if ($0=="queue name,args from (")  start=1;}' > temp
+  cat heatmap_jobs.sub | awk '{if ($0==")") start=0; if (!start) print $0} {if ($0=="queue name,args from (")  start=1;}' >temp
   #write new args
-  cat temp | awk -v heatmap_args="$heatmap_args" '{if ($0=="queue name,args from (") {print $0; print heatmap_args} else {print $0}}' > heatmap_jobs.sub
+  cat temp | awk -v heatmap_args="$heatmap_args" '{if ($0=="queue name,args from (") {print $0; print heatmap_args} else {print $0}}' >heatmap_jobs.sub
   rm temp
 
   #homer args
-  homer_args=$(\
-  cat dmr_jobs.sub |\
-  awk  '{if ($0==")") next; if (start) print $0} {if ($0=="queue name,args from (")  start=1;}'|\
-  awk -F , 'match($0, /--output_dir ([^ ]*)/, array2){print array2[1]}'| sed -E 's/\.\/|\/$//g'\
+  homer_args=$(
+    cat dmr_jobs.sub |
+      awk '{if ($0==")") next; if (start) print $0} {if ($0=="queue name,args from (")  start=1;}' |
+      awk -F , 'match($0, /--output_dir ([^ ]*)/, array2){print array2[1]}' | sed -E 's/\.\/|\/$//g'
   )
   #delete previous args
-  cat homer_jobs.sub | awk  '{if ($0==")") start=0; if (!start) print $0} {if ($0=="queue name from (")  start=1;}' > temp
-  cat temp | awk -v homer_args="$homer_args" '{if ($0=="queue name from (") {print $0; print homer_args} else {print $0}}' > homer_jobs.sub
+  cat homer_jobs.sub | awk '{if ($0==")") start=0; if (!start) print $0} {if ($0=="queue name from (")  start=1;}' >temp
+  cat temp | awk -v homer_args="$homer_args" '{if ($0=="queue name from (") {print $0; print homer_args} else {print $0}}' >homer_jobs.sub
   rm temp
 
 }
 
+arg_parse() {
+  if [[ $# -eq 0 ]]; then
+    help
+    exit 1
+  fi
 
-arg_parse()
-{
   while [[ $# -gt 0 ]]; do
     case $1 in
-      -h|--help)
+    -h | --help)
+      help
+      exit 1
+      ;;
+    --output-dir)
+      output_dir="$2"
+      shift # past argument
+      shift # past value
+      ;;
+    --no-tiles)
+      no_tiles=1
+      all_samples_100bp_tiles="${output_dir}/all_samps_100bp_tiles_meth_scores.bed"
+      echo no tiles provided, the heatmap script will use all_samps_100bp_tiles_meth_scores.bed produced by methylkit.
+      echo see help for details
+      shift # past argument
+      ;;
+    --tiles)
+      no_tiles=0
+      if [[ ! $(echo $1 | grep "\.bed") ]]; then
+        echo expecting bed file after --tiles, got $2
         help
         exit 1
-        ;;
-      --output-dir)
-        output_dir="$2"
-        shift # past argument
-        shift # past value
-        ;;
-      --no-tiles)
-        no_tiles=1
-        all_samples_100bp_tiles="${output_dir}/all_samps_100bp_tiles_meth_scores.bed"
-        echo no tiles provided, the heatmap script will use all_samps_100bp_tiles_meth_scores.bed produced by methylkit.
-        echo see help for details
-        shift # past argument
-        ;;
-      --tiles)
-        no_tiles=0
-        if [[ ! $(echo $1| grep "\.bed") ]]; then
-          echo expecting bed file after --tiles, got $2
-          help
-          exit 1
-        else
-          all_samples_100bp_tiles=$1
-        fi
-        ;;
-      --cov-files-dir)
-        cov_files_dir=$2
-        shift
-        shift
-        ;;
-      --samp-ids)
-        samp_ids=$2
-        shift
-        shift
-        ;;
-      --treatments)
-        treatments=$2
-        shift
-        shift
-        ;;
-      --pipeline)
-        pipeline=$2
-        shift
-        shift
-        ;;
-      --known-genes-file)
-        known_genes_file=$2
-        shift
-        shift
-        ;;
-      --meth-difference)
-        meth_difference=$2
-        shift
-        shift
-        ;;
-      --edit)
-        edit
-        exit 0
-        ;;
-        *)
-          help
-          exit 1
-        ;;
+      else
+        all_samples_100bp_tiles=$1
+      fi
+      ;;
+    --cov-files-dir)
+      cov_files_dir=$2
+      shift
+      shift
+      ;;
+    --samp-ids)
+      samp_ids=$2
+      shift
+      shift
+      ;;
+    --treatments)
+      treatments=$2
+      shift
+      shift
+      ;;
+    --pipeline)
+      pipeline=$2
+      shift
+      shift
+      ;;
+    --known-genes-file)
+      known_genes_file=$2
+      shift
+      shift
+      ;;
+    --meth-difference)
+      meth_difference=$2
+      shift
+      shift
+      ;;
+    --edit)
+      edit
+      exit 0
+      ;;
+    *)
+      help
+      exit 1
+      ;;
     esac
   done
 
