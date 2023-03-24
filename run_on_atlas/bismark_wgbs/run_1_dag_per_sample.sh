@@ -142,7 +142,6 @@ output = $(pwd)/logs/\$(name)_methylation_calling.out
 error = $(pwd)/logs/\$(name)_methylation_calling.out
 queue name, args from (
   $sample_name, -output-dir $(pwd)/$sample_name $ignore_r2 $keep_trimmed_fq
-
 )
 EOF
 
