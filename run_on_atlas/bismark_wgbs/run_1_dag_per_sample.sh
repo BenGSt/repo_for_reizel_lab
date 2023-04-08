@@ -72,7 +72,7 @@ write_condor_submission_files() { # <raw_dir>
   mkdir condor_submission_files
   for sample_name in $(find -L $raw_dir -type d | awk -F / 'NR>1{print $NF}' | sort); do
     sample_names+=($sample_name)
-    cat << EOF >condor_submission_files/trim_job_${sample_name}.sub
+    cat <<EOF >condor_submission_files/trim_job_${sample_name}.sub
 Initialdir = $(pwd)
 executable = $REPO_FOR_REIZEL_LAB/run_on_atlas/bismark_wgbs/trim_illumina_adaptors.sh
 Arguments = \$(args)
@@ -93,7 +93,7 @@ $(
 )
 EOF
 
-    cat << EOF >condor_submission_files/bismark_align_job_${sample_name}.sub
+    cat <<EOF >condor_submission_files/bismark_align_job_${sample_name}.sub
 Initialdir = $(pwd)
 executable = $REPO_FOR_REIZEL_LAB/run_on_atlas/bismark_wgbs/bismark_align.sh
 Arguments = \$(args)
@@ -115,7 +115,7 @@ $(
 )
 EOF
 
-    cat << EOF >condor_submission_files/deduplicate_job_${sample_name}.sub
+    cat <<EOF >condor_submission_files/deduplicate_job_${sample_name}.sub
 Initialdir = $(pwd)
 executable = $REPO_FOR_REIZEL_LAB/run_on_atlas/bismark_wgbs/deduplicate.sh
 Arguments = \$(args)
@@ -130,7 +130,7 @@ queue name, args from (
 )
 EOF
 
-    cat << EOF >condor_submission_files/methylation_calling_job_${sample_name}.sub
+    cat <<EOF >condor_submission_files/methylation_calling_job_${sample_name}.sub
 Initialdir = $(pwd)
 executable = $REPO_FOR_REIZEL_LAB/run_on_atlas/bismark_wgbs/methylation_calling.sh
 Arguments = \$(args)
@@ -145,7 +145,7 @@ queue name, args from (
 )
 EOF
 
-    cat << EOF >condor_submission_files/bam2nuc_job_${sample_name}.sub
+    cat <<EOF >condor_submission_files/bam2nuc_job_${sample_name}.sub
 Initialdir = $(pwd)
 executable = $REPO_FOR_REIZEL_LAB/run_on_atlas/bismark_wgbs/nucleotide_coverage_report.sh
 Arguments = \$(args)
@@ -160,7 +160,7 @@ queue name, args from (
 )
 EOF
 
-    cat << EOF >condor_submission_files/make_tiles_${sample_name}.sub
+    cat <<EOF >condor_submission_files/make_tiles_${sample_name}.sub
 Initialdir = $(pwd)
 executable = $REPO_FOR_REIZEL_LAB/run_on_atlas/bismark_wgbs/make_tiles.sh
 Arguments = \$(args)
@@ -175,8 +175,7 @@ queue name, args from (
 )
 EOF
 
-
-  cat << EOF >condor_submission_files/bismark_wgbs_${sample_name}.dag
+    cat <<EOF >condor_submission_files/bismark_wgbs_${sample_name}.dag
 JOB trim_and_qc $(realpath ./condor_submission_files/trim_job_${sample_name}.sub)
 JOB bismark_align $(realpath ./condor_submission_files/bismark_align_job_${sample_name}.sub)
 JOB deduplicate $(realpath ./condor_submission_files/deduplicate_job_${sample_name}.sub)
@@ -192,7 +191,7 @@ EOF
 
   done
 
-  cat << EOF > condor_submission_files/multiqc_job.sub
+  cat <<EOF >condor_submission_files/multiqc_job.sub
 Initialdir = $(pwd)
 executable = $REPO_FOR_REIZEL_LAB/run_on_atlas/bismark_wgbs/run_multiqc.sh
 Arguments = \$(args)
@@ -207,21 +206,53 @@ queue args from (
 )
 EOF
 
+  #Write the top level submission file to submit all dags
   rm -f ./condor_submission_files/submit_all_bismark_wgbs.dag #incase rerunning the script without delete
   sample_dags=$(realpath condor_submission_files/*.dag)
   touch ./condor_submission_files/submit_all_bismark_wgbs.dag
+  fileout=condor_submission_files/submit_all_bismark_wgbs.dag
+
   i=0
   for dag in $sample_dags; do
-    echo SUBDAG EXTERNAL ${sample_names[$i]} $dag >> condor_submission_files/submit_all_bismark_wgbs.dag
-    echo PRIORITY ${sample_names[$i]} $i >> condor_submission_files/submit_all_bismark_wgbs.dag #TODO: as of 23.3.23 awaiting tests.
-    echo >> condor_submission_files/submit_all_bismark_wgbs.dag
+    echo SUBDAG EXTERNAL ${sample_names[$i]} $dag >> $fileout
+    echo PRIORITY ${sample_names[$i]} $i >> $fileout
+    echo >>$fileout
     ((i++))
   done
-  echo JOB multiqc $(realpath ./condor_submission_files/multiqc_job.sub) >> condor_submission_files/submit_all_bismark_wgbs.dag
-  echo PARENT $(for ((k=0; k<=$i; k++)); do printf "%s " ${sample_names[$k]}; done) CHILD multiqc >> condor_submission_files/submit_all_bismark_wgbs.dag
+  echo JOB multiqc $(realpath ./condor_submission_files/multiqc_job.sub) >> $fileout
+  echo  >> $fileout
+  #echo PARENT $(for ((k=0; k<=$i; k++)); do printf "%s " ${sample_names[$k]}; done) CHILD multiqc >> $fileout
 
+  #Because Atlas' policy of holding jobs that have been submitted more than 3 days ago, break up
+  # samples into groups of NUM_PARALLEL_SAMP and have them as parent and child s.t. the next 3 are submitted only after the previous 3 have completed.
+  NUM_PARALLEL_SAMP=3 #the number of samples that run in parallel
+  n_samp=${#sample_names[@]}
+  j=0
+  if (($NUM_PARALLEL_SAMP > $n_samp)); then
+    printf "PARENT "
+    for ((k = 0; k < n_samp; k++)); do printf "%s " ${sample_names[$k]} >> $fileout; done
+    echo CHILD multiqc >> $fileout
+  else
+    for ((j = 0; j < ($n_samp / NUM_PARALLEL_SAMP); j++)); do
+      printf "PARENT %s %s %s " $(for ((k = 0; k < NUM_PARALLEL_SAMP; k++)); do echo ${sample_names[$j * 3 + $k]}; done) >> $fileout
+      if ((j != ($n_samp / NUM_PARALLEL_SAMP) - 1)); then
+        printf "CHILD %s %s %s\n" $(for ((k = NUM_PARALLEL_SAMP; k < 2 * NUM_PARALLEL_SAMP; k++)); do echo ${sample_names[$j * 3 + $k]}; done) >> $fileout
+      else
+        if (($n_samp % $NUM_PARALLEL_SAMP)); then
+          printf "CHILD " >> $fileout
+          for ((k = NUM_PARALLEL_SAMP; k < NUM_PARALLEL_SAMP + ($n_samp % $NUM_PARALLEL_SAMP); k++)); do
+            printf "%s " ${sample_names[$k]} >> $fileout
+          done
+          printf "\nPARENT " >> $fileout
+          for ((k = NUM_PARALLEL_SAMP; k < NUM_PARALLEL_SAMP + ($n_samp % $NUM_PARALLEL_SAMP); k++)); do
+            printf "%s " ${sample_names[$k]} >> $fileout
+          done
+        fi
+        echo CHILD multiqc >> $fileout
+      fi
+    done
+  fi
 }
-
 
 arg_parse() {
   if [[ $# -eq 0 ]]; then
