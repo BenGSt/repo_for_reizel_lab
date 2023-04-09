@@ -4,7 +4,7 @@ main()
 {
   arg_parse "$@"
   if [[ $keep_bam -eq 0 ]]; then
-    rm -v "$(find . -name "*.bam")"
+    rm -v $(find . -name "*.bam")
   fi
   source /Local/bfe_reizel/anaconda3/bin/activate wgbs_bismark_pipeline_2023
   multiqc $multiqc_args
