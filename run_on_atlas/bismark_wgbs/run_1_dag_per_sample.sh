@@ -5,7 +5,7 @@ REPO_FOR_REIZEL_LAB=/storage/bfe_reizel/bengst/repo_for_reizel_lab
 help() {
   echo Run The WGBS bismark pipeline \(separate dag for each sample\):
   echo USAGE: "$(echo "$0" | awk -F / '{print$NF}')" \{-single-end or -paired-end\} -raw-data-dir \<raw_data_dir\> \
-    -genome \<mm10 or hg38\>\[-non-directional\] \[-ignore_r2 \<int\>\] \[-extra-trim-galore-options "multiple quoted options"\]
+    -genome \<mm10 or hg38\> \[-non-directional\] \[-ignore_r2 \<int\>\] \[-extra-trim-galore-options "multiple quoted options"\]
   echo
   echo raw_data_dir should contain a dir for each sample containing it\'s fastq files.
   echo -non-directional instructs Bismark to use all four alignment outputs \(OT, CTOT, OB, CTOB\).
