@@ -13,6 +13,7 @@ help() {
   echo
   echo products: fastqc report, bismark covaregae file, 100 bp tiles with methylation levels, [bam file containing alignments]
   cat <<EOF
+
 A note about methylation bias correction: I recommend running the pipeline once without additional options, you could
 then view the m-bias plots in the MultiQC report. The expected unbiased result is a uniform distribution of the
 average methylation levels across read positions. If the results are biased, fix this by either running the methylation
