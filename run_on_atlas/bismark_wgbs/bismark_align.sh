@@ -84,11 +84,11 @@ align_to_genome()
 
   if [[ $read_type == "single_end" ]] ; then
     trim_galore_output=$(find . -name '*trimmed.fq*')
-    command=$(echo bismark --multicore $N_PARALLEL_INSTANCES --bowtie2 $bismark_genome_location $trim_galore_output $non_directional)
+    command=$(echo bismark --multicore $N_PARALLEL_INSTANCES --bowtie2 $dovetail --genome $bismark_genome_location $trim_galore_output $non_directional)
 	else
 	  trim_galore_output_1=$(find . -name '*val_1.fq*')
 	  trim_galore_output_2=$(find . -name '*val_2.fq*')
-    command=$(echo bismark --multicore $N_PARALLEL_INSTANCES --bowtie2 $bismark_genome_location -1 $trim_galore_output_1 -2 $trim_galore_output_2 $non_directional)
+    command=$(echo bismark --multicore $N_PARALLEL_INSTANCES --bowtie2 $dovetail --genome $bismark_genome_location -1 $trim_galore_output_1 -2 $trim_galore_output_2 $non_directional)
 	fi
 
   echo runnig: $command
@@ -116,6 +116,10 @@ arg_parse()
         ;;
       -non-directional)
         non_directional="--non_directional"
+        shift
+        ;;
+      -dovetail)
+        dovetail="--dovetail"
         shift
         ;;
       -genome)
