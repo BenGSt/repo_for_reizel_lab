@@ -221,10 +221,12 @@ EOF
   done
   echo JOB multiqc $(realpath ./condor_submission_files/multiqc_job.sub) >> $fileout
   echo  >> $fileout
+  # Old version - all samples submitted at once
   #echo PARENT $(for ((k=0; k<=$i; k++)); do printf "%s " ${sample_names[$k]}; done) CHILD multiqc >> $fileout
 
-  #Because Atlas' policy of holding jobs that have been submitted more than 3 days ago, break up
-  # samples into groups of NUM_PARALLEL_SAMP and have them as parent and child s.t. the next 3 are submitted only after the previous 3 have completed.
+  # New version - Because Atlas' policy of holding jobs that have been submitted more than 3 days ago, break up samples
+  # into groups of NUM_PARALLEL_SAMP and have them as parent and child s.t. the next 3 are submitted only after the
+  # previous 3 have completed.
   NUM_PARALLEL_SAMP=3 #the number of samples that run in parallel
   n_samp=${#sample_names[@]}
   j=0
