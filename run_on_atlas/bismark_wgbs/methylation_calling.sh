@@ -15,7 +15,7 @@ help()
   produces coverage report (only CpG for to include all Cytosines use option --CX)
 
 	-output-dir
-	#TODO: -keep-bam
+	#TODO: -keep-files #OT OB *.bedGraph.gz
 
 
 	optional:
@@ -26,6 +26,7 @@ help()
 	  as a result of end-repairing sonicated fragments with unmethylated cytosines (see M-bias plot),
 	  it is recommended that the first couple of bp of Read 2 are removed before starting downstream analysis.
 	  Please see the section on M-bias plots in the Bismark User Guide for more details.
+  -extra-options "multiple double quoted options" (see Bismark manual)
 EOF
 }
 
@@ -76,7 +77,7 @@ methylation_calling()
   alignment_output=$(find . -name '*bismark*deduplicated*bam')
   echo $alignment_output | grep 'pe' && paired="-p" || paired=""
 #  command=$(echo bismark_methylation_extractor --bedgraph $paired $ignore_r2 --multicore $N_PARALLEL_INSTANCES --gzip --buffer_size $BUFFER_SIZE --output methylation_extractor_output $alignment_output)
-  command=$(echo bismark_methylation_extractor --bedgraph $paired $ignore_r2 --multicore $N_PARALLEL_INSTANCES --gzip --buffer_size $BUFFER_SIZE $alignment_output)
+  command=$(echo bismark_methylation_extractor --bedgraph $paired $ignore_r2 --multicore $N_PARALLEL_INSTANCES --gzip --buffer_size $BUFFER_SIZE $extra $alignment_output)
   echo $SCRIPT_NAME runnig: $command
 	$command
 }
@@ -97,6 +98,11 @@ arg_parse()
         ;;
       -ignore_r2)
         ignore_r2=$(echo --ignore_r2 "$2")
+        shift
+        shift
+        ;;
+      -extra-options)
+        extra=$2
         shift
         shift
         ;;

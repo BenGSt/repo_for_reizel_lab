@@ -141,7 +141,7 @@ log = $(pwd)/logs/\$(name)_methylation_calling.log
 output = $(pwd)/logs/\$(name)_methylation_calling.out
 error = $(pwd)/logs/\$(name)_methylation_calling.out
 queue name, args from (
-  $sample_name, -output-dir $(pwd)/$sample_name $ignore_r2 $keep_trimmed_fq
+  $sample_name, -output-dir $(pwd)/$sample_name $ignore_r2 $keep_trimmed_fq $extra_meth_opts
 )
 EOF
 
@@ -299,6 +299,11 @@ arg_parse() {
       ;;
     -extra-trim-galore-options)
       extra_trim_opts=$(echo -extra-trim-galore-options \'"$2"\')
+      shift
+      shift
+      ;;
+    -extra-meth_extract-options)
+      extra_meth_opts=$(echo -extra-options \'"$2"\')
       shift
       shift
       ;;
