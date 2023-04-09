@@ -11,9 +11,16 @@ help() {
   echo -non-directional instructs Bismark to use all four alignment outputs \(OT, CTOT, OB, CTOB\).
   echo Run from the directory you wish the output to be written to.
   echo
-  echo Possibly edit the submission files \(you can do this before running the pipeline or after, running additional jobs\).
-  echo products: fastqc report, bismark covaregae file, [bam file containing alignments], [100 bp tiles with methylation levels]
+  echo products: fastqc report, bismark covaregae file, 100 bp tiles with methylation levels, [bam file containing alignments]
   cat <<EOF
+A note about methylation bias correction: I recommend running the pipeline once without additional options, you could
+then view the m-bias plots in the MultiQC report. The expected unbiased result is a uniform distribution of the
+average methylation levels across read positions. If the results are biased, fix this by either running the methylation
+calling jobs again ignoring the biased bases, or running the pipeline again with trimmed reads. Each of these approaches
+has it's advantages and disadvantages. Ignoring aligned bases is faster. Trimming the reads may improve alignment if
+done correctly, consider trimming R1 and R2 symmetrically and/or using the "--dovetail" bismark option for the bowtie2
+aligner.
+
 optional:
 
 -ignore_r2 <int>
@@ -24,9 +31,58 @@ optional:
   it is recommended that the first couple of bp of Read 2 are removed before starting downstream analysis.
   Please see the section on M-bias plots in the Bismark User Guide for more details.
 
--extra-trim-galore-options "multiple quoted options"
-handy extra options from trim_galore manual:
+
+-extra-meth_extract-options "multiple quoted options"
+handy options (from Bismark manual):
 =====================================
+
+Ignore bases in aligned reads.
+------------------------------------------------------------------------------------------------------------------
+--ignore <int>
+    Ignore the first <int> bp from the 5' end of Read 1 (or single-end alignment files) when processing
+    the methylation call string. This can remove e.g. a restriction enzyme site at the start of each read or any other
+    source of bias (such as PBAT-Seq data).
+
+--ignore_r2 <int>
+    Ignore the first <int> bp from the 5' end of Read 2 of paired-end sequencing results only. Since the first couple of
+    bases in Read 2 of BS-Seq experiments show a severe bias towards non-methylation as a result of end-repairing
+    sonicated fragments with unmethylated cytosines (see M-bias plot), it is recommended that the first couple of
+    bp of Read 2 are removed before starting downstream analysis. Please see the section on M-bias plots in the Bismark
+    User Guide for more details.
+
+--ignore_3prime <int>
+    Ignore the last <int> bp from the 3' end of Read 1 (or single-end alignment files) when processing the methylation
+    call string. This can remove unwanted biases from the end of reads.
+
+--ignore_3prime_r2 <int>
+    Ignore the last <int> bp from the 3' end of Read 2 of paired-end sequencing results only. This can remove unwanted
+    biases from the end of reads.
+
+Other
+------------------------------------------------------------------------------------------------------------------------
+--no_overlap
+    For paired-end reads it is theoretically possible that Read 1 and Read 2 overlap. This option avoids scoring
+    overlapping methylation calls twice (only methylation calls of read 1 are used for in the process since read 1 has
+    historically higher quality basecalls than read 2). Whilst this option removes a bias towards more methylation calls
+    in the center of sequenced fragments it may de facto remove a sizeable proportion of the data. This option is on by
+    default for paired-end data but can be disabled using --include_overlap. Default: ON.
+
+--include_overlap
+    For paired-end data all methylation calls will be extracted irrespective of whether they overlap or not.
+    Default: OFF.
+
+--zero_based
+    Write out an additional coverage file (ending in .zero.cov) that uses 0-based genomic start and 1-based genomic end
+    coordinates (zero-based, half-open), like used in the bedGraph file, instead of using 1-based coordinates
+    throughout. Default: OFF.
+
+
+-extra-trim-galore-options "multiple quoted options"
+handy options (from trim_galore manual):
+=====================================
+
+Remove bases from reads before alignment.
+------------------------------------------------------------------------------------------------------------------
 --clip_R1 <int>         Instructs Trim Galore to remove <int> bp from the 5' end of read 1 (or single-end
                       reads). This may be useful if the qualities were very poor, or if there is some
                       sort of unwanted bias at the 5' end. Default: OFF.
@@ -107,9 +163,9 @@ queue name, args from (
 $(
 
       if [[ $single_end -eq 1 ]]; then
-        echo $sample_name, -output-dir $(pwd)/$sample_name -single-end $non_directional -genome $genome
+        echo $sample_name, -output-dir $(pwd)/$sample_name -single-end $non_directional -genome $genome $dovetail
       else
-        echo $sample_name, -output-dir $(pwd)/$sample_name -paired-end $non_directional -genome $genome
+        echo $sample_name, -output-dir $(pwd)/$sample_name -paired-end $non_directional -genome $genome $dovetail
       fi
     )
 )
@@ -290,6 +346,10 @@ arg_parse() {
       ;;
     -keep-trimmed-fq)
       keep_trimmed_fq="-keep-trimmed-fq"
+      shift
+      ;;
+    -dovetail)
+      dovetail="-dovetail"
       shift
       ;;
     -genome)
