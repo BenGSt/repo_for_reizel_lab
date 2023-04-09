@@ -110,6 +110,7 @@ EOF
 }
 
 main() {
+  echo debug: number of args: $#
   if [[ ! ($# -gt 2) ]]; then #don't (re)write cmd.txt if no args
     echo \# the command used to prepare the jobs. Note that parentheses are lost > cmd.txt
     echo \# and need to be added to rerun: -extra-trim-galore-options \"multiple quoted options\" >> cmd.txt
