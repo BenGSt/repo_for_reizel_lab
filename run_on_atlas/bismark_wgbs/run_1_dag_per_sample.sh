@@ -376,7 +376,7 @@ arg_parse() {
       keep_trimmed_fq="-keep-trimmed-fq"
       shift
       ;;
-    -dovetail)
+    -dovetail) #seems this is on by default.
       dovetail="-dovetail"
       shift
       ;;
