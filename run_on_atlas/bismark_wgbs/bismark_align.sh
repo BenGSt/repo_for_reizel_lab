@@ -2,7 +2,7 @@
 
 N_CORES=10
 MEM=30GB
-N_PARALLEL_INSTANCES=1 #manual states ~5 cores per instance, But i'm seeing more on htcondor logs.
+N_PARALLEL_INSTANCES=2 #manual states ~5 cores per instance, But i'm seeing more on htcondor logs.
                         # Also exceeding MEM too often. changing to 1 parallel instance. 14.03.2023
 
 
