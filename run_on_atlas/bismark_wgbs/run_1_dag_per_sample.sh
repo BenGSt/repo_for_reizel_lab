@@ -137,7 +137,7 @@ write_condor_submission_files() { # <raw_dir>
   mkdir condor_submission_files
   for sample_name in $(find -L $raw_dir -type d | awk -F / 'NR>1{print $NF}' | sort); do
     sample_names+=($sample_name)
-    cat <<EOF >condor_submission_files/trim_job_${sample_name}.sub
+    cat <<EOF > condor_submission_files/trim_job_${sample_name}.sub
 Initialdir = $(pwd)
 executable = $REPO_FOR_REIZEL_LAB/run_on_atlas/bismark_wgbs/trim_illumina_adaptors.sh
 Arguments = \$(args)
@@ -158,7 +158,7 @@ $(
 )
 EOF
 
-    cat <<EOF >condor_submission_files/bismark_align_job_${sample_name}.sub
+    cat <<EOF > condor_submission_files/bismark_align_job_${sample_name}.sub
 Initialdir = $(pwd)
 executable = $REPO_FOR_REIZEL_LAB/run_on_atlas/bismark_wgbs/bismark_align.sh
 Arguments = \$(args)
@@ -180,7 +180,7 @@ $(
 )
 EOF
 
-    cat <<EOF >condor_submission_files/deduplicate_job_${sample_name}.sub
+    cat <<EOF > condor_submission_files/deduplicate_job_${sample_name}.sub
 Initialdir = $(pwd)
 executable = $REPO_FOR_REIZEL_LAB/run_on_atlas/bismark_wgbs/deduplicate.sh
 Arguments = \$(args)
@@ -195,7 +195,7 @@ queue name, args from (
 )
 EOF
 
-    cat <<EOF >condor_submission_files/methylation_calling_job_${sample_name}.sub
+    cat <<EOF > condor_submission_files/methylation_calling_job_${sample_name}.sub
 Initialdir = $(pwd)
 executable = $REPO_FOR_REIZEL_LAB/run_on_atlas/bismark_wgbs/methylation_calling.sh
 Arguments = \$(args)
@@ -210,7 +210,7 @@ queue name, args from (
 )
 EOF
 
-    cat <<EOF >condor_submission_files/bam2nuc_job_${sample_name}.sub
+    cat <<EOF > condor_submission_files/bam2nuc_job_${sample_name}.sub
 Initialdir = $(pwd)
 executable = $REPO_FOR_REIZEL_LAB/run_on_atlas/bismark_wgbs/nucleotide_coverage_report.sh
 Arguments = \$(args)
@@ -225,7 +225,7 @@ queue name, args from (
 )
 EOF
 
-    cat <<EOF >condor_submission_files/make_tiles_${sample_name}.sub
+    cat <<EOF > condor_submission_files/make_tiles_${sample_name}.sub
 Initialdir = $(pwd)
 executable = $REPO_FOR_REIZEL_LAB/run_on_atlas/bismark_wgbs/make_tiles.sh
 Arguments = \$(args)
@@ -240,23 +240,42 @@ queue name, args from (
 )
 EOF
 
-    cat <<EOF >condor_submission_files/bismark_wgbs_${sample_name}.dag
+
+    cat <<EOF > condor_submission_files/bismark2report_job_${sample_name}.sub
+Initialdir = $(pwd)
+executable = $REPO_FOR_REIZEL_LAB/run_on_atlas/bismark_wgbs/bismark2report.sh
+Arguments = \$(args)
+request_cpus = 1
+RequestMemory = 30GB
+universe = vanilla
+log = $(pwd)/logs/\$(name)_make_tiles.log
+output = $(pwd)/logs/\$(name)_make_tiles.out
+error = $(pwd)/logs/\$(name)_make_tiles.out
+queue name, args from (
+  $sample_name, -output-dir $(pwd)/$sample_name
+)
+EOF
+
+
+    cat <<EOF > condor_submission_files/bismark_wgbs_${sample_name}.dag
 JOB trim_and_qc $(realpath ./condor_submission_files/trim_job_${sample_name}.sub)
 JOB bismark_align $(realpath ./condor_submission_files/bismark_align_job_${sample_name}.sub)
 JOB deduplicate $(realpath ./condor_submission_files/deduplicate_job_${sample_name}.sub)
 JOB meth_call $(realpath ./condor_submission_files/methylation_calling_job_${sample_name}.sub)
 JOB make_tiles $(realpath ./condor_submission_files/make_tiles_${sample_name}.sub)
 JOB bam2nuc $(realpath ./condor_submission_files/bam2nuc_job_${sample_name}.sub)
+JOB bismark2report $(realpath ./condor_submission_files/bismark2report_job_${sample_name}.sub)
 
 PARENT trim_and_qc  CHILD bismark_align
 PARENT bismark_align  CHILD deduplicate
 PARENT deduplicate  CHILD meth_call bam2nuc
 PARENT meth_call  CHILD make_tiles
+PARENT meth_call bam2nuc  CHILD bismark2report
 EOF
 
   done
 
-  cat <<EOF >condor_submission_files/multiqc_job.sub
+  cat <<EOF > condor_submission_files/multiqc_job.sub
 Initialdir = $(pwd)
 executable = $REPO_FOR_REIZEL_LAB/run_on_atlas/bismark_wgbs/run_multiqc.sh
 Arguments = \$(args)
