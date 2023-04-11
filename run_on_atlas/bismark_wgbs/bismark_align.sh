@@ -81,12 +81,8 @@ align_to_genome()
   # Atlas max cpu request is 10 so I want to have 2 instances of bismark (5 cores each theoretically)
   # This is set in align_jobs.sub .
 
+  #fixes Bad file descriptor error (Seems like a bug), and reduces memory usage.
   unmapped_ambig="--un --ambiguous"
-  #I get the following errors when running on Atlas, perhaps this will fix these...
-    # Failed to close filehandle AMBIG_1: Bad file descriptor at /Local/bfe_reizel/anaconda3/envs/wgbs_bismark_pipeline_2023/bin/bismark line 2641, <IN2> line 339490404.
-     #Failed to close filehandle AMBIG_2: Bad file descriptor at /Local/bfe_reizel/anaconda3/envs/wgbs_bismark_pipeline_2023/bin/bismark line 2642, <IN2> line 339490404.
-     #Failed to close filehandle UNMAPPED_1: Bad file descriptor at /Local/bfe_reizel/anaconda3/envs/wgbs_bismark_pipeline_2023/bin/bismark line 2643, <IN2> line 339490404.
-     #Failed to close filehandle UNMAPPED_2: Bad file descriptor at /Local/bfe_reizel/anaconda3/envs/wgbs_bismark_pipeline_2023/bin/bismark line 2644, <IN2> line 339490404.
 
 
   if [[ $read_type == "single_end" ]] ; then
