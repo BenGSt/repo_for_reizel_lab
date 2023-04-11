@@ -57,6 +57,7 @@ main()
   if [[ $keep_trimmed_fq -eq 0 ]]; then #TODO: add this to args
     $rm_fq
   fi
+  rm -v *.fq.gz #rm unmapped, ambiguous
 
 	echo
 	echo
