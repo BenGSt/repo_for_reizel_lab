@@ -248,9 +248,9 @@ Arguments = \$(args)
 request_cpus = 1
 RequestMemory = 30GB
 universe = vanilla
-log = $(pwd)/logs/\$(name)_make_tiles.log
-output = $(pwd)/logs/\$(name)_make_tiles.out
-error = $(pwd)/logs/\$(name)_make_tiles.out
+log = $(pwd)/logs/\$(name)_bismark2report.log
+output = $(pwd)/logs/\$(name)_bismark2report.out
+error = $(pwd)/logs/\$(name)_bismark2report.out
 queue name, args from (
   $sample_name, -output-dir $(pwd)/$sample_name
 )
