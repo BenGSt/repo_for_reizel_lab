@@ -5,10 +5,10 @@ REPO_FOR_REIZEL_LAB=/storage/bfe_reizel/bengst/repo_for_reizel_lab
 help() {
   echo Run The WGBS bismark pipeline \(separate dag for each sample\):
   echo USAGE: "$(echo "$0" | awk -F / '{print$NF}')" \{-single-end or -paired-end\} -raw-data-dir \<raw_data_dir\> \
-    -genome \<mm10 or hg38\> \[-non-directional\] \[-ignore_r2 \<int\>\] \[-extra-trim-galore-options "multiple quoted options"\]
+    -genome \<mm10 or hg38\>   \[optional\]
   echo
   echo raw_data_dir should contain a dir for each sample containing it\'s fastq files.
-  echo -non-directional instructs Bismark to use all four alignment outputs \(OT, CTOT, OB, CTOB\).
+  echo -non-directional
   echo Run from the directory you wish the output to be written to.
   echo
   echo products: fastqc report, bismark covaregae file, 100 bp tiles with methylation levels, [bam file containing alignments]
@@ -23,9 +23,15 @@ done correctly, consider trimming R1 and R2 symmetrically and/or using the "--do
 aligner.
 
 optional:
+-non-directional
+  Use for non directional libraries. Instructs Bismark to align to OT, CTOT, OB, CTOB.
+
+-keep-bam
+  Don't delete the deduplicated bam files. Useful for running methylation calling jobs again to fix m-bias without
+  trimming and rerunning the pipeline, and possibly other downstream analysis.
 
 -ignore_r2 <int>
-  from Bismark User Guide:
+  From Bismark User Guide:
   ignore the first <int> bp from the 5' end of Read 2 of paired-end sequencing results only.
   Since the first couple of bases in Read 2 of BS-Seq experiments show a severe bias towards non-methylation
   as a result of end-repairing sonicated fragments with unmethylated cytosines (see M-bias plot),
