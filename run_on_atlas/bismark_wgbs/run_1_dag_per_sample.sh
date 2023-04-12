@@ -306,38 +306,38 @@ EOF
   echo JOB multiqc $(realpath ./condor_submission_files/multiqc_job.sub) >> $fileout
   echo  >> $fileout
   # Old version - all samples submitted at once
-  #echo PARENT $(for ((k=0; k<=$i; k++)); do printf "%s " ${sample_names[$k]}; done) CHILD multiqc >> $fileout
+  echo PARENT $(for ((k=0; k<=$i; k++)); do printf "%s " ${sample_names[$k]}; done) CHILD multiqc >> $fileout
 
   # New version - Because Atlas' policy of holding jobs that have been submitted more than 3 days ago, break up samples
   # into groups of NUM_PARALLEL_SAMP and have them as parent and child s.t. the next 3 are submitted only after the
   # previous 3 have completed.
-  NUM_PARALLEL_SAMP=3 #the number of samples that run in parallel
-  n_samp=${#sample_names[@]}
-  j=0
-  if (($NUM_PARALLEL_SAMP > $n_samp)); then
-    printf "PARENT "
-    for ((k = 0; k < n_samp; k++)); do printf "%s " ${sample_names[$k]} >> $fileout; done
-    echo CHILD multiqc >> $fileout
-  else
-    for ((j = 0; j < ($n_samp / NUM_PARALLEL_SAMP); j++)); do
-      printf "PARENT %s %s %s " $(for ((k = 0; k < NUM_PARALLEL_SAMP; k++)); do echo ${sample_names[$j * 3 + $k]}; done) >> $fileout
-      if ((j != ($n_samp / NUM_PARALLEL_SAMP) - 1)); then
-        printf "CHILD %s %s %s\n" $(for ((k = NUM_PARALLEL_SAMP; k < 2 * NUM_PARALLEL_SAMP; k++)); do echo ${sample_names[$j * 3 + $k]}; done) >> $fileout
-      else
-        if (($n_samp % $NUM_PARALLEL_SAMP)); then
-          printf "CHILD " >> $fileout
-          for ((k = NUM_PARALLEL_SAMP; k < NUM_PARALLEL_SAMP + ($n_samp % $NUM_PARALLEL_SAMP); k++)); do
-            printf "%s " ${sample_names[$k]} >> $fileout
-          done
-          printf "\nPARENT " >> $fileout
-          for ((k = NUM_PARALLEL_SAMP; k < NUM_PARALLEL_SAMP + ($n_samp % $NUM_PARALLEL_SAMP); k++)); do
-            printf "%s " ${sample_names[$k]} >> $fileout
-          done
-        fi
-        echo CHILD multiqc >> $fileout
-      fi
-    done
-  fi
+#  NUM_PARALLEL_SAMP=3 #the number of samples that run in parallel
+#  n_samp=${#sample_names[@]}
+#  j=0
+#  if (($NUM_PARALLEL_SAMP > $n_samp)); then
+#    printf "PARENT "
+#    for ((k = 0; k < n_samp; k++)); do printf "%s " ${sample_names[$k]} >> $fileout; done
+#    echo CHILD multiqc >> $fileout
+#  else
+#    for ((j = 0; j < ($n_samp / NUM_PARALLEL_SAMP); j++)); do
+#      printf "PARENT %s %s %s " $(for ((k = 0; k < NUM_PARALLEL_SAMP; k++)); do echo ${sample_names[$j * 3 + $k]}; done) >> $fileout
+#      if ((j != ($n_samp / NUM_PARALLEL_SAMP) - 1)); then
+#        printf "CHILD %s %s %s\n" $(for ((k = NUM_PARALLEL_SAMP; k < 2 * NUM_PARALLEL_SAMP; k++)); do echo ${sample_names[$j * 3 + $k]}; done) >> $fileout
+#      else
+#        if (($n_samp % $NUM_PARALLEL_SAMP)); then
+#          printf "CHILD " >> $fileout
+#          for ((k = NUM_PARALLEL_SAMP; k < NUM_PARALLEL_SAMP + ($n_samp % $NUM_PARALLEL_SAMP); k++)); do
+#            printf "%s " ${sample_names[$k]} >> $fileout
+#          done
+#          printf "\nPARENT " >> $fileout
+#          for ((k = NUM_PARALLEL_SAMP; k < NUM_PARALLEL_SAMP + ($n_samp % $NUM_PARALLEL_SAMP); k++)); do
+#            printf "%s " ${sample_names[$k]} >> $fileout
+#          done
+#        fi
+#        echo CHILD multiqc >> $fileout
+#      fi
+#    done
+#  fi
 }
 
 arg_parse() {
