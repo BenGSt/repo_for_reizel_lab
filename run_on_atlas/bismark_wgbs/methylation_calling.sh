@@ -3,7 +3,7 @@
 N_CORES=10
 N_PARALLEL_INSTANCES=4 #each instance uses ~3 cores
 BUFFER_SIZE=10G #buffer size for unix sort
-MEM=4GB
+MEM=20GB
 
 
 help()
