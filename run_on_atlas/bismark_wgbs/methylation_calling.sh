@@ -2,8 +2,8 @@
 
 N_CORES=10
 N_PARALLEL_INSTANCES=4 #each instance uses ~3 cores
-BUFFER_SIZE=10G #buffer size for unix sort
-MEM=20GB
+BUFFER_SIZE=20G #buffer size for unix sort
+MEM=8GB
 
 
 help()
@@ -76,9 +76,10 @@ methylation_calling()
 {
   alignment_output=$(find . -name '*bismark*deduplicated*bam')
   echo $alignment_output | grep 'pe' && paired="-p" || paired=""
-#  command=$(echo bismark_methylation_extractor --bedgraph $paired $ignore_r2 --multicore $N_PARALLEL_INSTANCES --gzip --buffer_size $BUFFER_SIZE $extra $alignment_output)
-  #try out --ample_memory
-  command=$(echo bismark_methylation_extractor --ample_memory --bedgraph $paired $ignore_r2 --multicore $N_PARALLEL_INSTANCES --gzip  $extra $alignment_output)
+  command=$(echo bismark_methylation_extractor --bedgraph $paired $ignore_r2 --multicore $N_PARALLEL_INSTANCES --gzip --buffer_size $BUFFER_SIZE $extra $alignment_output)
+
+  #--ample_memory speeds things up for samples over 10 million reads or so. since it may take over an hour to get going ATLAS policy holds the jobs.
+#  command=$(echo bismark_methylation_extractor --ample_memory --bedgraph $paired $ignore_r2 --multicore $N_PARALLEL_INSTANCES --gzip  $extra $alignment_output)
   echo $SCRIPT_NAME runnig: $command
 	$command
 }
