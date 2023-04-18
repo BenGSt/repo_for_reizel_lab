@@ -1,0 +1,15 @@
+name: wgbs_bismark_pipeline_2023
+channels:
+  - bioconda
+  - conda-forge
+  - defaults
+dependencies:
+  - cutadapt=4.3
+  - fastqc=0.12.1
+  - trim-galore=0.6.10
+  - bowtie2=2.5.1
+  - samtools=1.17
+  - bismark=0.24.0
+  - bedtools=2.30.0
+  - multiqc=1.14
+#prefix: /Local/bfe_reizel/anaconda3/envs/wgbs_bismark_pipeline_2023
