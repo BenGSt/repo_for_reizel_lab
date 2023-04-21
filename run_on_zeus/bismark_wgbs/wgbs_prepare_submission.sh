@@ -111,7 +111,7 @@ main() {
   fi
 
   arg_parse "$@"
-  script=$REPO_FOR_REIZEL_LAB/run_on_atlas/bismark_wgbs/wgbs_prepare_submission.sh
+  script=$REPO_FOR_REIZEL_LAB/run_on_atlas/bismark_wgbs/bismark_wgbs_single_job.sh
 
 #  sample_names=()
   for sample_name in $(find -L $raw_data_dir -type d | awk -F / 'NR>1{print $NF}' | sort); do
