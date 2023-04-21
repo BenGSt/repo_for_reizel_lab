@@ -3,6 +3,14 @@
 N_CORES_TRIM_GALORE=10
 N_BISMARK_INSTANCES=4
 
+help(){
+  cat << EOF
+Author: Ben steinberg 2023
+Runs the bismark wgbs pipline on Zeus cluster.
+Intended to be used with wgbs_prepare_submission.sh which writes a PBS submission file for each sample, see help there.
+EOF
+}
+
 main() {
   SCRIPT_NAME=$(echo $0 | awk -F / '{print $NF}')
   echo
@@ -106,11 +114,11 @@ methylation_calling() {
   alignment_output=$(find . -name '*bismark*deduplicated*bam')
   echo $alignment_output | grep 'pe' && paired="-p" || paired=""
   # option 1 : use unix sort
-  # command=$(echo bismark_methylation_extractor --bedgraph $paired --multicore $N_PARALLEL_INSTANCES --gzip --buffer_size $BUFFER_SIZE $extra_bismark_opts $alignment_output)
+  # command=$(echo bismark_methylation_extractor --bedgraph $paired --multicore $N_PARALLEL_INSTANCES --gzip --buffer_size $BUFFER_SIZE $extra_meth_extract_opts $alignment_output)
 
   #option2 use arrays
   # --ample_memory speeds things up for samples over 10 million reads or so. since it may take over an hour to get going ATLAS policy holds the jobs.
-  command=$(echo bismark_methylation_extractor --ample_memory --bedgraph $paired --multicore $N_PARALLEL_INSTANCES --gzip $extra_bismark_opts $alignment_output)
+  command=$(echo bismark_methylation_extractor --ample_memory --bedgraph $paired --multicore $N_PARALLEL_INSTANCES --gzip $extra_meth_extract_opts $alignment_output)
 
   echo $SCRIPT_NAME runnig: $command
   $command
@@ -205,7 +213,7 @@ arg_parse() {
       shift
       shift
       ;;
-    -extra-bismark-options)
+    -extra-meth-extractor-options)
       extra_bismark_opts=$2
       shift
       shift
