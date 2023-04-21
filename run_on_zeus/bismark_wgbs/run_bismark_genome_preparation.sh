@@ -11,5 +11,5 @@
 PBS_O_WORKDIR=/home/s.benjamin/extra_storage_1TB/genomic_reference_data/hg38
 cd $PBS_O_WORKDIR
 
-conda activate /home/s.benjamin/micromamba/envs/wgbs_bismark_pipeline_2023
+/home/s.benjamin/other_software/mambaforge/bin/activate  /home/s.benjamin/micromamba/envs/wgbs_bismark_pipeline_2023
 bismark_genome_preparation --bowtie2 --parallel 10 --verbose /home/s.benjamin/extra_storage_1TB/genomic_reference_data/hg38 > bismark_genome_preparation.log 2>&1
