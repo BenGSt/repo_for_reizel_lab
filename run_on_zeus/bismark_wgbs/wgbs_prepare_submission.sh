@@ -123,7 +123,7 @@ main() {
       args=$(echo -output-dir $(pwd)/$sample_name -paired-input-fastq-files $(realpath $raw_data_dir/$sample_name/*.fastq.gz) -genome $genome $non_directional $extra_trim_opts $extra_meth_opts)
     fi
 
-    mkdir $sample_name
+    mkdir -p $sample_name
     cd $sample_name
     cat <<EOF >bismark_wgbs_{$sample_name}.q
 #!/bin/bash
