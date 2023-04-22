@@ -125,9 +125,9 @@ main() {
 
     mkdir -p $sample_name
     cd $sample_name
-    cat <<EOF >bismark_wgbs_{$sample_name}.q
+    cat <<EOF >bismark_wgbs_${sample_name}.q
 #!/bin/bash
-#PBS  -N  bismark_wgbs{dir_name}
+#PBS  -N  bismark_wgbs_${dir_name}
 #PBS  -q  zeus_all_q
 #PBS  -m  abe
 #PBS  -M  s.benjamin@technion.ac.il
@@ -138,7 +138,7 @@ PBS_O_WORKDIR=$(pwd)
 cd \$PBS_O_WORKDIR
 
 
-$script $args > bismark_wgbs_{$sample_name}.log 2>&1
+$script $args > bismark_wgbs_${sample_name}.log 2>&1
 
 EOF
     cd ..
