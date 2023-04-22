@@ -34,7 +34,10 @@ main() {
   micromamba activate /home/s.benjamin/micromamba/envs/wgbs_bismark_pipeline_2023
   echo debug: micromamba activate return val: $?
 
-  trim_reads_and_fastqc $input_fastq_1 $input_fastq_2
+#  trim_reads_and_fastqc $input_fastq_1 $input_fastq_2
+# fastqc in trim_galore runs on 1 core. run separately with fastqc --threads 20 *val*.fq
+  trim_reads $input_fastq_1 $input_fastq_2
+  fastqc --threads 20 ./*val*.fq
   align_to_genome
   remove_duplicates
   methylation_calling && nucleotide_cov_report
@@ -69,6 +72,23 @@ trim_reads_and_fastqc() { # R1 R2
   $cmd
 }
 
+
+trim_reads() { # R1 R2
+  # positional argument are  R1, R2 fastq file/s to trim
+  # note on multicore from cutadapt manual:
+  #   To automatically detect the number of available cores, use -j 0 (or --cores=0). The detection takes into account resource restrictions that may be in place. For example, if running Cutadapt as a batch job on a cluster system, the actual number of cores assigned to the job will be used. (This works if the cluster systems uses the cpuset(1) mechanism to impose the resource limitation.)
+  # note from trim_galore manual:
+  #   It seems that --cores 4 could be a sweet spot, anything above has diminishing returns.
+  #   --cores 4 would then be: 4 (read) + 4 (write) + 4 (Cutadapt) + 2 (extra Cutadapt) + 1 (Trim Galore) = 15, and so forth.
+  if [[ $read_type == "single_end" ]]; then
+    cmd="trim_galore $1 --dont_gzip --cores $N_CORES_TRIM_GALORE $extra_trim_galore_opts"
+  else #if [[ $read_type == "paired_end" ]]
+    cmd="trim_galore --dont_gzip --paired $1 $2 --cores $N_CORES_TRIM_GALORE  $extra_trim_galore_opts"
+  fi
+  echo runnig: $cmd
+  $cmd
+}
+
 set_bismark_genome_location() {
   if [[ $genome == "mm10" ]]; then
     bismark_genome_location=/utemp/s.benjamin/genomic_reference_data/from_huji/mm10/Sequence/WholeGenomeFasta
@@ -84,6 +104,8 @@ align_to_genome() {
   #see http://felixkrueger.github.io/Bismark/Docs/ :
   #"--parallel 4 for e.g. the GRCm38 mouse genome will probably use ~20 cores and eat ~48GB of RAM,
   # but at the same time reduce the alignment time to ~25-30%. You have been warned."
+
+  set_bismark_genome_location
 
   #on Atlas: fixes Bad file descriptor error (Seems like a bug), and reduces memory usage. #TODO: same on Zeus?
   unmapped_ambig="--un --ambiguous"
