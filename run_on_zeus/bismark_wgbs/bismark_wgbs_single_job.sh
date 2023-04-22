@@ -31,6 +31,7 @@ main() {
   cd $output_dir || exit 1
 
   /home/s.benjamin/other_software/mambaforge/bin/activate /home/s.benjamin/micromamba/envs/wgbs_bismark_pipeline_2023
+  echo debug: mambaforge activate return val: $?
   trim_reads_and_fastqc $input_fastq_1 $input_fastq_2
   align_to_genome
   remove_duplicates

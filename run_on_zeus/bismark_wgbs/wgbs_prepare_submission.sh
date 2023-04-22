@@ -127,7 +127,7 @@ main() {
     cd $sample_name
     cat <<EOF >bismark_wgbs_${sample_name}.q
 #!/bin/bash
-#PBS  -N  bismark_wgbs_${dir_name}
+#PBS  -N  bismark_wgbs_${sample_name}
 #PBS  -q  zeus_all_q
 #PBS  -m  abe
 #PBS  -M  s.benjamin@technion.ac.il
