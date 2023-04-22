@@ -147,10 +147,10 @@ EOF
   printf 'Submit all jobs now? (y/n)? '
   read answer
   if [ "$answer" != "${answer#[Yy]}" ] ;then # this grammar (the #[] operator) means that the variable $answer where any Y or y in 1st position will be dropped if they exist.
-    find . -name "*.q" | awk '{print qsub $1}' | bash
+    find . -name "*.q" | awk '{print "qsub" $1}' | bash
 else
     echo You may find this list of submission commands usefull:
-    find . -name "*.q" | awk '{print qsub $1}'
+    find . -name "*.q" | awk '{print "qsub" $1}'
 fi
 echo Good luck!
 
