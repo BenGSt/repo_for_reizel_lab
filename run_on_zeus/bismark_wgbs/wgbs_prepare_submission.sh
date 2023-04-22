@@ -138,7 +138,7 @@ PBS_O_WORKDIR=$(pwd)
 cd \$PBS_O_WORKDIR
 
 
-$script $args > bismark_wgbs_{sample_name}.log 2>&1
+$script $args > bismark_wgbs_{$sample_name}.log 2>&1
 
 EOF
     cd ..
