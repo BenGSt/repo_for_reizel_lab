@@ -144,7 +144,7 @@ EOF
     cd ..
   done
 
-  printf 'Submit all jobs now? (y/n)? '
+  printf 'Submit all jobs now? (y/n) '
   read answer
   if [ "$answer" != "${answer#[Yy]}" ] ;then # this grammar (the #[] operator) means that the variable $answer where any Y or y in 1st position will be dropped if they exist.
     find . -name "*.q" | awk '{print "qsub " $1}' | bash
