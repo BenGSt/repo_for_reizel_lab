@@ -42,7 +42,7 @@ main() {
   align_to_genome
   remove_duplicates
   methylation_calling && nucleotide_cov_report
-  calculate_tiles 100 10
+#  calculate_tiles 100 10
   write_html_report
 
   echo
@@ -87,7 +87,7 @@ trim_reads_and_fastqc() { # R1 R2
   fi
 
   print_command_info "$cmd"
-  $cmd
+#  $cmd
 }
 
 trim_reads() { # R1 R2
@@ -104,7 +104,7 @@ trim_reads() { # R1 R2
   fi
 
   print_command_info "$cmd"
-  $cmd
+#  $cmd
 }
 
 set_bismark_genome_location() {
@@ -138,7 +138,7 @@ align_to_genome() {
   fi
 
   print_command_info "$command"
-  $command
+#  $command
 
   #cleanup
   rm_fq="rm -v *.fq"
@@ -150,7 +150,7 @@ align_to_genome() {
 
 remove_duplicates() {
   print_command_info "$(echo deduplicate_bismark ./*bismark*bam)"
-  deduplicate_bismark ./*bismark*bam
+#  deduplicate_bismark ./*bismark*bam
   rm -v $(find . -name '*.bam' | grep -v deduplicated) #delete bam with duplicates
 }
 
@@ -165,7 +165,7 @@ methylation_calling() {
   command=$(echo bismark_methylation_extractor --ample_memory --bedgraph $paired --multicore $N_BISMARK_INSTANCES --gzip $extra_meth_extract_opts $alignment_output)
 
   print_command_info "$command"
-  $command
+#  $command
 
   #cleanup
   rm -v $(find ./ | grep -P 'OT|OB')
@@ -174,9 +174,9 @@ methylation_calling() {
 
 nucleotide_cov_report() {
   print_command_info "$(echo bam2nuc --genome_folder $bismark_genome_location ./*.bam)"
-  bam2nuc --genome_folder $bismark_genome_location ./*.bam
+#  bam2nuc --genome_folder $bismark_genome_location ./*.bam
   print_command_info "$(echo bismark2report --splitting_report *splitting_report.txt --mbias_report *M-bias.txt)"
-  bismark2report --splitting_report *splitting_report.txt --mbias_report *M-bias.txt
+#  bismark2report --splitting_report *splitting_report.txt --mbias_report *M-bias.txt
 }
 
 calculate_tiles() {
@@ -206,7 +206,7 @@ calculate_tiles() {
 write_html_report() {
   cmd=$(echo bismark2report --splitting_report *splitting_report.txt --mbias_report *M-bias.txt)
   print_command_info "$cmd"
-  $cmd
+#  $cmd
 
 }
 
