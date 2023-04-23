@@ -3,8 +3,8 @@
 N_CORES_TRIM_GALORE=10
 N_BISMARK_INSTANCES=4
 
-help(){
-  cat << EOF
+help() {
+  cat <<EOF
 Author: Ben steinberg 2023
 Runs the bismark wgbs pipline on Zeus cluster.
 Intended to be used with wgbs_prepare_submission.sh which writes a PBS submission file for each sample, see help there.
@@ -34,10 +34,11 @@ main() {
   micromamba activate /home/s.benjamin/micromamba/envs/wgbs_bismark_pipeline_2023
   echo debug: micromamba activate return val: $?
 
-#  trim_reads_and_fastqc $input_fastq_1 $input_fastq_2
-# fastqc in trim_galore runs on 1 core. run separately with fastqc --threads 20 *val*.fq
-  trim_reads $input_fastq_1 $input_fastq_2
-  fastqc --threads 20 ./*val*.fq
+  trim_reads_and_fastqc $input_fastq_1 $input_fastq_2
+  # fastqc in trim_galore runs on 1 core. run separately with fastqc --threads 20 *val*.fq
+  #  trim_reads $input_fastq_1 $input_fastq_2
+  #  fastqc --threads 20 ./*val*.fq
+  # TESTED: dosn't change anything, fastqc is just slow...
   align_to_genome
   remove_duplicates
   methylation_calling && nucleotide_cov_report
@@ -56,6 +57,22 @@ main() {
   echo
 }
 
+print_command_info() { # $cmd
+  cat <<EOF
+
+
+#################################
+#################################
+running: $1
+date: $(date)
+pwd: $(pwd)
+#################################
+#################################
+
+
+EOF
+}
+
 trim_reads_and_fastqc() { # R1 R2
   # positional argument are  R1, R2 fastq file/s to trim
   # note on multicore from cutadapt manual:
@@ -68,10 +85,10 @@ trim_reads_and_fastqc() { # R1 R2
   else #if [[ $read_type == "paired_end" ]]
     cmd="trim_galore --dont_gzip --paired $1 $2 --cores $N_CORES_TRIM_GALORE --fastqc $extra_trim_galore_opts"
   fi
-  echo runnig: $cmd
+
+  print_command_info "$cmd"
   $cmd
 }
-
 
 trim_reads() { # R1 R2
   # positional argument are  R1, R2 fastq file/s to trim
@@ -85,7 +102,8 @@ trim_reads() { # R1 R2
   else #if [[ $read_type == "paired_end" ]]
     cmd="trim_galore --dont_gzip --paired $1 $2 --cores $N_CORES_TRIM_GALORE  $extra_trim_galore_opts"
   fi
-  echo runnig: $cmd
+
+  print_command_info "$cmd"
   $cmd
 }
 
@@ -119,7 +137,7 @@ align_to_genome() {
     command=$(echo bismark --multicore $N_BISMARK_INSTANCES --bowtie2 --genome $bismark_genome_location -1 $trim_galore_output_1 -2 $trim_galore_output_2 $non_directional $unmapped_ambig)
   fi
 
-  echo runnig: $command
+  print_command_info "$command"
   $command
 
   #cleanup
@@ -131,6 +149,7 @@ align_to_genome() {
 }
 
 remove_duplicates() {
+  print_command_info "$(echo deduplicate_bismark ./*bismark*bam)"
   deduplicate_bismark ./*bismark*bam
   rm -v $(find . -name '*.bam' | grep -v deduplicated) #delete bam with duplicates
 }
@@ -143,9 +162,9 @@ methylation_calling() {
 
   #option2 use arrays
   # --ample_memory speeds things up for samples over 10 million reads or so. since it may take over an hour to get going ATLAS policy holds the jobs.
-  command=$(echo bismark_methylation_extractor --ample_memory --bedgraph $paired --multicore $N_PARALLEL_INSTANCES --gzip $extra_meth_extract_opts $alignment_output)
+  command=$(echo bismark_methylation_extractor --ample_memory --bedgraph $paired --multicore $N_BISMARK_INSTANCES --gzip $extra_meth_extract_opts $alignment_output)
 
-  echo $SCRIPT_NAME runnig: $command
+  print_command_info "$command"
   $command
 
   #cleanup
@@ -154,7 +173,9 @@ methylation_calling() {
 }
 
 nucleotide_cov_report() {
+  print_command_info "$(echo bam2nuc --genome_folder $bismark_genome_location ./*.bam)"
   bam2nuc --genome_folder $bismark_genome_location ./*.bam
+  print_command_info "$(echo bismark2report --splitting_report *splitting_report.txt --mbias_report *M-bias.txt)"
   bismark2report --splitting_report *splitting_report.txt --mbias_report *M-bias.txt
 }
 
@@ -184,7 +205,7 @@ calculate_tiles() {
 
 write_html_report() {
   cmd=$(echo bismark2report --splitting_report *splitting_report.txt --mbias_report *M-bias.txt)
-  echo running: $cmd
+  print_command_info "$cmd"
   $cmd
 
 }
@@ -239,7 +260,7 @@ arg_parse() {
       shift
       ;;
     -extra-meth-extractor-options)
-      extra_bismark_opts=$2
+      extra_meth_extract_opts=$2
       shift
       shift
       ;;
