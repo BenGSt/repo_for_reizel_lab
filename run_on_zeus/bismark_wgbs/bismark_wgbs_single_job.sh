@@ -12,7 +12,7 @@ EOF
 }
 
 main() {
-  SCRIPT_NAME=$(echo $0 | awk -F / '{print $NF}')
+  script_name=$(echo $0 | awk -F / '{print $NF}')
   echo
   echo
   echo \#################################
