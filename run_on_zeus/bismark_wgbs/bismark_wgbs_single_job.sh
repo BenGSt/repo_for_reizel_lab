@@ -40,7 +40,9 @@ main() {
   trim_reads_and_fastqc $input_fastq_1 $input_fastq_2
   align_to_genome
   remove_duplicates
-  methylation_calling && nucleotide_cov_report
+  methylation_calling &
+  nucleotide_cov_report &
+  wait %1 # wait for methylation_calling to complete
   calculate_tiles 100 10
   write_html_report
 
@@ -172,13 +174,9 @@ methylation_calling() {
 }
 
 nucleotide_cov_report() {
-  cmd1="$(echo bam2nuc --genome_folder $bismark_genome_location ./*.bam)"
-  print_command_info "$cmd1"
-  $cmd1
-
-  cmd2="$(echo bismark2report --splitting_report *splitting_report.txt --mbias_report *M-bias.txt)"
-  print_command_info "$cmd2"
-  $cmd2
+  cmd="$(echo bam2nuc --genome_folder $bismark_genome_location ./*.bam)"
+  print_command_info "$cmd"
+  $cmd
 }
 
 calculate_tiles() {
