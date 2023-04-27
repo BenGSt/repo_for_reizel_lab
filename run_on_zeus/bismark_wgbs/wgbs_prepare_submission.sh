@@ -5,8 +5,8 @@ REPO_FOR_REIZEL_LAB=/home/s.benjamin/bioinformatics_software/repo_for_reizel_lab
 
 help() {
   cat <<EOF
-Usage:  "$(echo "$0" | awk -F / '{print$NF}')" \{-single-end or -paired-end\} -raw-data-dir \<raw_data_dir\> \
-    -genome \<mm10 or hg38\>   \[optional\]
+Usage:  $(echo "$0" | awk -F / '{print$NF}') {-single-end or -paired-end} -raw-data-dir <raw_data_dir>
+    -genome <mm10 or hg38>  [optional]
 
 Run from the directory you wish the output to be written to.
 raw_data_dir should contain a dir for each sample containing it's fastq files.
