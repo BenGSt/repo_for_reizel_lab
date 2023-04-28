@@ -2,6 +2,7 @@
 
 N_CORES_TRIM_GALORE=10
 N_BISMARK_INSTANCES=4
+GENOMIC_REFERENCE_DATA=/utemp/s.benjamin/genomic_reference_data/
 
 help() {
   cat <<EOF
@@ -110,9 +111,9 @@ trim_reads() { # R1 R2
 
 set_bismark_genome_location() {
   if [[ $genome == "mm10" ]]; then
-    bismark_genome_location=/utemp/s.benjamin/genomic_reference_data/from_huji/mm10/Sequence/WholeGenomeFasta
+    bismark_genome_location=$GENOMIC_REFERENCE_DATA/from_huji/mm10/Sequence/WholeGenomeFasta/
   elif [[ $genome == "hg38" ]]; then
-    bismark_genome_location=/utemp/s.benjamin/genomic_reference_data/hg38
+    bismark_genome_location=$GENOMIC_REFERENCE_DATA/hg38/
   else
     echo ERROR: genome $genome not supported
     exit 1
@@ -190,9 +191,9 @@ calculate_tiles() {
   meth_calling_output=$(find . -name "*.cov.gz")
 
   if [[ $genome == "mm10" ]]; then
-    tiles_file=/utemp/s.benjamin/genomic_reference_data/from_huji/mm10/mm10_${tile_size}bp_tiles.bed
+    tiles_file=/utemp/s.benjamin/GENOMIC_REFERENCE_DATA/from_huji/mm10/mm10_${tile_size}bp_tiles.bed
   elif [[ $genome == "hg38" ]]; then
-    tiles_file=/utemp/s.benjamin/genomic_reference_data/hg38/hg38_${tile_size}bp_tiles.bed
+    tiles_file=/utemp/s.benjamin/GENOMIC_REFERENCE_DATA/hg38/hg38_${tile_size}bp_tiles.bed
   fi
 
   # tiles variant 2: First calculate the tiles and then remove tiles with total coverage < 10
