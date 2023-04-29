@@ -2,7 +2,7 @@
 
 N_CORES_TRIM_GALORE=10
 N_BISMARK_INSTANCES=4
-GENOMIC_REFERENCE_DATA=/utemp/s.benjamin/genomic_reference_data/
+GENOMIC_REFERENCE_DATA=/home/s.benjamin/genomic_reference_data/
 
 help() {
   cat <<EOF
