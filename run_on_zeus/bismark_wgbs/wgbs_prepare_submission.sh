@@ -128,7 +128,7 @@ main() {
     cat <<EOF >bismark_wgbs_${sample_name}.q
 #!/bin/bash
 #PBS  -N  bismark_wgbs_${sample_name}
-#PBS  -q  zeus_all_q
+#PBS  -q  zeus_new_q
 #PBS  -m  abe
 #PBS  -M  s.benjamin@technion.ac.il
 #PBS  -l select=1:ncpus=${N_CORES}
