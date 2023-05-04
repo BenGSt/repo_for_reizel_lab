@@ -133,7 +133,6 @@ main() {
 #PBS  -M  s.benjamin@technion.ac.il
 #PBS  -l select=1:ncpus=${N_CORES}
 #PBS  -l select=mem=64gb
-#PBS  -l walltime=48:00:00
 PBS_O_WORKDIR=$(pwd)
 cd \$PBS_O_WORKDIR
 
