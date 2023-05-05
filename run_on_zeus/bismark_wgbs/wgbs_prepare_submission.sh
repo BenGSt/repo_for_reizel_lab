@@ -133,7 +133,7 @@ main() {
 #PBS  -M  s.benjamin@technion.ac.il
 #PBS  -l select=1:ncpus=${N_CORES}
 #PBS  -l select=mem=64gb
-PBS_O_WORKDIR=$(pwd)
+PBS_O_WORKDIR=$(realpath $PWD)
 cd \$PBS_O_WORKDIR
 
 
