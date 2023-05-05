@@ -118,9 +118,9 @@ main() {
 #    sample_names+=($sample_name)
 
     if [[ $single_end -eq 1 ]]; then
-      args=$(echo -output-dir $(pwd)/$sample_name -input-fastq-file $(realpath $raw_data_dir/$sample_name/*.fastq.gz) -genome $genome $non_directional $extra_trim_opts $extra_meth_opts)
+      args=$(echo -output-dir $(realpath $PWD)/$sample_name -input-fastq-file $(realpath $raw_data_dir/$sample_name/*.fastq.gz) -genome $genome $non_directional $extra_trim_opts $extra_meth_opts)
     else
-      args=$(echo -output-dir $(pwd)/$sample_name -paired-input-fastq-files $(realpath $raw_data_dir/$sample_name/*.fastq.gz) -genome $genome $non_directional $extra_trim_opts $extra_meth_opts)
+      args=$(echo -output-dir $(realpath $PWD)/$sample_name -paired-input-fastq-files $(realpath $raw_data_dir/$sample_name/*.fastq.gz) -genome $genome $non_directional $extra_trim_opts $extra_meth_opts)
     fi
 
     mkdir -p $sample_name
