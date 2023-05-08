@@ -125,10 +125,11 @@ main() {
 
     mkdir -p $sample_name
     cd $sample_name
+#TODO: 8.5.23: use zeus_new_q, holding all jobs for some reason. using long_q for now
     cat <<EOF >bismark_wgbs_${sample_name}.q
 #!/bin/bash
 #PBS  -N  bismark_wgbs_${sample_name}
-#PBS  -q  zeus_new_q
+#PBS  -q  zeus_long_q
 #PBS  -m  abe
 #PBS  -M  s.benjamin@technion.ac.il
 #PBS  -l select=1:ncpus=${N_CORES}
