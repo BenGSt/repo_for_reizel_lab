@@ -1,7 +1,7 @@
 #!/bin/bash
 
 N_CORES=20
-REPO_FOR_REIZEL_LAB=/home/s.benjamin/bioinformatics_software/repo_for_reizel_lab
+REPO_FOR_REIZEL_LAB=/home/s.benjamin/repo_for_reizel_lab
 
 help() {
   cat <<EOF
