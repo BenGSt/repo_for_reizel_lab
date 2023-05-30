@@ -118,6 +118,10 @@ EOF
 }
 
 arg_parse() {
+  if [[ $# -lt 4 ]]; then
+    help
+    exit1
+  fi
   while [[ $# -gt 0 ]]; do
     case $1 in
     -h | --help)
