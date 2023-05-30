@@ -131,7 +131,7 @@ error = logs/\$(name)_htseq-count.out
 queue name, args from (
 $(for samp_dir in $(find $raw_dir/* -type d); do
     echo $samp_dir | awk -F / '{printf $NF", "}'
-    echo $samp_dir | awk -F / '{print "./"$NF"/"$NF".hisat2_output.bam ./"$NF"/"$NF".htseq-count_output.txt"}'
+    echo $samp_dir | awk -v genome=$genome -F / '{print "./"$NF"/"$NF".hisat2_output.bam ./"$NF"/"$NF".htseq-count_output.txt genome"}'
   done)
 )
 EOF
