@@ -25,11 +25,11 @@ main()
   echo hisat2_idx: $hisat2_idx
   echo r1: $r1
 
-  if [[ $read_type == "single_end" ]]; then
-    hisat2 -p 10 -x $hisat2_idx -U $r1 --summary-file $summary_file | samtools sort -n --output-fmt BAM > $output_file
-  else
-    hisat2 -p 10 -x $hisat2_idx -1 $r1 -2 $r2 --summary-file $summary_file | samtools sort -n --output-fmt BAM > $output_file
-  fi
+#  if [[ $read_type == "single_end" ]]; then
+#    hisat2 -p 10 -x $hisat2_idx -U $r1 --summary-file $summary_file | samtools sort -n --output-fmt BAM > $output_file
+#  else
+#    hisat2 -p 10 -x $hisat2_idx -1 $r1 -2 $r2 --summary-file $summary_file | samtools sort -n --output-fmt BAM > $output_file
+#  fi
 }
     #hisat2 -p 10 -x $hisat2_idx -1 $r1 -2 $r2 --summary-file $summary_file | samtools sort -n --output-fmt BAM >$output_file
 
