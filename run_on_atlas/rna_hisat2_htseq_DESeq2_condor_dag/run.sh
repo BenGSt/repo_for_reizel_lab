@@ -118,11 +118,9 @@ EOF
 }
 
 arg_parse() {
-  echo debug: num args: $#
-  exit
   if [[ $# -lt 4 ]]; then
     help
-    exit1
+    exit 1
   fi
   while [[ $# -gt 0 ]]; do
     case $1 in
