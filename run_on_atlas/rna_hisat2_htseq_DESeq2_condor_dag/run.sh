@@ -118,6 +118,8 @@ EOF
 }
 
 arg_parse() {
+  echo debug: num args: $#
+  exit
   if [[ $# -lt 4 ]]; then
     help
     exit1
