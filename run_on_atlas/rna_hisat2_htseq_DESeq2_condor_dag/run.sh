@@ -2,7 +2,6 @@
 
 help() {
   echo Run The RNA-seq deg pipeline:
-  echo OLD USAGE: $(echo $0 | awk -F / '{print$NF}') \<1 for single end or 2 for piared end\> \<\raw_data_dir\>
   echo USAGE: $(echo $0 | awk -F / '{print$NF}') \{-single-end or -paired-end\} -raw-dir \<raw_data_dir\> -genome \<mm10 or hg38\>
   echo raw_data_dir should contain a dir for each sample containing it\'s fastq files.
   echo Biological replicates of the same condition should be in dirs named the same except for tailing numbers e.g. cntrl1 cntrl2.
