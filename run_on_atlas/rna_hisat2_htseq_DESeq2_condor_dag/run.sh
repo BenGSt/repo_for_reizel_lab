@@ -96,7 +96,7 @@ EOF
     queue name, args from (
 $(for samp_dir in $(find $raw_dir/* -type d); do
       echo $samp_dir | awk -F / '{printf $NF", "}'
-      printf " -genome %s" $genome
+      printf "-single-end -genome %s" $genome
       printf " -r1 %s " $(find $samp_dir |grep -E "*.fq|*.fq.gz|*.fastq|*.fastq.gz")
       echo $samp_dir | awk -F / '{print "-output-file ./"$NF"/"$NF".hisat2_output.bam -summary-file ./"$NF"/"$NF".hisat2.summary.txt "}'
     done)
@@ -109,7 +109,7 @@ $(for samp_dir in $(find $raw_dir/* -type d); do
       r1=$( find $samp_dir | grep -E '.fq.gz|.fastq.gz'| grep -E '_1|R1')
       r2=$( find $samp_dir | grep -E '.fq.gz|.fastq.gz'| grep -E '_2|R2')
       echo $samp_dir | awk -F / '{printf $NF", "}'
-      printf " -genome %s" $genome
+      printf "-paired-end -genome %s" $genome
       printf " -r1 %s " $r1
       printf " -r2 %s " $r2
       echo $samp_dir | awk -F / '{print "-output-file ./"$NF"/"$NF".hisat2_output.bam -summary-file ./"$NF"/"$NF".hisat2.summary.txt "}'
