@@ -57,6 +57,7 @@ EOF
 $(for samp_dir in $(find $raw_dir/* -type d); do
       r1=$( find $samp_dir | grep -E '.fq.gz|.fastq.gz'| grep -E '_1|R1')
       r2=$( find $samp_dir | grep -E '.fq.gz|.fastq.gz'| grep -E '_2|R2')
+      echo $samp_dir | awk -F / '{printf $NF", "}'
       printf " -genome %s" $genome
       printf " -r1 %s " $r1
       printf " -r2 %s " $r2
