@@ -1,39 +1,24 @@
 #!/bin/bash
 
-help()
-{
-    echo Run The RNA-seq deg pipeline:
-    echo USAGE: $(echo $0 | awk -F / '{print$NF}') \<1 for single end or 2 for piared end\> \<\raw_data_dir\>
-    echo raw_data_dir should contain a dir for each sample containing it\'s fastq files.
-    echo Biological replicates of the same condition should be in dirs named the same except for tailing numbers e.g. cntrl1 cntrl2.
-    echo Run from the directory you wish the output to be written to.
-    echo
-    echo Possibly edit the submission files \(you can do this before running the pipeline or after, running additional jobs\).
-    echo Single end mode isn\'t set up yet. contact me if you need this feature. Ben
-    echo products: volcano plot, html report, csv.
+help() {
+  echo Run The RNA-seq deg pipeline:
+  echo OLD USAGE: $(echo $0 | awk -F / '{print$NF}') \<1 for single end or 2 for piared end\> \<\raw_data_dir\>
+  echo USAGE: $(echo $0 | awk -F / '{print$NF}') \{-single-end or -paired-end\} -raw-dir \<raw_data_dir\> -genome \<mm10 or hg38\>
+  echo raw_data_dir should contain a dir for each sample containing it\'s fastq files.
+  echo Biological replicates of the same condition should be in dirs named the same except for tailing numbers e.g. cntrl1 cntrl2.
+  echo Run from the directory you wish the output to be written to.
+  echo
+  echo Possibly edit the submission files \(you can do this before running the pipeline or after, running additional jobs\).
+  echo Single end mode isn\'t set up yet. contact me if you need this feature. Ben
+  echo products: volcano plot, html report, csv.
 
 }
 
+main() {
+  REPO_FOR_REIZEL_LAB=/storage/bfe_reizel/bengst/repo_for_reizel_lab
+  arg_parse "$@"
 
-main()
-{
- REPO_FOR_REIZEL_LAB=/storage/bfe_reizel/bengst/repo_for_reizel_lab
-
- if [[ $# -lt 2 ]]; then
-    help
-    exit 1
-  fi
-
-  if [[ $1 -eq 1 ]]; then
-    single_end=1
-  elif [[ $1 -eq 2 ]]; then
-    single_end=0
-  else
-    help
-    exit 1
-  fi
-
-  write_condor_submition_files $2
+  write_condor_submition_files
   write_condor_dag
   mkdir logs
 
@@ -43,10 +28,8 @@ main()
 
 }
 
-write_condor_submition_files()
-{
-  raw_dir=$1
-  cat << EOF > hisat2_jobs.sub
+write_condor_submition_files() {
+  cat <<EOF >hisat2_jobs.sub
 Initialdir = $(pwd)
 executable = $REPO_FOR_REIZEL_LAB/run_on_atlas/rna_hisat2_htseq_DESeq2_condor_dag/hisat2_job.sh
 Arguments = \$(args)
@@ -57,21 +40,34 @@ log = logs/\$(name)_hisat2.log
 output = logs/\$(name)_hisat2.out
 error = logs/\$(name)_hisat2.out
 EOF
-#  if [[ $single_end -eq 0 ]]; then
-#    cat << EOF >> hisat2_jobs.sub
-#    queue name, args from (
-#$( for samp_dir in $(find $raw_dir/* -type d); do echo $samp_dir | awk -F / '{printf $NF", "}'; find $samp_dir | grep -E '_1|_2|R1|R2'| sort | awk '{printf $0" "}' ; echo $samp_dir | awk -F / '{print "./"$NF"/"$NF".hisat2_output.bam ./"$NF"/"$NF".hisat2.summary.txt "}'  ; done)
-#)
-#EOF
-#  else #if single end
-    cat << EOF >> hisat2_jobs.sub
+  if [[ $read_type == "single_end" ]]; then
+    cat <<EOF >>hisat2_jobs.sub
     queue name, args from (
-$( for samp_dir in $(find $raw_dir/* -type d); do echo $samp_dir | awk -F / '{printf $NF", "}'; find $samp_dir | grep -E '.fq.gz|.fastq.gz'| sort | awk '{printf $0" "}' ; echo $samp_dir | awk -F / '{print "./"$NF"/"$NF".hisat2_output.bam ./"$NF"/"$NF".hisat2.summary.txt "}'  ; done)
+$(for samp_dir in $(find $raw_dir/* -type d); do
+      echo $samp_dir | awk -F / '{printf $NF", "}'
+      printf " -genome %s" $genome
+      printf " -r1 %s " $(find $samp_dir |grep -E "*.fq|*.fq.gz|*.fastq|*.fastq.gz")
+      echo $samp_dir | awk -F / '{print "-output-file ./"$NF"/"$NF".hisat2_output.bam -summary-file ./"$NF"/"$NF".hisat2.summary.txt "}'
+    done)
 )
 EOF
-#  fi
+  else #if paired end
+    cat <<EOF >>hisat2_jobs.sub
+    queue name, args from (
+$(for samp_dir in $(find $raw_dir/* -type d); do
+      r1=$( find $samp_dir | grep -E '.fq.gz|.fastq.gz'| grep -E '_1|R1')
+      r2=$( find $samp_dir | grep -E '.fq.gz|.fastq.gz'| grep -E '_2|R2')
+      printf " -genome %s" $genome
+      printf " -r1 %s " $r1
+      printf " -r2 %s " $r2
+      echo $samp_dir | awk -F / '{print "-output-file ./"$NF"/"$NF".hisat2_output.bam -summary-file ./"$NF"/"$NF".hisat2.summary.txt "}'
+    done)
+)
+EOF
+  fi
 
-  cat << EOF > htseq_jobs.sub
+
+  cat <<EOF >htseq_jobs.sub
 Initialdir = $(pwd)
 executable = $REPO_FOR_REIZEL_LAB/run_on_atlas/rna_hisat2_htseq_DESeq2_condor_dag/htseq_job.sh
 Arguments = \$(args)
@@ -82,14 +78,17 @@ log = logs/\$(name)_htseq-count.log
 output = logs/\$(name)_htseq-count.out
 error = logs/\$(name)_htseq-count.out
 queue name, args from (
-$( for samp_dir in $(find $raw_dir/* -type d); do echo $samp_dir | awk -F / '{printf $NF", "}'; echo $samp_dir | awk -F / '{print "./"$NF"/"$NF".hisat2_output.bam ./"$NF"/"$NF".htseq-count_output.txt"}'  ; done)
+$(for samp_dir in $(find $raw_dir/* -type d); do
+    echo $samp_dir | awk -F / '{printf $NF", "}'
+    echo $samp_dir | awk -F / '{print "./"$NF"/"$NF".hisat2_output.bam ./"$NF"/"$NF".htseq-count_output.txt"}'
+  done)
 )
 EOF
 
-#2 conditions for deg, assuming each fastq dir follows the pattern: NAME[0-9].*
-condition_1=`ls  $raw_dir/ | sed 's/\(^.*\)[0-9].*$/\1/' | uniq | awk 'NR==1'`
-condition_2=`ls  $raw_dir/ | sed 's/\(^.*\)[0-9].*$/\1/' | uniq | awk 'NR==2'`
-  cat << EOF > deseq2_job.sub
+  #2 conditions for deg, assuming each fastq dir follows the pattern: NAME[0-9].*
+  condition_1=$(ls $raw_dir/ | sed 's/\(^.*\)[0-9].*$/\1/' | uniq | awk 'NR==1')
+  condition_2=$(ls $raw_dir/ | sed 's/\(^.*\)[0-9].*$/\1/' | uniq | awk 'NR==2')
+  cat <<EOF >deseq2_job.sub
 environment = REPO_FOR_REIZEL_LAB=$REPO_FOR_REIZEL_LAB
 Initialdir = $(pwd)
 executable = $REPO_FOR_REIZEL_LAB/run_on_atlas/rna_hisat2_htseq_DESeq2_condor_dag/deseq2_job.sh
@@ -107,9 +106,8 @@ EOF
 
 }
 
-write_condor_dag()
-{
-    cat << EOF > rna_seq_jobs.dag
+write_condor_dag() {
+  cat <<EOF >rna_seq_jobs.dag
 JOB align_hisat2 hisat2_jobs.sub
 JOB count_reads_htseq htseq_jobs.sub
 JOB find_deg_deseq2 deseq2_job.sub
@@ -118,5 +116,39 @@ PARENT align_hisat2  CHILD count_reads_htseq
 PARENT count_reads_htseq  CHILD find_deg_deseq2
 EOF
 }
+
+arg_parse() {
+  while [[ $# -gt 0 ]]; do
+    case $1 in
+    -h | --help)
+      help
+      exit 1
+      ;;
+    -single-end)
+      read_type="single_end"
+      shift
+      ;;
+    -paired-end)
+      read_type="paired_end"
+      shift
+      ;;
+    -genome)
+      genome="$2"
+      shift
+      shift
+      ;;
+    -raw-dir)
+      raw_dir="$2"
+      shift
+      shift
+      ;;
+    *)
+      help
+      exit 1
+      ;;
+    esac
+  done
+}
+
 
 main "$@"
