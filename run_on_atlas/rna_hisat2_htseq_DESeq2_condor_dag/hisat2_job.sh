@@ -6,6 +6,8 @@
 
 main()
 {
+  arg_parse
+
 	if [[ $genome == "mm10" ]]; then
 	 hisat2_idx=/storage/bfe_reizel/bengst/genomic_reference_data/from_huji/mm10/Sequence/whole_genome_fasta_hisat2_index/hisat2-index
 	elif [[ $genome == "hg38" ]]; then
