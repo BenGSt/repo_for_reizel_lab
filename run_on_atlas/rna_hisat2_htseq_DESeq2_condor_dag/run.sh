@@ -13,7 +13,7 @@ help() {
   echo products: volcano plot, html report, csv.
   echo
   echo example args pe: -paired-end -raw-dir ~/storage/raw_data/ihep_rna_20.09.2022/X201SC22082747-Z01-F001/01.RawData/ -genome hg38
-  echo example args se:
+  echo example args se: -single-end -raw-dir ~/storage/raw_data/rnaseq_row_data_alona/  -genome mm10
   cat << EOF
 examples of directory structure:
 paired-end with 3 conditions (F, I, ND):

@@ -20,6 +20,11 @@ main()
   source /Local/bfe_reizel/anaconda3/bin/activate rna-seq_hisat2_htseq_deseq2_2022
   mkdir -p $(dirname $summary_file)
 
+  #debug
+  echo read_type: $read_type
+  echo hisat2_idx: $hisat2_idx
+  echo r1: $r1
+
   if [[ $read_type == "single_end" ]]; then
     hisat2 -p 10 -x $hisat2_idx -U $r1 --summary-file $summary_file | samtools sort -n --output-fmt BAM > $output_file
   else
