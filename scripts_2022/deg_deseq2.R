@@ -3,6 +3,7 @@ suppressMessages(library(DESeq2))
 suppressMessages(library(ReportingTools))
 suppressMessages(library(EnhancedVolcano))
 suppressMessages(library("org.Hs.eg.db"))
+suppressMessages(library("org.Mm.eg.db"))
 suppressMessages(library(argparser))
 
 GTF_USED_BY_HTSEQ = 'ENSEMBL' # keytype argument for "org.Hs.eg.db"
@@ -77,7 +78,7 @@ buildHtmlReport = function(dds, report_dir, pvalue_cutoff=0.01, contrast=NULL)
   publish(dds, report, pvalueCutoff=pvalue_cutoff,
           n=N_GENES_REPORT,
           factor = colData(dds)$conditions,
-          annotation.db="org.Hs.eg.db",
+          annotation.db="org.Mm.eg.db",
           keytype = GTF_USED_BY_HTSEQ ,
           contrast=contrast,
           reportDir=report_dir)
@@ -89,7 +90,7 @@ buildHtmlReport = function(dds, report_dir, pvalue_cutoff=0.01, contrast=NULL)
 
 volcano = function(res, pvalue_cutoff = 10e-10, log2_fc_cutoff = 0.5, png_path, title)
 {
-  symbols <- mapIds(org.Hs.eg.db, keys = rownames(res),
+  symbols <- mapIds(org.Mm.eg.db, keys = rownames(res),
                     column = c('SYMBOL'), keytype = GTF_USED_BY_HTSEQ)
   symbols[is.na(symbols)] <- names(symbols[is.na(symbols)])
   rownames(res) <- symbols
@@ -117,7 +118,7 @@ volcano = function(res, pvalue_cutoff = 10e-10, log2_fc_cutoff = 0.5, png_path, 
 
 volcano_padj = function(res, adjp_cutoff = 10e-10, log2_fc_cutoff = 0.5, png_path, title)
 {
-  symbols <- mapIds(org.Hs.eg.db, keys = rownames(res),
+  symbols <- mapIds(org.Mm.eg.db, keys = rownames(res),
                     column = c('SYMBOL'), keytype = 'ENSEMBL')
   symbols[is.na(symbols)] <- names(symbols[is.na(symbols)])
   rownames(res) <- symbols
@@ -160,7 +161,7 @@ main = function(htseq_out_dir, report_dir, padj_cutoff=0.01,  log2_fc_cutoff=1,
   res <- results(dds, contrast = contrast, alpha = padj_cutoff)
   volcano_padj(res, padj_cutoff, log2_fc_cutoff, png_path, volcano_plot_title)
   deg_list = res[abs(res$log2FoldChange) >= log2_fc_cutoff & !is.na(res$padj) & res$padj  <= padj_cutoff,]
-  symbols <- mapIds(org.Hs.eg.db, keys = rownames(deg_list),
+  symbols <- mapIds(org.Mm.eg.db, keys = rownames(deg_list),
                   column = c('SYMBOL'), keytype = GTF_USED_BY_HTSEQ)
   symbols[is.na(symbols)] <- names(symbols[is.na(symbols)])
   rownames(deg_list) <- symbols
