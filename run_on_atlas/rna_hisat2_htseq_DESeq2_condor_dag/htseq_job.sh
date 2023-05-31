@@ -3,7 +3,7 @@ input_file=$1
 output_file=$2
 genome=$3
 
-running "$@"
+echo running "$@"
 echo input_file=$1
 echo output_file=$2
 echo genome=$3
