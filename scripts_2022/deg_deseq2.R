@@ -197,16 +197,16 @@ if (argv$genome == "mm10") {
   quit(status=1)
 }
 
-# main(
-#     htseq_out_dir = argv$htseq_output_dir,
-#     report_dir = argv$report_dir,
-#     padj_cutoff = argv$padj_cutoff,
-#     log2_fc_cutoff = argv$log2_fc_cutoff,
-#     contrast = eval(parse(text=argv$contrast)),
-#     csv_path = argv$csv,
-#     volcano_plot_title = argv$volcano_plot_title,
-#     png_path = "volcano_plot.png",
-# )
+main(
+    htseq_out_dir = argv$htseq_output_dir,
+    report_dir = argv$report_dir,
+    padj_cutoff = argv$padj_cutoff,
+    log2_fc_cutoff = argv$log2_fc_cutoff,
+    contrast = eval(parse(text=argv$contrast)),
+    csv_path = argv$csv,
+    volcano_plot_title = argv$volcano_plot_title,
+    png_path = "volcano_plot.png",
+)
 
 
 #Note:  the error "'select()' returned 1:many mapping between keys and columns" Is because of NAs returned for some keys.
