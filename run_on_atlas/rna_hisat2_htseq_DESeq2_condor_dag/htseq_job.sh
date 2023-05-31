@@ -12,7 +12,7 @@ else
   exit 1
 fi
 
-echo running "$@"
+echo running $0 "$@"
 echo input_file=$1
 echo output_file=$2
 echo genome=$3
