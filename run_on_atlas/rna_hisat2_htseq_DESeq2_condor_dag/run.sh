@@ -8,7 +8,6 @@ help() {
   echo Run from the directory you wish the output to be written to.
   echo
   echo Possibly edit the submission files \(you can do this before running the pipeline or after, running additional jobs\).
-  echo Single end mode isn\'t set up yet. contact me if you need this feature. Ben
   echo products: volcano plot, html report, csv.
   echo
   echo example args pe: -paired-end -raw-dir ~/storage/raw_data/ihep_rna_20.09.2022/X201SC22082747-Z01-F001/01.RawData/ -genome hg38
