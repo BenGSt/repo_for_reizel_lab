@@ -205,7 +205,7 @@ main(
     contrast = eval(parse(text=argv$contrast)),
     csv_path = argv$csv,
     volcano_plot_title = argv$volcano_plot_title,
-    png_path = "volcano_plot.png",
+    png_path = "volcano_plot.png"
 )
 
 
