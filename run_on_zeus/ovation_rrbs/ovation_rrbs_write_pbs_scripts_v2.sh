@@ -48,11 +48,11 @@ arg_parse() {
   while [[ $# -gt 0 ]]; do
     case $1 in
     -single-end)
-      READ_TYPE="-single-end"
+      READ_TYPE="single_end"
       shift # past argument
       ;;
     -paired-end)
-      READ_TYPE="-paired-end"
+      READ_TYPE="paired_end"
       shift # past argument
       ;;
     -raw_samples_dir)
