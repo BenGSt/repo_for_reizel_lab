@@ -2,7 +2,7 @@
 
 main() {
   arg_parse "$@"
-  script=/home/s.benjamin/bioinformatics_software/repo_for_reizel_lab/run_on_zeus/ovation_rrbs/analyze_ovation_rrbs_v2.sh
+  script=/home/s.benjamin/repo_for_reizel_lab/run_on_zeus/ovation_rrbs/analyze_ovation_rrbs_v2.sh
 
   if [[ ! -d $OUTPUT_DIR ]]; then
     mkdir $OUTPUT_DIR
