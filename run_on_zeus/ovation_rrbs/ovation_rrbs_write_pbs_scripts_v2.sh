@@ -9,13 +9,7 @@ main() {
   fi
   cd $OUTPUT_DIR
 
-  echo DEBUG: pwd=$PWD
-  if [[ $READ_TYPE == "single_end" ]]; then
-    sample_list=$(ls $RAW_SAMPLES_DIR | grep -P 'fastq|fq' | grep -v md5)
-  else
-    sample_list=$(ls $RAW_SAMPLES_DIR | grep R1 | grep -P 'fastq|fq' | grep -v md5)
-  fi
-
+  sample_list=$(ls $RAW_SAMPLES_DIR)
   for sample in $sample_list; do
     if [[ $READ_TYPE == "single_end" ]]; then
       dir_name=$(echo $sample | awk -F . '{print $1}')
