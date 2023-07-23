@@ -11,6 +11,7 @@
 PBS_O_WORKDIR=/home/s.benjamin/genomic_reference_data/Mus_musculus/UCSC/mm9/Sequence/WholeGenomeFasta/
 cd $PBS_O_WORKDIR
 
-/home/s.benjamin/other_software/mambaforge/bin/activate  /home/s.benjamin/micromamba/envs/wgbs_bismark_pipeline_2023
+eval "$(micromamba shell hook --shell=bash)"
+micromamba activate  /home/s.benjamin/micromamba/envs/wgbs_bismark_pipeline_2023
 echo running"bismark_genome_preparation --bowtie2 --parallel 10 --verbose /home/s.benjamin/genomic_reference_data/Mus_musculus/UCSC/mm9/Sequence/WholeGenomeFasta/ >> bismark_genome_preparation.log 2>&1" > bismark_genome_preparation.log
 bismark_genome_preparation --bowtie2 --parallel 10 --verbose /home/s.benjamin/genomic_reference_data/Mus_musculus/UCSC/mm9/Sequence/WholeGenomeFasta/ >> bismark_genome_preparation.log 2>&1
