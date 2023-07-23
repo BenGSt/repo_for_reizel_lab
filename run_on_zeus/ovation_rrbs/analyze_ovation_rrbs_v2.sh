@@ -53,9 +53,9 @@ select_genome() {
 #'
 trim_illumina_adapters() {
   if [[ $READ_TYPE == "single_end" ]]; then
-    cmd=$(${TRIM_GALORE} --adapter AGATCGGAAGAGC $INPUT_FASTQ --cores $N_CORES --fastqc)
+    cmd=$(echo ${TRIM_GALORE} --adapter AGATCGGAAGAGC $INPUT_FASTQ --cores $N_CORES --fastqc)
   else
-    cmd=$(${TRIM_GALORE} --paired --adapter AGATCGGAAGAGC --adapter2 AAATCAAAAAAAC $INPUT_FASTQ_1 $INPUT_FASTQ_2 \
+    cmd=$(echo ${TRIM_GALORE} --paired --adapter AGATCGGAAGAGC --adapter2 AAATCAAAAAAAC $INPUT_FASTQ_1 $INPUT_FASTQ_2 \
       --cores $N_CORES --fastqc)
   fi
   echo runnig: $cmd
