@@ -3,6 +3,8 @@
 GENOMIC_REFERENCE_DATA=/home/s.benjamin/genomic_reference_data
 
 main() {
+  arg_parse "$@"
+
   SCRIPT_NAME=$(echo $0 | awk -F / '{print $NF}')
   echo \###################$SCRIPT_NAME \($(date)\)#############
   echo running: $SCRIPT_NAME "$@"
@@ -11,7 +13,7 @@ main() {
   echo \########################################################
   echo
 
-  arg_parse "$@"
+
   select_genome
 
   #activate conda environment
