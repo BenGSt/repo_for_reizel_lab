@@ -41,14 +41,14 @@ select_genome() {
   fi
 }
 
-:'
-Positional argument are  R1, R2 fastq file to trim.
-Note on multicore from cutadapt manual:
-  To automatically detect the number of available cores, use -j 0 (or --cores=0). The detection takes into account resource restrictions that may be in place. For example, if running Cutadapt as a batch job on a cluster system, the actual number of cores assigned to the job will be used. (This works if the cluster systems uses the cpuset(1) mechanism to impose the resource limitation.)
-Note from trim_galore manual:
-  It seems that --cores 4 could be a sweet spot, anything above has diminishing returns.
-  --cores 4 would then be: 4 (read) + 4 (write) + 4 (Cutadapt) + 2 (extra Cutadapt) + 1 (Trim Galore) = 15, and so forth.
-'
+#:'
+#Positional argument are  R1, R2 fastq file to trim.
+#Note on multicore from cutadapt manual:
+#  To automatically detect the number of available cores, use -j 0 (or --cores=0). The detection takes into account resource restrictions that may be in place. For example, if running Cutadapt as a batch job on a cluster system, the actual number of cores assigned to the job will be used. (This works if the cluster systems uses the cpuset(1) mechanism to impose the resource limitation.)
+#Note from trim_galore manual:
+#  It seems that --cores 4 could be a sweet spot, anything above has diminishing returns.
+#  --cores 4 would then be: 4 (read) + 4 (write) + 4 (Cutadapt) + 2 (extra Cutadapt) + 1 (Trim Galore) = 15, and so forth.
+#'
 trim_illumina_adapters() {
   if [[ $READ_TYPE == "single_end" ]]; then
     cmd=$(${TRIM_GALORE} --adapter AGATCGGAAGAGC $INPUT_FASTQ --cores $N_CORES --fastqc)
