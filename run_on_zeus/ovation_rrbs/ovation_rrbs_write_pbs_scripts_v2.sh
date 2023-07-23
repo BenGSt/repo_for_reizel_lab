@@ -13,13 +13,13 @@ main() {
   for sample in $sample_list; do
     if [[ $READ_TYPE == "single_end" ]]; then
       dir_name=$(echo $sample | awk -F . '{print $1}')
-      script_args=$(-genome $genome $non_directional -n_cores $N_CORES $READ_TYPE -input_fastq_file $RAW_SAMPLES_DIR/$sample \> $dir_name.log 2\>\&1)
+      script_args=$(echo -genome $genome $non_directional -n_cores $N_CORES $READ_TYPE -input_fastq_file $RAW_SAMPLES_DIR/$sample \> $dir_name.log 2\>\&1)
     else
       echo sample = $sample
       r1=$sample
       r2=$(echo $sample | sed 's/R1/R2/')
       dir_name=$(echo $sample | awk -F . '{print $1}' | sed 's/R1_//')
-      script_args=$(-genome $genome $non_directional -n_cores $N_CORES $READ_TYPE -paired_input_fastq_files $RAW_SAMPLES_DIR/${r1} $RAW_SAMPLES_DIR/${r2} \> $dir_name.log 2\>\&1)
+      script_args=$(echo -genome $genome $non_directional -n_cores $N_CORES $READ_TYPE -paired_input_fastq_files $RAW_SAMPLES_DIR/${r1} $RAW_SAMPLES_DIR/${r2} \> $dir_name.log 2\>\&1)
     fi
 
     mkdir $dir_name
