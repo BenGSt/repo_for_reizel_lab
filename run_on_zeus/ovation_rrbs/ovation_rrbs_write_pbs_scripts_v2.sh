@@ -11,15 +11,14 @@ main() {
 
   sample_list=$(ls $RAW_SAMPLES_DIR)
   for sample in $sample_list; do
+    dir_name=$(echo $sample | awk -F . '{print $1}')
     if [[ $READ_TYPE == "single_end" ]]; then
-      dir_name=$(echo $sample | awk -F . '{print $1}')
       script_args=$(echo -genome $genome $non_directional -n_cores $N_CORES $READ_TYPE -input_fastq_file $RAW_SAMPLES_DIR/$sample \> $dir_name.log 2\>\&1)
-    else
+    else #TODO test paired end, maybe add _1 _2 not only R1 R2
       echo sample = $sample
-      r1=$sample
-      r2=$(echo $sample | sed 's/R1/R2/')
-      dir_name=$(echo $sample | awk -F . '{print $1}' | sed 's/R1_//')
-      script_args=$(echo -genome $genome $non_directional -n_cores $N_CORES $READ_TYPE -paired_input_fastq_files $RAW_SAMPLES_DIR/${r1} $RAW_SAMPLES_DIR/${r2} \> $dir_name.log 2\>\&1)
+      r1=$(find $RAW_SAMPLES_DIR -name R1)
+      r2=$(find $RAW_SAMPLES_DIR -name R2)
+      script_args=$(echo -genome $genome $non_directional -n_cores $N_CORES $READ_TYPE -paired_input_fastq_files ${r1} ${r2} \> $dir_name.log 2\>\&1)
     fi
 
     mkdir $dir_name
