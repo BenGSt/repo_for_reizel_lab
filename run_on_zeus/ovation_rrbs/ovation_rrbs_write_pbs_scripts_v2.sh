@@ -9,6 +9,7 @@ main() {
   fi
   cd $OUTPUT_DIR
 
+  echo DEBUG: pwd=$PWD
   if [[ $READ_TYPE == "single_end" ]]; then
     sample_list=$(ls $RAW_SAMPLES_DIR | grep -P 'fastq|fq' | grep -v md5)
   else
