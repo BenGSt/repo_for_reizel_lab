@@ -161,7 +161,7 @@ combine_methylation_coverage_to_tiles() {
   meth_call_output=$(ls | grep cov.gz)
 
   # 100bp tiles variant 2: First calculate the tiles and then remove tiles with total coverage < 10
-  file_out=$(echo meth_call_output | awk -v tile_size=$tile_size -F "." '{print $1 "_" tile_size "bp_tiles.bed" }')
+  file_out=$(echo $meth_call_output | awk -v tile_size=$tile_size -F "." '{print $1 "_" tile_size "bp_tiles.bed" }')
   bedtools intersect -a $genome_tiles -b $meth_call_output -wa -wb | awk -v cov=$min_coverage -v tileSize=$tile_size 'BEGIN {OFS="\t"; Prev=-1} {if ($2 == Prev) {T=T+$8+$9; M=M+$8} else {if (Prev!=-1 && T>=cov) {print PrevChr,Prev,Prev+tileSize-1,M/T};T=$8+$9; M=$8;}; Prev=$2; PrevChr=$1}' >../${file_out}
 
   #unite tiles from different samples into big table
