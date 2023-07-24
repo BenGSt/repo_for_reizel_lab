@@ -5,7 +5,11 @@ DIVERSITY_TRIM_SCRIPT=/home/s.benjamin/bioinformatics_software/NuMetRRBS/trimRRB
 N_CORES=20
 TILE_SIZE=100
 TILE_MIN_COV=10
+
 main() {
+  # Enable "exit immediately on error" behavior
+  set -e
+
   arg_parse "$@"
 
   #activate conda environment
@@ -21,12 +25,12 @@ main() {
   echo
 
   select_genome
-  time trim_illumina_adapters
-  time trim_diversity_adaptors
-  time align_to_genome
+  trim_illumina_adapters
+  trim_diversity_adaptors
+  align_to_genome
   ##TODO: remove PCR duplicates (optional)
-  time methylation_calling
-  time combine_methylation_coverage_to_tiles $TILE_SIZE $TILE_MIN_COV
+  methylation_calling
+  combine_methylation_coverage_to_tiles $TILE_SIZE $TILE_MIN_COV
 
   echo \########################################################
   echo finished $script_name \($(date)\)
@@ -114,11 +118,11 @@ trim_diversity_adaptors() {
 align_to_genome() {
   if [[ $read_type == "single_end" ]]; then
     trim_diversity_output=$(echo $trim_galore_output | sed 's/\.gz/_trimmed.fq.gz/')
-    cmd=$(echo bismark $non_directional --parallel $(($N_CORES / 4))--bowtie2 $bismark_genome_location $trim_diversity_output)
+    cmd=$(echo bismark $non_directional --parallel $(($N_CORES / 4)) --bowtie2 $bismark_genome_location $trim_diversity_output)
   else
     trim_diversity_output_1=$(echo $trim_galore_output_1 | sed 's/\.gz/_trimmed.fq.gz/')
     trim_diversity_output_2=$(echo $trim_galore_output_2 | sed 's/\.gz/_trimmed.fq.gz/')
-    cmd=$(echo $non_directional --parallel $(($N_CORES / 4))--bowtie2 $bismark_genome_location -1 $trim_diversity_output_1 -2 $trim_diversity_output_2)
+    cmd=$(echo $non_directional --parallel $(($N_CORES / 4)) --bowtie2 $bismark_genome_location -1 $trim_diversity_output_1 -2 $trim_diversity_output_2)
   fi
 
   echo runnig: $cmd \($(date)\)
