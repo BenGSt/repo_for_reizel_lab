@@ -7,7 +7,7 @@ TILE_SIZE=100
 TILE_MIN_COV=10
 
 main() {
-  # Enable "exit immediately on error" behavior
+  #enable "exit immediately on error" behavior
   set -e
   arg_parse "$@"
 
