@@ -44,7 +44,7 @@ EOF
 }
 
 arg_parse() {
-
+  [[ $# -eq 0 ]] && { help; exit 1; }
   while [[ $# -gt 0 ]]; do
     case $1 in
     -single-end)
