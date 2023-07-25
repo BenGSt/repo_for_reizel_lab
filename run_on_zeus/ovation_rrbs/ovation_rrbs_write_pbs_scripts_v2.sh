@@ -105,21 +105,21 @@ help() {
   cat <<EOF
   makes a directory for each sample and writes a pbs script ready to be run with qsub to it.
 
-	-single-end
-	or
-	-paired-end
-	
-	-raw_samples_dir <path> (should contain a directory for each sample containing it's fastq files.)
-	-output_dir
-	-genome <mm9/mm10/hg38>
+  -single-end
+  or
+  -paired-end
+
+  -raw_samples_dir <path> (should contain a directory for each sample containing it's fastq files.)
+  -output_dir
+  -genome <mm9/mm10/hg38>
 
   Optional:
   =========
   [-ovation (must use for Ovation RRBS kit - enables diversity adapters trimming)]
-	[-n_cores <int> (DEFAULT: 20)]
-	[-non-directional]
-	[-extra-meth-extractor-options "multiple quoted arguments"]
-	[-extra-trim-galore-options "multiple quoted arguments"]
+  [-n_cores <int> (DEFAULT: 20)]
+  [-non-directional]
+  [-extra-meth-extractor-options "multiple quoted arguments"]
+  [-extra-trim-galore-options "multiple quoted arguments"]
 
 
 EOF
