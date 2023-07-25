@@ -14,11 +14,11 @@ main() {
     echo sample: $dir_name
     if [[ $READ_TYPE == "single_end" ]]; then
       fastq=$(find $RAW_SAMPLES_DIR/$dir_name/ -regex '.*\.\(fastq\|fq\).*')
-      script_args=$(echo -genome $genome $non_directional -n_cores $N_CORES -single-end -input_fastq_file $fastq \> $dir_name.log 2\>\&1)
+      script_args=$(echo -genome $genome $non_directional $ovation -n_cores $N_CORES -single-end -input_fastq_file $fastq \> $dir_name.log 2\>\&1)
     else #TODO test paired end, maybe add _1 _2 not only R1 R2
       r1=$(find $RAW_SAMPLES_DIR/$dir_name/ -name R1)
       r2=$(find $RAW_SAMPLES_DIR/$dir_name/ -name R2)
-      script_args=$(echo -genome $genome $non_directional -n_cores $N_CORES -paired-end -paired_input_fastq_files ${r1} ${r2} \> $dir_name.log 2\>\&1)
+      script_args=$(echo -genome $genome $non_directional $ovation -n_cores $N_CORES -paired-end -paired_input_fastq_files ${r1} ${r2} \> $dir_name.log 2\>\&1)
     fi
 
     mkdir $dir_name
@@ -79,6 +79,20 @@ arg_parse() {
       shift
       shift
       ;;
+    -ovation)
+      ovation="-ovation"
+      shift
+      ;;
+    -extra-trim-galore-options)
+      extra_trim_galore_opts=$(echo -extra_trim_galore_opts \'"$2"\')
+      shift
+      shift
+      ;;
+    -extra-meth-extractor-options)
+      extra_meth_extract_opts=$(echo -extra_meth_extract_opts \'"$2"\')
+      shift
+      shift
+      ;;
     -h | --help)
       help
       exit 1
@@ -97,9 +111,16 @@ help() {
 	
 	-raw_samples_dir <path> (should contain a directory for each sample containing it's fastq files.)
 	-output_dir
-	-n_cores
 	-genome <mm9/mm10/hg38>
+
+  Optional:
+  =========
+  [-ovation (must use for Ovation RRBS kit - enables diversity adapters trimming)]
+	[-n_cores <int> (DEFAULT: 20)]
 	[-non-directional]
+	[-extra-meth-extractor-options "multiple quoted arguments"]
+	[-extra-trim-galore-options "multiple quoted arguments"]
+
 
 EOF
 }

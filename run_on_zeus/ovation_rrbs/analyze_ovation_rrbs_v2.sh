@@ -25,9 +25,13 @@ main() {
 
   select_genome
   trim_illumina_adapters
-  trim_diversity_adaptors
+
+  if [[ $ovation ]]; then
+    trim_diversity_adaptors
+  fi
+
   align_to_genome
-  ##TODO: remove PCR duplicates (optional)
+  #TODO: remove PCR duplicates (optional)
   methylation_calling
   combine_methylation_coverage_to_tiles $TILE_SIZE $TILE_MIN_COV
 
@@ -61,44 +65,14 @@ select_genome() {
 #'
 trim_illumina_adapters() {
   if [[ $read_type == "single_end" ]]; then
-    cmd=$(echo trim_galore --adapter AGATCGGAAGAGC $input_fastq --cores $N_CORES --fastqc)
+    cmd=$(echo trim_galore $extra_trim_galore_opts --adapter AGATCGGAAGAGC $input_fastq --cores $N_CORES --fastqc)
   else
-    cmd=$(echo trim_galore --paired --adapter AGATCGGAAGAGC --adapter2 AAATCAAAAAAAC $input_fastq_1 $input_fastq_2 \
+    cmd=$(echo trim_galore $extra_trim_galore_opts --paired --adapter AGATCGGAAGAGC --adapter2 AAATCAAAAAAAC $input_fastq_1 $input_fastq_2 \
       --cores $N_CORES --fastqc)
   fi
   echo runnig: $cmd
   $cmd
 }
-
-#TODO: test new trim function, if works delete next two functions.
-#trim_illumina_adapter_paired_end() #<R1> <R2>
-#{
-#	#positional argument are  R1, R2 fastq file to trim
-#	#note on nulticores from cutadapt manual
-#		#To automatically detect the number of available cores, use -j 0 (or --cores=0). The detection takes into account resource restrictions that may be in place. For example, if running Cutadapt as a batch job on a cluster system, the actual number of cores assigned to the job will be used. (This works if the cluster systems uses the cpuset(1) mechanism to impose the resource limitation.)
-#	#note from trim_galore manual
-#		#It seems that --cores 4 could be a sweet spot, anything above has diminishing returns.
-#		#--cores 4 would then be: 4 (read) + 4 (write) + 4 (Cutadapt) + 2 (extra Cutadapt) + 1 (Trim Galore) = 15, and so forth.
-#	echo \###################$script_name \($(date)\)#############
-#	echo runnig: trim_galore --paired --adapter AGATCGGAAGAGC --adapter2 AAATCAAAAAAAC $1 $2 --cores $N_CORES --fastqc \($(date)\)
-#	trim_galore --paired --adapter AGATCGGAAGAGC --adapter2 AAATCAAAAAAAC $1 $2 --cores $N_CORES --fastqc
-#	echo \########################################################
-#}
-#
-#trim_illumina_adapter_single_end()
-#{
-#	#first positional argument is fastq file to trim
-#	#note on nulticores from cutadapt manual
-#		#To automatically detect the number of available cores, use -j 0 (or --cores=0). The detection takes into account resource restrictions that may be in place. For example, if running Cutadapt as a batch job on a cluster system, the actual number of cores assigned to the job will be used. (This works if the cluster systems uses the cpuset(1) mechanism to impose the resource limitation.)
-#	#note from trim_galore manual
-#		#It seems that --cores 4 could be a sweet spot, anything above has diminishing returns.
-#		#--cores 4 would then be: 4 (read) + 4 (write) + 4 (Cutadapt) + 2 (extra Cutadapt) + 1 (Trim Galore) = 15, and so forth.
-#	echo \###################$script_name \($(date)\)#############
-#	echo runnig: trim_galore --adapter AGATCGGAAGAGC $1 --cores $N_CORES \($(date)\)
-#	trim_galore --adapter AGATCGGAAGAGC $1  --cores $N_CORES --fastqc
-#	echo \########################################################
-#}
-#
 
 trim_diversity_adaptors() {
   #https://github.com/nugentechnologies/NuMetRRBS#diversity-trimming-and-filtering-with-nugens-diversity-trimming-scripts
@@ -138,10 +112,10 @@ methylation_calling() {
   if [[ $read_type == "single_end" ]]; then
     alignment_output=$(echo $trim_diversity_output | sed 's/\.fq\.gz/_bismark_bt2.bam/')
     #By default, this mode will only consider cytosines in CpG context, but it can be extended to cytosines in any sequence context by using the option --CX
-    cmd=$(echo bismark_methylation_extractor --multicore $(($N_CORES / 3)) --bedGraph --buffer_size 10G --output methylation_extractor_output $alignment_output)
+    cmd=$(echo bismark_methylation_extractor $extra_meth_extract_opts --multicore $(($N_CORES / 3)) --bedGraph --buffer_size 10G --output methylation_extractor_output $alignment_output)
   else
     alignment_output=$(echo $trim_diversity_output_1 | sed 's/\.fq\.gz/_bismark_bt2_pe.bam/')
-    cmd=$(echo bismark_methylation_extractor -p --multicore $(($N_CORES / 3)) --bedGraph --buffer_size 10G --output methylation_extractor_output $alignment_output)
+    cmd=$(echo bismark_methylation_extractor $extra_meth_extract_opts -p --multicore $(($N_CORES / 3)) --bedGraph --buffer_size 10G --output methylation_extractor_output $alignment_output)
   fi
 
   echo runnig: $cmd
@@ -176,8 +150,13 @@ combine_methylation_coverage_to_tiles() {
 help() {
   cat <<EOF
 	-single-end or -paired-end
-	-input_fastq_file or -paired_input_fastq_files
-	-n_cores
+	-input_fastq_file <file> or -paired_input_fastq_files <R1> <R2>
+	-genome <hg38, mm10, mm9>
+	[-ovation (use for Ovation RRBS kit - enables diversity adapters trimming)]
+	[-n_cores <int> (DEFAULT: 20)]
+	[-non-directional]
+	[-extra-meth-extractor-options "multiple quoted arguments"]
+	[-extra-trim-galore-options "multiple quoted arguments"]
 EOF
 }
 
@@ -213,8 +192,22 @@ arg_parse() {
       non_directional="--non_directional"
       shift
       ;;
+    -ovation)
+      ovation=1
+      shift
+      ;;
     -genome)
       genome=$2
+      shift
+      shift
+      ;;
+    -extra-trim-galore-options)
+      extra_trim_galore_opts=$2
+      shift
+      shift
+      ;;
+    -extra-meth-extractor-options)
+      extra_meth_extract_opts=$2
       shift
       shift
       ;;
