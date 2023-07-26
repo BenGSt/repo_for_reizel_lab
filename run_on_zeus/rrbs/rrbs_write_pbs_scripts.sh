@@ -109,12 +109,12 @@ arg_parse() {
       shift
       ;;
     -extra-trim-galore-options)
-      extra_trim_galore_opts=$(echo -extra_trim_galore_opts \'"$2"\')
+      extra_trim_galore_opts=$(echo -extra-trim-galore-options \'"$2"\')
       shift
       shift
       ;;
     -extra-meth-extractor-options)
-      extra_meth_extract_opts=$(echo -extra_meth_extract_opts \'"$2"\')
+      extra_meth_extract_opts=$(echo -extra-meth-extractor-options \'"$2"\')
       shift
       shift
       ;;
