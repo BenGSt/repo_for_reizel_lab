@@ -14,11 +14,11 @@ main() {
     echo sample: $dir_name
     if [[ $READ_TYPE == "single_end" ]]; then
       fastq=$(find $RAW_SAMPLES_DIR/$dir_name/ -regex '.*\.\(fastq\|fq\).*')
-      script_args=$(echo -genome $genome $non_directional $ovation -n_cores $N_CORES -single-end -input_fastq_file $fastq \> $dir_name.log 2\>\&1)
+      script_args=$(echo $extra_trim_galore_opts $extra_meth_extract_opts -genome $genome $non_directional $ovation -n_cores $N_CORES -single-end -input_fastq_file $fastq \> $dir_name.log 2\>\&1)
     else #TODO test paired end, maybe add _1 _2 not only R1 R2
       r1=$(find $RAW_SAMPLES_DIR/$dir_name/ -name R1)
       r2=$(find $RAW_SAMPLES_DIR/$dir_name/ -name R2)
-      script_args=$(echo -genome $genome $non_directional $ovation -n_cores $N_CORES -paired-end -paired_input_fastq_files ${r1} ${r2} \> $dir_name.log 2\>\&1)
+      script_args=$(echo $extra_trim_galore_opts $extra_meth_extract_opts -genome $genome $non_directional $ovation -n_cores $N_CORES -paired-end -paired_input_fastq_files ${r1} ${r2} \> $dir_name.log 2\>\&1)
     fi
 
     mkdir $dir_name
