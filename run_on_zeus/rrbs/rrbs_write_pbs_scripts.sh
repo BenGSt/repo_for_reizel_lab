@@ -1,8 +1,9 @@
 #!/bin/bash
 
 main() {
+  write_cmd "$@"
   arg_parse "$@"
-  script=/home/s.benjamin/repo_for_reizel_lab/run_on_zeus/ovation_rrbs/analyze_ovation_rrbs_v2.sh
+  script=/home/s.benjamin/repo_for_reizel_lab/run_on_zeus/rrbs/bismark_rrbs_pipeline.sh
 
   if [[ ! -d $OUTPUT_DIR ]]; then
     mkdir $OUTPUT_DIR
@@ -41,10 +42,34 @@ $script $script_args
 EOF
     cd ..
   done
+
+  suggest_submit
+}
+
+suggest_submit() {
+  echo You may find this list of submission commands usefull:
+  find . -name "*.q" | awk '{print "qsub " $1}'
+  printf 'Submit all jobs now? (y/n) '
+  read answer
+  if [ "$answer" != "${answer#[Yy]}" ]; then # (the #[] operator) means that the variable $answer where any Y or y in 1st position will be dropped if they exist.
+    find . -name "*.q" | awk '{print "qsub " $1}' | bash
+  fi
+  echo Good luck!
+}
+
+write_cmd() {
+  if [[ $# -gt 2 ]]; then #don't (re)write cmd.txt if no args
+    echo \# the command used to prepare the jobs. Note that parentheses are lost >cmd.txt
+    echo \# and need to be added to rerun: -extra-trim-galore-options \"multiple quoted options\" >>cmd.txt
+    echo "$0" "$@" >>cmd.txt #TODO: preserve quotes that may be in args
+  fi
 }
 
 arg_parse() {
-  [[ $# -eq 0 ]] && { help; exit 1; }
+  [[ $# -eq 0 ]] && {
+    help
+    exit 1
+  }
   while [[ $# -gt 0 ]]; do
     case $1 in
     -single-end)
