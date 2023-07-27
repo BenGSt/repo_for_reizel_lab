@@ -1,4 +1,4 @@
-#!Rscript
+#!/usr/bin/env Rscript
 
 install_packages <- function()
 {
@@ -26,8 +26,8 @@ read_meth_call_files <- function(meth_call_files_dir, pipeline_, samp_ids, treat
                                 pattern = "*.cov.gz|*.cov",
                                 full.names = TRUE)
 
-  sprintf("Make sure the samp_ids match the cov files order:")
-  sprintf("cov file: %s\n sam id: %s", basename(meth_call_files), samp_ids)
+  sprintf("Make sure the samp_ids match the cov files order:") %>% print()
+  sprintf("cov file: %s\n sam id: %s", basename(meth_call_files), samp_ids) %>% print()
 
   methyl_raw_list <- methRead(as.list(meth_call_files),
                               sample.id = as.list(samp_ids),
