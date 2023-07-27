@@ -1,0 +1,320 @@
+#!/usr/bin/env Rscript
+
+install_packages <- function()
+{
+  if (!require("argparser", quietly = TRUE))
+    install.packages("argparser", dependencies = TRUE)
+
+  if (!require("dplyr", quietly = TRUE))
+    install.packages("dplyr", dependencies = TRUE)
+
+
+  if (!require("BiocManager", quietly = TRUE))
+    install.packages("BiocManager", dependencies = TRUE)
+
+  BiocManager::install("methylKit", dependencies = TRUE)
+  BiocManager::install("GenomicFeatures", dependencies = TRUE)
+  install.packages("RMariaDB", dependencies = TRUE) # needed for makeTxDbFromUCSC from "GenomicFeatures"
+  BiocManager::install("genomation", dependencies = TRUE)
+  BiocManager::install("rGREAT", dependencies = TRUE)
+}
+
+
+read_meth_call_files <- function(meth_call_files_dir, pipeline_, samp_ids, treatments)
+{
+  meth_call_files <- list.files(path = meth_call_files_dir,
+                                pattern = "*.cov.gz|*.cov",
+                                full.names = TRUE)
+
+  sprintf("Make sure the samp_ids match the cov files order:")
+  sprintf("cov file: %s\n sam id: %s", basename(meth_call_files), samp_ids)
+
+  methyl_raw_list <- methRead(as.list(meth_call_files),
+                              sample.id = as.list(samp_ids),
+                              assembly = "mm10",
+                              pipeline = pipeline_,
+                              header = FALSE,
+                              treatment = treatments,
+                              context = "CpG",
+                              mincov = 10)
+  return(methyl_raw_list)
+}
+
+
+filter_bases <- function(methyl_raw_list)
+{
+  # It might be useful to filter samples based on coverage. Particularly, 
+  # if our samples are suffering from PCR bias it would be useful to discard bases
+  # with very high read coverage. Furthermore, we would also like to discard base
+  # that have low read coverage, a high enough read coverage will increase the
+  # power of the statistical tests. The code below filters a methylRawList and
+  # discards bases that have coverage below 10X and also discards the bases
+  # that have more than 99.9th percentile of coverage in each sample.
+
+  filtered <- filterByCoverage(methyl_raw_list, lo.count = 10, lo.perc = NULL,
+                               hi.count = NULL, hi.perc = 99.9)
+  return(filtered)
+}
+
+
+make_tiles <- function(meth_call_files_dir, pipeline, samp_ids,
+                       treatments)
+{
+  methyl_raw_list <- read_meth_call_files(meth_call_files_dir, pipeline,
+                                          samp_ids, treatments)
+
+
+  methyl_raw_list <- filter_bases(methyl_raw_list)
+  # getMethylationStats(methyl_raw_list[[3]],plot=T, both.strands=FALSE)
+  # getCoverageStats(methyl_raw_list[[3]],plot=T,both.strands=FALSE)
+
+  tiles_raw <- tileMethylCounts(methyl_raw_list, win.size = 100, step.size = 100,
+                                mc.cores = 1)
+
+  # By default, unite function produces bases/regions covered in all samples.
+  # That requirement can be relaxed using ???min.per.group??? option in unite function.
+  tiles_raw_Cov10_unite <- unite(tiles_raw, destrand = FALSE)
+
+  return(tiles_raw_Cov10_unite)
+}
+
+
+#' write all meth scores (not only dmrs) that can be used for heatmaps and other applications instead of
+#' the tiles produced by the rrbs pipeline
+write_meth_scores <- function(methylBase.obj, output_file)
+{
+  table <- percMethylation(methylBase.obj, rowids = TRUE)
+  rownames(table) <- str_replace_all(rownames(table), '\\.', '\t')
+  write.table(paste("#chr\tstart\tend", paste(colnames(table), collapse = "\t"), sep = "\t"),
+              output_file, sep = "\t", row.names = FALSE, col.names = FALSE,
+              quote = FALSE)
+  write.table(table / 100, output_file, append = TRUE, sep = "\t",
+              row.names = TRUE, col.names = FALSE, quote = FALSE)
+}
+
+
+create_dirs <- function(output_dir) {
+  if (!dir.exists(output_dir))
+    dir.create(output_dir)
+  setwd(output_dir)
+  if (!dir.exists("figures"))
+    dir.create("figures")
+  setwd("./figures")
+}
+
+#' Plot correlation matrix, hierarchical clustering and PCA
+plot_corelation_pca_hc <- function(tiles_raw_Cov10_unite) {
+  png(file = "correlation_matrix.png", width = 1000, height = 1000)
+  correlation_matrix <- getCorrelation(tiles_raw_Cov10_unite, plot = TRUE)
+  dev.off()
+  png(file = "hierarchical_clustering.png", width = 2000, height = 1000, res = 200)
+  hc <- clusterSamples(tiles_raw_Cov10_unite, dist = "correlation", method = "ward",
+                       plot = TRUE)
+  dev.off()
+  png(file = "pca.png", width = 1500, height = 1000, res = 100)
+  PCASamples(tiles_raw_Cov10_unite)
+  dev.off()
+}
+
+#TODO: fix or delete (used to work in 2022, broke in 2023)
+get_genes_info_old_broken_version <- function(genome, known_genes_file, output_dir) {
+  if (is.null(known_genes_file))
+  {
+    #TODO: on 26.07.2023 this is broken. knownGene has no track info.
+    # Error in normArgTrack(track, trackids) (debug_makeTxDbFromUCSC.R#2): 'track' must be a single string or a list of strings
+
+    #get annotation info
+    #download  KnownGenes.bed file it wasn't given by user
+    KG_txdb <- makeTxDbFromUCSC(genome = genome, tablename = "knownGene")
+    bed_path <- file.path(output_dir, paste(genome, "KnownGenes.bed"))
+    rtracklayer::export(asBED(KG_txdb), bed_path)
+  }
+  else
+    bed_path <- known_genes_file
+  return(bed_path)
+}
+
+#' Download KnownGenes.txt.gz file from UCSC and convert it to bed
+#' Replaces get_genes_info_old_broken_version() that utalized makeTxDbFromUCSC
+#' TODO: also broken - how to convert KnownGenes.txt.gz to bed12?
+#' for now must download manually from http://genome.ucsc.edu/cgi-bin/hgTables
+# get_KnownGene_from_ucsc <- function(genome, known_genes_file, output_dir) {
+#   if (is.null(known_genes_file))
+#   {
+#     download.file(url = str_c("http://hgdownload.cse.ucsc.edu/goldenPath/", genome, "/database/knownGene.txt.gz"),
+#                   destfile = str_c(output_dir, "/", genome, "KnownGenes.txt.gz"))
+#     gunzip(str_c(output_dir, "/", genome, "KnownGenes.txt.gz"))
+#     #TODO how the hell does one convert this to bed12?
+#   }
+#   else
+#     bed_path <- known_genes_file
+#   return(bed_path)
+# }
+
+
+#' Visualize the distribution of hypo/hyper-methylated bases/regions per chromosome
+#' @param meth_difference difference in percent for DMRs
+#' @param tiles_raw_Cov10_unite_DMRs
+plot_meth_diff_per_chr <- function(meth_difference, tiles_raw_Cov10_unite_DMRs) {
+  png("meth_diff_per_chr.png")
+  diffMethPerChr(tiles_raw_Cov10_unite_DMRs, plot = TRUE, qvalue.cutoff = 0.01,
+                 meth.cutoff = meth_difference)
+  dev.off()
+}
+
+#' Write methDiff files as tsv, including all DMRs with P-value, Q-value, and %diff
+write_methDiff_files <- function(dmrs_hyper, dmrs_hypo, meth_difference, output_dir, tiles_raw_Cov10_unite_DMRs) {
+  write.table(tiles_raw_Cov10_unite_DMRs, str_c(output_dir, "/dmrs.tsv"), sep = "\t")
+  write.table(dmrs_hyper, str_c(output_dir, "/dmrs_", meth_difference, "p_hyper.tsv"), sep = "\t")
+  write.table(dmrs_hypo, str_c(output_dir, "/dmrs_", meth_difference, "p_hypo.tsv"), sep = "\t")
+}
+
+
+#' Write bed files (only chr start end)
+write_bed_files <- function(dmrs_hyper, dmrs_hypo, meth_difference, output_dir, tiles_raw_Cov10_unite) {
+  write.table(getData(dmrs_hyper)[, 1:3], str_c(output_dir, "/dmrs_", meth_difference, "p_hyper.bed"), sep = "\t", row.names = FALSE, col.names = FALSE, quote = FALSE)
+  write.table(getData(dmrs_hypo)[, 1:3], str_c(output_dir, "/dmrs_", meth_difference, "p_hypo.bed"), sep = "\t", row.names = FALSE, col.names = FALSE, quote = FALSE)
+  write.table(getData(tiles_raw_Cov10_unite)[, 1:3], str_c(output_dir, "/all_100bp_tiles_united.bed"), sep = "\t", row.names = FALSE, col.names = FALSE, quote = FALSE)
+}
+
+
+#' Write backgronud files for GREAT (gene ontology analysis) web GUI
+write_bg_for_great <- function(dmrs_hyper, dmrs_hypo, output_dir, tiles_raw_Cov10_unite) {
+  name <- str_split(normalizePath(output_dir, winslash = "/"), "/")[[1]] %>% tail(n = 1)
+  write.table(rbind(getData(dmrs_hyper)[, 1:3], getData(dmrs_hypo)[, 1:3], sample_n(getData(tiles_raw_Cov10_unite)[, 1:3], 3000)) %>% unique(), str_c(output_dir, "/", name, "_dmrs_plus_random_3000_100bp_tiles.bed"), sep = "\t", row.names = FALSE, col.names = FALSE, quote = FALSE)
+  write.table(rbind(getData(dmrs_hyper)[, 1:3], getData(dmrs_hypo)[, 1:3], sample_n(getData(tiles_raw_Cov10_unite)[, 1:3], 5000)) %>% unique(), str_c(output_dir, "/", name, "_dmrs_plus_random_5000_100bp_tiles.bed"), sep = "\t", row.names = FALSE, col.names = FALSE, quote = FALSE)
+  write.table(rbind(getData(dmrs_hyper)[, 1:3], getData(dmrs_hypo)[, 1:3], sample_n(getData(tiles_raw_Cov10_unite)[, 1:3], 50000)) %>% unique(), str_c(output_dir, "/", name, "_dmrs_plus_random_50000_100bp_tiles.bed"), sep = "\t", row.names = FALSE, col.names = FALSE, quote = FALSE)
+}
+
+
+#' Plot pie chart with relative distribution of exons, introns, promoters, intergenic regions ..
+plot_dmr_gene_annotation <- function(bed_path, dmrs_hyper, dmrs_hypo, meth_difference) {
+  gene.obj <- readTranscriptFeatures(bed_path)
+  dmrs_hyper_annotation <- annotateWithGeneParts(as(dmrs_hyper, "GRanges"), gene.obj)
+  dmrs_hypo_annotation <- annotateWithGeneParts(as(dmrs_hypo, "GRanges"), gene.obj)
+  png(file = "hypo_annotation.png", width = 1000, height = 1000, res = 150)
+  plotTargetAnnotation(dmrs_hypo_annotation, precedence = TRUE, main = str_c("DMRs ", meth_difference, "% hypo annotation"))
+  dev.off()
+  png(file = "hyper_annotation.png", width = 1000, height = 1000, res = 150)
+  plotTargetAnnotation(dmrs_hyper_annotation, precedence = TRUE, main = str_c("DMRs ", meth_difference, "% hyper annotation"))
+  dev.off()
+}
+
+
+#'Gene Ontology analysis via GREAT
+run_gene_ontology_analysis <- function(dmrs_hypo, genome) {
+  #TODO: ask tzachi about great params, use bg?
+  great_job <- submitGreatJob(as(dmrs_hypo, "GRanges"), species = genome)
+  tb <- getEnrichmentTables(great_job, download_by = "tsv")
+  png(file = "RegionGeneAssociationGraphs.png", width = 10000, height = 2500, res = 1000)
+  res = plotRegionGeneAssociationGraphs(great_job)
+  dev.off()
+}
+
+#' Finding DMRs with methylKit
+#'
+#' @param meth_call_files_dir directory where the .cov files are (all will be used)
+#' @param samp_ids character vector with the names of the samples (must match the order of the .cov files)
+#' @param treatments  vector with the condition of each sample (0 or 1) the dmrs
+#'                    are found as the difference between  1 - 0 groups (1 - treated , 0 - control)
+#' @param pipeline name of the alignment pipeline, it can be either "amp", "bismark","bismarkCoverage", "bismarkCytosineReport" or a list (default:'amp'). See methylkit documentation for more details.
+#' @param output_dir directory to save the results in
+#' @param known_genes_file for annotation
+#' @param meth_difference difference in percent for DMRs, default 25%
+#'
+#' @return
+#' @export methdiff files , bed files, figures
+#'
+#' @examples
+#' meth_call_files_dir="C:/Users/bengs/Nextcloud/Tzachi_bioinformatics/Fah_regeneration/bismkark_meth_extractor_output"
+#' pipeline="bismarkCoverage"
+#' samp_ids=c("YoungYoung", "YoungYoung", "OldOld", "YoungYoungProlong", "Young", "YoungYoungProlong", "OldOld", "Old", "Young", "OldOld", "Old")
+#' treatments=c(1, 1, 1, 1, 0, 1, 1, 0, 0, 1, 0 )
+#' setwd("C:/Users/bengs/Nextcloud/Tzachi_bioinformatics/Fah_regeneration")
+#' dir.create("figures")
+#' setwd("C:/Users/bengs/Nextcloud/Tzachi_bioinformatics/Fah_regeneration/figures")
+main <- function(meth_call_files_dir, samp_ids, treatments, pipeline, output_dir, known_genes_file, meth_difference, genome)
+{
+  if (is.null(meth_difference))
+    meth_difference <- 25
+
+  tiles_raw_Cov10_unite <- make_tiles(meth_call_files_dir, pipeline, samp_ids, treatments)
+  create_dirs(output_dir)
+  plot_corelation_pca_hc(tiles_raw_Cov10_unite)
+  tiles_raw_Cov10_unite_DMRs <- calculateDiffMeth(tiles_raw_Cov10_unite)
+
+  # get hyper methylated bases
+  dmrs_hyper = getMethylDiff(tiles_raw_Cov10_unite_DMRs, difference = meth_difference,
+                             qvalue = 0.01, type = "hyper")
+  # get hypo methylated bases
+  dmrs_hypo <- getMethylDiff(tiles_raw_Cov10_unite_DMRs, difference = meth_difference,
+                             qvalue = 0.01, type = "hypo")
+
+  plot_meth_diff_per_chr(meth_difference, tiles_raw_Cov10_unite_DMRs)
+  write_methDiff_files(dmrs_hyper, dmrs_hypo, meth_difference, output_dir, tiles_raw_Cov10_unite_DMRs)
+  write_bed_files(dmrs_hyper, dmrs_hypo, meth_difference, output_dir, tiles_raw_Cov10_unite)
+  #write all 100bp tiles meth scores (not only dmrs) that can be used for heatmaps and other applications instead of
+  # the 100bp tiles produced by the rrbs pipeline
+  write_meth_scores(tiles_raw_Cov10_unite, str_c(output_dir, "/all_samps_100bp_tiles_meth_scores.bed"))
+  write_bg_for_great(dmrs_hyper, dmrs_hypo, output_dir, tiles_raw_Cov10_unite)
+
+  #NOTE: download KnownGenes.bed broken since 07-2023 (TxdDbFromUCSC is broken)
+  # bed_path <- get_genes_info_old_broken_version(genome, known_genes_file, output_dir)
+  # bed_path <- get_KnownGene_from_ucsc(genome, known_genes_file, output_dir)
+  if (!is.null(known_genes_file)) {
+    bed_path <- known_genes_file
+    plot_dmr_gene_annotation(bed_path, dmrs_hyper, dmrs_hypo, meth_difference)
+  }
+
+  run_gene_ontology_analysis(dmrs_hypo, genome)
+}
+
+
+suppressMessages(library(argparser))
+suppressMessages(library(methylKit))
+suppressMessages(library(GenomicFeatures)) # for getting annotation info
+suppressMessages(library(genomation)) #for annotating
+suppressMessages(library(rGREAT))
+suppressMessages(library(dplyr))
+suppressMessages(library(stringr))
+# library(R.utils) #for gunzip - not needed if not using the function get_KnownGene_from_ucsc()
+
+# Create a parser
+p <- arg_parser("Find DMRs with methylKit")
+p <- add_argument(p, "--meth_call_files_dir", help = "directory where the .cov files are (all will be used)", short = "-m")
+p <- add_argument(p, "--samp_ids", help = "vector with the names of the samples separated by \"-\" (must match the order of the .cov files)", short = "-s")
+p <- add_argument(p, "--treatments", help = "vector with the condition of each sample (0 or 1) separated by \"-\" the dmrs are found as the difference between  1 - 0 groups (1 - treated , 0 - control)", short = "-t")
+p <- add_argument(p, "--pipeline", help = "name of the alignment pipeline, it can be either amp, bismark,bismarkCoverage, bismarkCytosineReport or a list. See methylkit documentation for more details.", short = "-p")
+p <- add_argument(p, "--output_dir", help = "directory to save the results in", short = "-o")
+p <- add_argument(p, "--genome", help = "mm9, mm10, hg38, etc.")
+p <- add_argument(p, "--known_genes_file", help = "annotation info in bed12 format e.g. mm10KnownGenes.bed.
+                    For now must download manually from http://genome.ucsc.edu/cgi-bin/hgTables or use what I have
+                    previously downloaded #TODO: if none is given will be downloaded - broken since 07-2023 (TxdDbFromUCSC is broken)")
+p <- add_argument(p, "--meth_difference", help = "difference in percent for DMRs, default 25%")
+#TODO: p <- add_argument(p, "--install-packages", help="install requirements")
+argv <- parse_args(p)
+
+# to solve problem on condor multiple jobs will be using "-" instead of whitespace
+# to separate treatments and samp_ids
+treatments = strsplit(argv$treatments, '-')[[1]] %>% as.numeric
+samp_ids = strsplit(argv$samp_ids, '-')[[1]]
+# treatments = strsplit(argv$treatments,' +')[[1]] %>% as.numeric
+# samp_ids = strsplit(argv$samp_ids,' +')[[1]]
+
+#allow list(...) as pipline input
+if (str_detect(argv$pipeline, "list"))
+  argv$pipeline = eval(parse(text = argv$pipeline))
+
+main(normalizePath(argv$meth_call_files_dir), samp_ids, treatments, argv$pipeline,
+     normalizePath(argv$output_dir), argv$known_genes_file, as.numeric(argv$meth_difference), argv$genome)
+
+#test main manually
+# main(meth_call_files_dir = "C:/Users/User/Nextcloud/Tzachi_bioinformatics/Fah_regeneration/FAH_are_young_vs_old_hyper-dmrs_tissue_specific/align_FAH_ctrl_samps_to_mm9/no_m-bias_fix/FAH_ctrl_samps_cov_files_mm9/",
+#      samp_ids = c("FAH_ctl_21_month", "FAH_ctl_24_month", "FAH_ctl_3_month", "FAH_ctl_3_month_2"),
+#      treatments = c(1, 1, 0, 0),
+#      pipeline = "bismarkCoverage",
+#      output_dir = "C:/Users/User/Nextcloud/Tzachi_bioinformatics/Fah_regeneration/FAH_are_young_vs_old_hyper-dmrs_tissue_specific/align_FAH_ctrl_samps_to_mm9/no_m-bias_fix/old_vs_young_dmrs/",
+#      known_genes_file = "C:/Users/User/Nextcloud/Tzachi_bioinformatics/Fah_regeneration/FAH_are_young_vs_old_hyper-dmrs_tissue_specific/align_FAH_ctrl_samps_to_mm9/mm9_KnownGene_down_from_ucsc_gui.bed",
+#      meth_difference = 25,
+#      genome = "mm9")
+
