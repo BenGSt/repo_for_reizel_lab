@@ -20,18 +20,26 @@ install_packages <- function()
 }
 
 
-read_meth_call_files <- function(meth_call_files_dir, pipeline_, samp_ids, treatments)
+read_meth_call_files <- function(meth_call_files_dir, pipeline_, samp_ids, treatments, genome)
 {
   meth_call_files <- list.files(path = meth_call_files_dir,
                                 pattern = "*.cov.gz|*.cov",
                                 full.names = TRUE)
 
-  sprintf("Make sure the samp_ids match the cov files order:") %>% print()
-  sprintf("cov file: %s\n sam id: %s", basename(meth_call_files), samp_ids) %>% print()
+  #try ro use basename to get file names without full path, if that fails use str_split
+  tryCatch(meth_call_files_no_fullpath <<- basename(meth_call_files),
+           error = function(e) {
+             print(e)
+             split = str_split(meth_call_files, "/")
+             meth_call_files_no_fullpath <<- lapply(split, function(x) x[length(x)]) %>% unlist()
+           })
+
+  sprintf("Make sure the samp_ids match the cov files order:\n") %>% cat()
+  sprintf("cov file: %s\n samp id: %s\n\n", meth_call_files_no_fullpath, samp_ids) %>% cat()
 
   methyl_raw_list <- methRead(as.list(meth_call_files),
                               sample.id = as.list(samp_ids),
-                              assembly = "mm10",
+                              assembly = genome,
                               pipeline = pipeline_,
                               header = FALSE,
                               treatment = treatments,
@@ -57,11 +65,9 @@ filter_bases <- function(methyl_raw_list)
 }
 
 
-make_tiles <- function(meth_call_files_dir, pipeline, samp_ids,
-                       treatments)
+make_tiles <- function(meth_call_files_dir, pipeline, samp_ids, treatments, genome)
 {
-  methyl_raw_list <- read_meth_call_files(meth_call_files_dir, pipeline,
-                                          samp_ids, treatments)
+  methyl_raw_list <- read_meth_call_files(meth_call_files_dir, pipeline, samp_ids, treatments, genome)
 
 
   methyl_raw_list <- filter_bases(methyl_raw_list)
@@ -93,14 +99,11 @@ write_meth_scores <- function(methylBase.obj, output_file)
 }
 
 
-create_dirs <- function(output_dir) {
+create_dir <- function(output_dir) {
   if (!dir.exists(output_dir))
     dir.create(output_dir)
-  setwd(output_dir)
-  if (!dir.exists("figures"))
-    dir.create("figures")
-  setwd("./figures")
 }
+
 
 #' Plot correlation matrix, hierarchical clustering and PCA
 plot_corelation_pca_hc <- function(tiles_raw_Cov10_unite) {
@@ -157,16 +160,16 @@ get_genes_info_old_broken_version <- function(genome, known_genes_file, output_d
 #' @param tiles_raw_Cov10_unite_DMRs
 plot_meth_diff_per_chr <- function(meth_difference, tiles_raw_Cov10_unite_DMRs) {
   png("meth_diff_per_chr.png")
-  diffMethPerChr(tiles_raw_Cov10_unite_DMRs, plot = TRUE, qvalue.cutoff = 0.01,
-                 meth.cutoff = meth_difference)
+  diff_meth_per_chr <- diffMethPerChr(tiles_raw_Cov10_unite_DMRs, plot = TRUE, qvalue.cutoff = 0.01,
+                                      meth.cutoff = meth_difference)
   dev.off()
 }
 
 #' Write methDiff files as tsv, including all DMRs with P-value, Q-value, and %diff
 write_methDiff_files <- function(dmrs_hyper, dmrs_hypo, meth_difference, output_dir, tiles_raw_Cov10_unite_DMRs) {
-  write.table(tiles_raw_Cov10_unite_DMRs, str_c(output_dir, "/dmrs.tsv"), sep = "\t")
-  write.table(dmrs_hyper, str_c(output_dir, "/dmrs_", meth_difference, "p_hyper.tsv"), sep = "\t")
-  write.table(dmrs_hypo, str_c(output_dir, "/dmrs_", meth_difference, "p_hypo.tsv"), sep = "\t")
+  write.table(tiles_raw_Cov10_unite_DMRs, str_c(output_dir, "/dmrs.tsv") %>% normalizePath(), sep = "\t")
+  write.table(dmrs_hyper, str_c(output_dir, "/dmrs_", meth_difference, "p_hyper.tsv") %>% normalizePath(), sep = "\t")
+  write.table(dmrs_hypo, str_c(output_dir, "/dmrs_", meth_difference, "p_hypo.tsv") %>% normalizePath(), sep = "\t")
 }
 
 
@@ -211,6 +214,47 @@ run_gene_ontology_analysis <- function(dmrs_hypo, genome) {
   dev.off()
 }
 
+
+print_args <- function(genome, known_genes_file, meth_call_files_dir, meth_difference, output_dir, pipeline, samp_ids, treatments) {
+  sprintf("\n\nGiven Arguments:\n") %>% cat()
+  sprintf("pwd: %s\n", getwd()) %>% cat()
+  sprintf("meth_call_files_dir: %s\n", meth_call_files_dir) %>% cat()
+  sprintf("samp_ids: %s\n", str_c(samp_ids, collapse = ", ")) %>% cat()
+  sprintf("treatments: %s\n", str_c(treatments, collapse = ", ")) %>% cat()
+  sprintf("pipeline: %s\n", pipeline) %>% cat()
+  sprintf("output_dir: %s\n", output_dir) %>% cat()
+  sprintf("known_genes_file: %s\n", known_genes_file) %>% cat()
+  sprintf("meth_difference: %s\n", meth_difference) %>% cat()
+  sprintf("genome: %s\n\n\n", genome) %>% cat()
+}
+
+#' make sure output_dir exists, create figures dir inside it, and setwd to figures
+set_up_directories <- function(output_dir) {
+  if (!exists(output_dir)) #if using main() directly
+    create_dir(output_dir)
+  setwd(output_dir)
+  if (!dir.exists("figures"))
+    dir.create("figures")
+  setwd("./figures")
+}
+
+parse_cli_args <- function() {
+  p <- arg_parser("Find DMRs with methylKit")
+  p <- add_argument(p, "--meth_call_files_dir", help = "directory where the .cov files are (all will be used)", short = "-m")
+  p <- add_argument(p, "--samp_ids", help = "vector with the names of the samples separated by \"-\" (must match the order of the .cov files)", short = "-s")
+  p <- add_argument(p, "--treatments", help = "vector with the condition of each sample (0 or 1) separated by \"-\" the dmrs are found as the difference between  1 - 0 groups (1 - treated , 0 - control)", short = "-t")
+  p <- add_argument(p, "--pipeline", help = "name of the alignment pipeline, it can be either amp, bismark,bismarkCoverage, bismarkCytosineReport or a list. See methylkit documentation for more details.", short = "-p")
+  p <- add_argument(p, "--output_dir", help = "directory to save the results in", short = "-o")
+  p <- add_argument(p, "--genome", help = "mm9, mm10, hg38, etc.")
+  p <- add_argument(p, "--known_genes_file", help = "annotation info in bed12 format e.g. mm10KnownGenes.bed.
+                    For now must download manually from http://genome.ucsc.edu/cgi-bin/hgTables or use what I have
+                    previously downloaded #TODO: if none is given will be downloaded - broken since 07-2023 (TxdDbFromUCSC is broken)")
+  p <- add_argument(p, "--meth_difference", help = "difference in percent for DMRs, default 25%", default = 25)
+  argv <- parse_args(p)
+  return(argv)
+}
+
+
 #' Finding DMRs with methylKit
 #'
 #' @param meth_call_files_dir directory where the .cov files are (all will be used)
@@ -230,25 +274,19 @@ run_gene_ontology_analysis <- function(dmrs_hypo, genome) {
 #' pipeline="bismarkCoverage"
 #' samp_ids=c("YoungYoung", "YoungYoung", "OldOld", "YoungYoungProlong", "Young", "YoungYoungProlong", "OldOld", "Old", "Young", "OldOld", "Old")
 #' treatments=c(1, 1, 1, 1, 0, 1, 1, 0, 0, 1, 0 )
-#' setwd("C:/Users/bengs/Nextcloud/Tzachi_bioinformatics/Fah_regeneration")
-#' dir.create("figures")
-#' setwd("C:/Users/bengs/Nextcloud/Tzachi_bioinformatics/Fah_regeneration/figures")
 main <- function(meth_call_files_dir, samp_ids, treatments, pipeline, output_dir, known_genes_file, meth_difference, genome)
 {
-  if (is.null(meth_difference))
-    meth_difference <- 25
+  set_up_directories(output_dir)
+  print_args(genome, known_genes_file, meth_call_files_dir, meth_difference, output_dir, pipeline, samp_ids, treatments)
 
-  tiles_raw_Cov10_unite <- make_tiles(meth_call_files_dir, pipeline, samp_ids, treatments)
-  create_dirs(output_dir)
+  tiles_raw_Cov10_unite <- make_tiles(meth_call_files_dir, pipeline, samp_ids, treatments, genome)
   plot_corelation_pca_hc(tiles_raw_Cov10_unite)
   tiles_raw_Cov10_unite_DMRs <- calculateDiffMeth(tiles_raw_Cov10_unite)
 
   # get hyper methylated bases
-  dmrs_hyper = getMethylDiff(tiles_raw_Cov10_unite_DMRs, difference = meth_difference,
-                             qvalue = 0.01, type = "hyper")
+  dmrs_hyper = getMethylDiff(tiles_raw_Cov10_unite_DMRs, difference = meth_difference, qvalue = 0.01, type = "hyper")
   # get hypo methylated bases
-  dmrs_hypo <- getMethylDiff(tiles_raw_Cov10_unite_DMRs, difference = meth_difference,
-                             qvalue = 0.01, type = "hypo")
+  dmrs_hypo <- getMethylDiff(tiles_raw_Cov10_unite_DMRs, difference = meth_difference, qvalue = 0.01, type = "hypo")
 
   plot_meth_diff_per_chr(meth_difference, tiles_raw_Cov10_unite_DMRs)
   write_methDiff_files(dmrs_hyper, dmrs_hypo, meth_difference, output_dir, tiles_raw_Cov10_unite_DMRs)
@@ -258,14 +296,15 @@ main <- function(meth_call_files_dir, samp_ids, treatments, pipeline, output_dir
   write_meth_scores(tiles_raw_Cov10_unite, str_c(output_dir, "/all_samps_100bp_tiles_meth_scores.bed"))
   write_bg_for_great(dmrs_hyper, dmrs_hypo, output_dir, tiles_raw_Cov10_unite)
 
-  #NOTE: download KnownGenes.bed broken since 07-2023 (TxdDbFromUCSC is broken)
+  #NOTE: Must supply local KnownGenes.bed to get annotations.
+  # Downloading KnownGenes.bed broken since 07-2023 (TxdDbFromUCSC is broken)
   # bed_path <- get_genes_info_old_broken_version(genome, known_genes_file, output_dir)
-  # bed_path <- get_KnownGene_from_ucsc(genome, known_genes_file, output_dir)
+  # bed_path <- get_KnownGene_from_ucsc(genome, known_genes_file, output_dir) #TODO: figure out hot to convert KnownGenes.txt.gz to bed12
   if (!is.null(known_genes_file)) {
+    print("DEBUG: got known_genes_file")
     bed_path <- known_genes_file
     plot_dmr_gene_annotation(bed_path, dmrs_hyper, dmrs_hypo, meth_difference)
   }
-
   run_gene_ontology_analysis(dmrs_hypo, genome)
 }
 
@@ -280,41 +319,40 @@ suppressMessages(library(stringr))
 # library(R.utils) #for gunzip - not needed if not using the function get_KnownGene_from_ucsc()
 
 # Create a parser
-p <- arg_parser("Find DMRs with methylKit")
-p <- add_argument(p, "--meth_call_files_dir", help = "directory where the .cov files are (all will be used)", short = "-m")
-p <- add_argument(p, "--samp_ids", help = "vector with the names of the samples separated by \"-\" (must match the order of the .cov files)", short = "-s")
-p <- add_argument(p, "--treatments", help = "vector with the condition of each sample (0 or 1) separated by \"-\" the dmrs are found as the difference between  1 - 0 groups (1 - treated , 0 - control)", short = "-t")
-p <- add_argument(p, "--pipeline", help = "name of the alignment pipeline, it can be either amp, bismark,bismarkCoverage, bismarkCytosineReport or a list. See methylkit documentation for more details.", short = "-p")
-p <- add_argument(p, "--output_dir", help = "directory to save the results in", short = "-o")
-p <- add_argument(p, "--genome", help = "mm9, mm10, hg38, etc.")
-p <- add_argument(p, "--known_genes_file", help = "annotation info in bed12 format e.g. mm10KnownGenes.bed.
-                    For now must download manually from http://genome.ucsc.edu/cgi-bin/hgTables or use what I have
-                    previously downloaded #TODO: if none is given will be downloaded - broken since 07-2023 (TxdDbFromUCSC is broken)")
-p <- add_argument(p, "--meth_difference", help = "difference in percent for DMRs, default 25%")
-#TODO: p <- add_argument(p, "--install-packages", help="install requirements")
-argv <- parse_args(p)
+argv <- parse_cli_args()
 
-# to solve problem on condor multiple jobs will be using "-" instead of whitespace
-# to separate treatments and samp_ids
-treatments = strsplit(argv$treatments, '-')[[1]] %>% as.numeric
-samp_ids = strsplit(argv$samp_ids, '-')[[1]]
-# treatments = strsplit(argv$treatments,' +')[[1]] %>% as.numeric
-# samp_ids = strsplit(argv$samp_ids,' +')[[1]]
+process_cli_args <- function(argv) {
+  # to solve problem on condor multiple jobs will be using "-" instead of whitespace
+  # to separate treatments and samp_ids
+  treatments <<- strsplit(argv$treatments, '-')[[1]] %>% as.numeric
+  samp_ids <<- strsplit(argv$samp_ids, '-')[[1]]
+  # treatments = strsplit(argv$treatments,' +')[[1]] %>% as.numeric
+  # samp_ids = strsplit(argv$samp_ids,' +')[[1]]
 
-#allow list(...) as pipline input
-if (str_detect(argv$pipeline, "list"))
-  argv$pipeline = eval(parse(text = argv$pipeline))
+  #allow list(...) as pipline input
+  if (str_detect(argv$pipeline, "list"))
+    argv$pipeline <<- eval(parse(text = argv$pipeline))
 
-main(normalizePath(argv$meth_call_files_dir), samp_ids, treatments, argv$pipeline,
-     normalizePath(argv$output_dir), argv$known_genes_file, as.numeric(argv$meth_difference), argv$genome)
+  # not sure why normalizePath(argv$meth_call_files_dir) acts wiredly, if the argument is given straight to main it only
+  # returns the relative path unless I print it first, loooks like a wiered bug.
+  meth_call_files_dir <- normalizePath(argv$meth_call_files_dir, winslash = "/", mustWork = TRUE)
 
-#test main manually
-# main(meth_call_files_dir = "C:/Users/User/Nextcloud/Tzachi_bioinformatics/Fah_regeneration/FAH_are_young_vs_old_hyper-dmrs_tissue_specific/align_FAH_ctrl_samps_to_mm9/no_m-bias_fix/FAH_ctrl_samps_cov_files_mm9/",
-#      samp_ids = c("FAH_ctl_21_month", "FAH_ctl_24_month", "FAH_ctl_3_month", "FAH_ctl_3_month_2"),
+  # dir must be created before running main because normalizePath()'s behavior is undefined if the dir dosn't exist
+  create_dir(argv$output_dir)
+  output_dir <- normalizePath(argv$output_dir, winslash = "/", mustWork = TRUE)
+}
+#print cli args
+cat("\n\nRunning:\n", commandArgs(trailingOnly = FALSE), "\n")
+
+main(meth_call_files_dir, samp_ids, treatments, argv$pipeline,
+     output_dir, argv$known_genes_file, as.numeric(argv$meth_difference), argv$genome)
+
+#use main manually
+# main(meth_call_files_dir = "C:/Users/User/Nextcloud/Tzachi_bioinformatics/Fah_regeneration/FAH_are_young_vs_old_hyper-dmrs_tissue_specific/align_FAH_ctrl_samps_to_mm9/with_m-bias_fix/cov_files_FAH_ctl_samps_m-bias_fix_mm9",
+#      samp_ids = c("FAH_ctl_21_month", "FAH_ctl_24_month", "FAH_ctl_3_month_2", "FAH_ctl_3_month"),
 #      treatments = c(1, 1, 0, 0),
 #      pipeline = "bismarkCoverage",
-#      output_dir = "C:/Users/User/Nextcloud/Tzachi_bioinformatics/Fah_regeneration/FAH_are_young_vs_old_hyper-dmrs_tissue_specific/align_FAH_ctrl_samps_to_mm9/no_m-bias_fix/old_vs_young_dmrs/",
-#      known_genes_file = "C:/Users/User/Nextcloud/Tzachi_bioinformatics/Fah_regeneration/FAH_are_young_vs_old_hyper-dmrs_tissue_specific/align_FAH_ctrl_samps_to_mm9/mm9_KnownGene_down_from_ucsc_gui.bed",
+#      output_dir = "C:/Users/User/Nextcloud/Tzachi_bioinformatics/Fah_regeneration/FAH_are_young_vs_old_hyper-dmrs_tissue_specific/align_FAH_ctrl_samps_to_mm9/with_m-bias_fix/old_vs_young_dmrs_pycharm/",
+#      known_genes_file = "C:/Users/User/Nextcloud/Tzachi_bioinformatics/Fah_regeneration/FAH_are_young_vs_old_hyper-dmrs_tissue_specific/align_FAH_ctrl_samps_to_mm9/no_m-bias_fix/mm9_KnownGene_down_from_ucsc_gui.bed",
 #      meth_difference = 25,
 #      genome = "mm9")
-
