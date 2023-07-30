@@ -1,5 +1,14 @@
 #!/usr/bin/env Rscript
 
+#' find_dmrs_methylkit_v2_2023.R
+#' Date: 30.07.2023
+#' Author: Ben Steinberg
+#' Purpose: find dmrs using methylkit (based on my script from 2022)
+#'
+#' NOTE: I might want to change the find_dmrs_methylkit_v2_2023.R script to accept min cov 1 per CpG and 10 per tile
+#' (or add these as a cli param). As of 30.07.2023 the setting are min cov 10 per cpg and 0 per tile
+#' (thus min 10 per tile as well, but stricter)
+
 install_packages <- function()
 {
   if (!require("argparser", quietly = TRUE))
