@@ -155,13 +155,13 @@ main = function(htseq_out_dir, report_dir, padj_cutoff = 0.01, log2_fc_cutoff = 
   dds = buildDESeqDataSet(sampleTable, htseq_out_dir)
   dds <- DESeq(dds)
 
+  buildHtmlReport(dds, report_dir, padj_cutoff, contrast)
+
   #TEST: 3.8.2023 added PCA
   vsd <- vst(dds, blind = FALSE)
   png(file = "pca.png", width = 2000, height = 1500, res = 150)
   print(plotPCA(vsd))
   dev.off()
-
-  buildHtmlReport(dds, report_dir, padj_cutoff, contrast)
 
   # By default the argument alpha is set to 0.1. If the adjusted p value cutoff will be a value other than 0.1, alpha should be set to that value
   res <- results(dds, contrast = contrast, alpha = padj_cutoff)
