@@ -155,6 +155,12 @@ main = function(htseq_out_dir, report_dir, padj_cutoff = 0.01, log2_fc_cutoff = 
   dds = buildDESeqDataSet(sampleTable, htseq_out_dir)
   dds <- DESeq(dds)
 
+  #TEST: 3.8.2023 added PCA
+  vsd <- vst(dds, blind = FALSE)
+  png(file = "pca.png", width = 2000, height = 1500, res = 150)
+  print(plotPCA(vsd))
+  dev.off()
+
   buildHtmlReport(dds, report_dir, padj_cutoff, contrast)
 
   # By default the argument alpha is set to 0.1. If the adjusted p value cutoff will be a value other than 0.1, alpha should be set to that value
@@ -194,18 +200,18 @@ if (argv$genome == "mm10") {
   annotation_db <- org.Hs.eg.db
 } else {
   print(sprintf("genome %s not supported", argv$genome))
-  quit(status=1)
+  quit(status = 1)
 }
 
 main(
-    htseq_out_dir = argv$htseq_output_dir,
-    report_dir = argv$report_dir,
-    padj_cutoff = argv$padj_cutoff,
-    log2_fc_cutoff = argv$log2_fc_cutoff,
-    contrast = eval(parse(text=argv$contrast)),
-    csv_path = argv$csv,
-    volcano_plot_title = argv$volcano_plot_title,
-    png_path = "volcano_plot.png"
+  htseq_out_dir = argv$htseq_output_dir,
+  report_dir = argv$report_dir,
+  padj_cutoff = argv$padj_cutoff,
+  log2_fc_cutoff = argv$log2_fc_cutoff,
+  contrast = eval(parse(text = argv$contrast)),
+  csv_path = argv$csv,
+  volcano_plot_title = argv$volcano_plot_title,
+  png_path = "volcano_plot.png"
 )
 
 
