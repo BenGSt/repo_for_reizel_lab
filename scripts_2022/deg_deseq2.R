@@ -157,7 +157,8 @@ main = function(htseq_out_dir, report_dir, padj_cutoff = 0.01, log2_fc_cutoff = 
 
   buildHtmlReport(dds, report_dir, padj_cutoff, contrast)
 
-  #TEST: 3.8.2023 added PCA
+  #NOTE: 3.8.2023 added PCA
+  #TODO: not the same as orig on PC, dig further?
   vsd <- vst(dds, blind = FALSE)
   png(file = "pca.png", width = 2000, height = 1500, res = 150)
   print(plotPCA(vsd, intgroup = "condition", ntop = 500, returnData = FALSE))
