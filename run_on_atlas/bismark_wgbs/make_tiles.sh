@@ -54,7 +54,7 @@ combine_methylation_coverage_to_tiles()
 	meth_calling_output=$(find . -name "*.cov.gz")
 
 	mm10_tiles=${GENOMIC_REFERENCE_LOCATION}/mm10_whole_genome_${tile_size}bpTiles.bed
-	hg38_tiles=${GENOMIC_REFERENCE_LOCATION}/hg38/hg38_100bp_tiles.bed
+	hg38_tiles=${GENOMIC_REFERENCE_LOCATION}/hg38/hg38_100bp_tiles.bed #TODO: create tiles for minChromSet, speed things up.
 	if [[ $3 == "mm10" ]]; then
 	  tiles_file=$mm10_tiles
 	elif [[ $3 == "hg38" ]]; then

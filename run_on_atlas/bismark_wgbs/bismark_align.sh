@@ -44,7 +44,9 @@ main()
 	if [[ $genome == "mm10" ]]; then
 	  bismark_genome_location=/storage/bfe_reizel/bengst/genomic_reference_data/from_huji/mm10/Sequence/WholeGenomeFasta
 	elif [[ $genome == "hg38" ]]; then
-	  bismark_genome_location=/storage/bfe_reizel/bengst/genomic_reference_data/hg38/analysisSet/hg38.analysisSet.chroms/
+	  bismark_genome_location=/srv01/technion/bengst/storage/genomic_reference_data/hg38/minChromSet/hg38.minChromSet.chroms
+	  # NOTE: deleted all random and unknown chromosomes from hg38 analysis set to reduce memory usage, s.t.
+	  #       bismark can run on atlas, which is restricted to 40GB per job.
 	else
 	  echo genome not recognized
 	  exit 1
