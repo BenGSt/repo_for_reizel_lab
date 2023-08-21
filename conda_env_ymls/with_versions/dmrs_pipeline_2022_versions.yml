@@ -1,0 +1,20 @@
+name: dmrs_pipeline_2022
+channels:
+  - bioconda
+  - conda-forge
+  - defaults
+dependencies:
+  - homer=4.11
+  - r-base=4.1.3
+  - r-argparser=0.7.1
+  - bioconductor-methylkit=1.20.0
+  - bioconductor-genomicfeatures=1.46.1
+  - bioconductor-genomation=1.26.0
+  - bioconductor-rgreat=1.26.0
+  - r-dplyr=1.0.9
+  - r-stringr=1.4.0
+  - r-magrittr=2.0.3
+  - r-pheatmap=1.0.12
+  - r-rmariadb=1.2.1
+  - bedtools=2.30.0
+prefix: /Local/bfe_reizel/anaconda3/envs/dmrs_pipeline_2022
