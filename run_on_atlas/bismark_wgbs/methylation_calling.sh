@@ -51,7 +51,9 @@ main()
 	echo
 	echo
 
-	time methylation_calling
+#	time methylation_calling
+	#TODO try without time , see if it speeds up or less memory used
+  methylation_calling
 
 	#cleanup
   rm -v $(find ./ | grep -P 'OT|OB')
