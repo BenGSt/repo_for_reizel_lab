@@ -134,10 +134,14 @@ main() {
 }
 
 write_align_sub_file(){
+  #unset vars
   split=
+  sep=
+
   chunk=$1
   if [[ $chunk ]]; then
     split="split"
+    sep="_"
     filename=condor_submission_files/${sample_name}/bismark_align_job_${sample_name}_${chunk}.sub
   else
     filename=condor_submission_files/${sample_name}/bismark_align_job_${sample_name}.sub
@@ -156,9 +160,9 @@ queue name, args from (
 $(
 
       if [[ $single_end -eq 1 ]]; then
-        echo $sample_name_${chunk}, -output-dir $(pwd)/$sample_name/$split/$chunk -single-end $non_directional -genome $genome $dovetail
+        echo $sample_name$sep$chunk, -output-dir $(pwd)/$sample_name/$split/$chunk -single-end $non_directional -genome $genome $dovetail
       else
-        echo $sample_name_${chunk}, -output-dir $(pwd)/$sample_name/$split/$chunk -paired-end $non_directional -genome $genome $dovetail
+        echo $sample_name$sep$chunk, -output-dir $(pwd)/$sample_name/$split/$chunk -paired-end $non_directional -genome $genome $dovetail
       fi
     )
 )
@@ -167,9 +171,11 @@ EOF
 
 write_trim_jobs_submission_files(){
   split=
+  sep=
   chunk=$1
   if [[ $chunk ]]; then
     split="split"
+    sep="_"
     filename=condor_submission_files/${sample_name}/trim_job_${sample_name}.sub_${chunk}.sub
   else
     filename=condor_submission_files/${sample_name}/trim_job_${sample_name}.sub
@@ -187,9 +193,9 @@ error = $(pwd)/logs/$sample_name/\$(name)_trim.out
 queue name, args from (
 $(
       if [[ $single_end -eq 1 ]]; then
-        echo $sample_name$chunk, \" -output-dir $(pwd)/$sample_name/$split/$chunk -input-fastq-file $(realpath $raw_dir/$sample_name/*.fastq.gz) $extra_trim_opts\"
+        echo $sample_name$sep$chunk, \" -output-dir $(pwd)/$sample_name/$split/$chunk -input-fastq-file $(realpath $raw_dir/$sample_name/*.fastq.gz) $extra_trim_opts\"
       else
-        echo $sample_name$chunk, \" -output-dir $(pwd)/$sample_name/$split/$chunk -paired-input-fastq-files $(realpath $raw_dir/$sample_name/*.fastq.gz) $extra_trim_opts\"
+        echo $sample_name$sep$chunk, \" -output-dir $(pwd)/$sample_name/$split/$chunk -paired-input-fastq-files $(realpath $raw_dir/$sample_name/*.fastq.gz) $extra_trim_opts\"
       fi
     )
 )
