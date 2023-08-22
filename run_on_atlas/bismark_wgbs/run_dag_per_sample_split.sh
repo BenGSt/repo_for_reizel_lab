@@ -199,7 +199,10 @@ EOF
 
   echo "Counting reads in $sample_name to see if the fastq file(s) should be split into chunks"
   n_reads=$(( $(zcat $(find $raw_dir/$sample_name/ -name "*.fastq.gz" | head -1) | wc -l) / 4 ))
-  n_chunks=$(( $n_reads / $n_reads_per_chunk + 1 ))
+  n_chunks=$(( n_reads / n_reads_per_chunk ))
+  if [[ $(( n_reads % n_reads_per_chunk )) ]]; then
+    ((n_chunks ++))
+  fi
   echo "n_reads: $n_reads, n_reads_per_chunk: $n_reads_per_chunk"
 
   if [[ $n_reads -gt $n_reads_per_chunk ]]; then
@@ -218,7 +221,7 @@ queue
 EOF
 
     #condor job to align each chunk
-    for chunk in $(seq -w 00 $n_chunks); do
+    for chunk in $(seq -w 00 $((n_chunks -1))); do
       echo write_align_sub_file $sample_name $sample_name/split/${chunk} $chunk
       write_align_sub_file $sample_name $sample_name/split/${chunk} $chunk
     done
