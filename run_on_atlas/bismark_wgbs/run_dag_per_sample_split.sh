@@ -210,9 +210,24 @@ Arguments = $(pwd)/$sample_name $n_reads_per_chunk $n_chunks
 request_cpus = 1
 RequestMemory = 250MB
 universe = vanilla
-log = $(pwd)/logs/$sample_name/\$(name)_split_fastq.log
-output = $(pwd)/logs/$sample_name/\$(name)_split_fastq.out
-error = $(pwd)/logs/$sample_name/\$(name)_split_fastq.out
+log = $(pwd)/logs/$sample_name/${sample_name}_split_fastq.log
+output = $(pwd)/logs/$sample_name/${sample_name}_split_fastq.out
+error = $(pwd)/logs/$sample_name/${sample_name}_split_fastq.out
+queue
+EOF
+}
+
+write_unite_and_sort_bam_job_submission_files(){
+  cat << EOF > condor_submission_files/${sample_name}/unite_and_sort_bam_${sample_name}.sub
+Initialdir = $(pwd)
+executable = $REPO_FOR_REIZEL_LAB/run_on_atlas/bismark_wgbs/unite_and_sort_bam.sh
+Arguments = $(pwd)/$sample_name
+request_cpus = 1
+RequestMemory = 250MB
+universe = vanilla
+log = $(pwd)/logs/$sample_name/${sample_name}_unite_and_sort_bam.log
+output = $(pwd)/logs/$sample_name/${sample_name}_unite_and_sort_bam.out
+error = $(pwd)/logs/$sample_name/${sample_name}_unite_and_sort_bam.out
 queue
 EOF
 }
@@ -225,24 +240,20 @@ write_condor_submission_files() { # <raw_dir>
     mkdir -p condor_submission_files/$sample_name
     mkdir -p logs/$sample_name
 
-
-
-# if fastq file longer than n_reads_per_chunk reads, split it into n_reads_per_chunk read chunks
-
-
+  # if fastq file longer than n_reads_per_chunk reads, split it into n_reads_per_chunk read chunks
   echo "Counting reads in $sample_name to see if the fastq file(s) should be split into chunks"
 #  n_reads=$(( $(zcat $(find $raw_dir/$sample_name/ -name "*.fastq.gz" | head -1) | wc -l) / 4 ))
   n_reads=$(( $(pigz -p 4 -c -d $(find $raw_dir/$sample_name/ -name "*.fastq.gz" | head -1) | wc -l) / 4 ))
   n_chunks=$(( n_reads / n_reads_per_chunk ))
+
   if [[ $(( n_reads % n_reads_per_chunk )) ]]; then
-    ((n_chunks ++))
+    ((n_chunks ++)) # add one more chunk for the remainder reads
   fi
   echo "n_reads: $n_reads, n_reads_per_chunk: $n_reads_per_chunk"
 
   if [[ $n_reads -gt $n_reads_per_chunk ]]; then
-    echo "fastq files will be split into $(( $n_chunks - 1 )) chunks of $n_reads_per_chunk reads each + 1 chunk of $(( $n_reads % $n_reads_per_chunk )) reads"
+    echo "fastq files will be split into $(( n_chunks - 1 )) chunks of $n_reads_per_chunk reads each + 1 chunk of $(( n_reads % n_reads_per_chunk )) reads"
     write_split_job_submission_files
-
     #write condor sub files for jobs to align each chunk
     for chunk in $(seq -w 00 $((n_chunks -1))); do
       write_trim_jobs_submission_files  $chunk
