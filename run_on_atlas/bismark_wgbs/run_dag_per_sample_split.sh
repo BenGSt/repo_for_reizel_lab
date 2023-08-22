@@ -134,13 +134,13 @@ main() {
 }
 
 write_align_sub_file(){
-  samp=$1
-  samp_path=$2
-  chunk=$3
+  split=
+  chunk=$1
   if [[ $chunk ]]; then
-    filename=condor_submission_files/${samp}/bismark_align_job_${samp}_${chunk}.sub
+    split="split"
+    filename=condor_submission_files/${sample_name}/bismark_align_job_${sample_name}_${chunk}.sub
   else
-    filename=condor_submission_files/${samp}/bismark_align_job_${samp}.sub
+    filename=condor_submission_files/${sample_name}/bismark_align_job_${sample_name}.sub
   fi
   cat <<EOF > $filename
 Initialdir = $(pwd)
@@ -156,23 +156,25 @@ queue name, args from (
 $(
 
       if [[ $single_end -eq 1 ]]; then
-        echo $samp_path, -output-dir $(pwd)/$samp -single-end $non_directional -genome $genome $dovetail
+        echo $sample_name_${chunk}, -output-dir $(pwd)/$sample_name/$split/$chunk -single-end $non_directional -genome $genome $dovetail
       else
-        echo $samp_path, -output-dir $(pwd)/$samp -paired-end $non_directional -genome $genome $dovetail
+        echo $sample_name_${chunk}, -output-dir $(pwd)/$sample_name/$split/$chunk -paired-end $non_directional -genome $genome $dovetail
       fi
     )
 )
 EOF
 }
 
-write_condor_submission_files() { # <raw_dir>
-  raw_dir=$1
-  sample_names=()
-  for sample_name in $(find -L $raw_dir -type d | awk -F / 'NR>1{print $NF}' | sort); do
-    sample_names+=($sample_name)
-    mkdir -p condor_submission_files/$sample_name
-    mkdir -p logs/$sample_name
-    cat <<EOF > condor_submission_files/${sample_name}/trim_job_${sample_name}.sub
+write_trim_jobs_submission_files(){
+  split=
+  chunk=$1
+  if [[ $chunk ]]; then
+    split="split"
+    filename=condor_submission_files/${sample_name}/trim_job_${sample_name}.sub_${chunk}.sub
+  else
+    filename=condor_submission_files/${sample_name}/trim_job_${sample_name}.sub
+  fi
+      cat <<EOF > $filename
 Initialdir = $(pwd)
 executable = $REPO_FOR_REIZEL_LAB/run_on_atlas/bismark_wgbs/trim_illumina_adaptors.sh
 Arguments = \$(args)
@@ -185,29 +187,17 @@ error = $(pwd)/logs/$sample_name/\$(name)_trim.out
 queue name, args from (
 $(
       if [[ $single_end -eq 1 ]]; then
-        echo $sample_name, \" -output-dir $(pwd)/$sample_name -input-fastq-file $(realpath $raw_dir/$sample_name/*.fastq.gz) $extra_trim_opts\"
+        echo $sample_name$chunk, \" -output-dir $(pwd)/$sample_name/$split/$chunk -input-fastq-file $(realpath $raw_dir/$sample_name/*.fastq.gz) $extra_trim_opts\"
       else
-        echo $sample_name, \" -output-dir $(pwd)/$sample_name -paired-input-fastq-files $(realpath $raw_dir/$sample_name/*.fastq.gz) $extra_trim_opts\"
+        echo $sample_name$chunk, \" -output-dir $(pwd)/$sample_name/$split/$chunk -paired-input-fastq-files $(realpath $raw_dir/$sample_name/*.fastq.gz) $extra_trim_opts\"
       fi
     )
 )
 EOF
+}
 
-
-
-# if fastq file longer than n_reads_per_chunk reads, split it into n_reads_per_chunk read chunks
-
-  echo "Counting reads in $sample_name to see if the fastq file(s) should be split into chunks"
-  n_reads=$(( $(zcat $(find $raw_dir/$sample_name/ -name "*.fastq.gz" | head -1) | wc -l) / 4 ))
-  n_chunks=$(( n_reads / n_reads_per_chunk ))
-  if [[ $(( n_reads % n_reads_per_chunk )) ]]; then
-    ((n_chunks ++))
-  fi
-  echo "n_reads: $n_reads, n_reads_per_chunk: $n_reads_per_chunk"
-
-  if [[ $n_reads -gt $n_reads_per_chunk ]]; then
-    echo "fastq files will be split into $(( $n_chunks - 1 )) chunks of $n_reads_per_chunk reads each + 1 chunk of $(( $n_reads % $n_reads_per_chunk )) reads"
-    cat << EOF > condor_submission_files/${sample_name}/split_fastq_${sample_name}.sub
+write_split_job_submission_files(){
+      cat << EOF > condor_submission_files/${sample_name}/split_fastq_${sample_name}.sub
 Initialdir = $(pwd)
 executable = $REPO_FOR_REIZEL_LAB/run_on_atlas/bismark_wgbs/split_fastq.sh
 Arguments = $(pwd)/$sample_name $n_reads_per_chunk $n_chunks
@@ -219,14 +209,41 @@ output = $(pwd)/logs/$sample_name/\$(name)_split_fastq.out
 error = $(pwd)/logs/$sample_name/\$(name)_split_fastq.out
 queue
 EOF
+}
 
-    #condor job to align each chunk
+write_condor_submission_files() { # <raw_dir>
+  raw_dir=$1
+  sample_names=()
+  for sample_name in $(find -L $raw_dir -type d | awk -F / 'NR>1{print $NF}' | sort); do
+    sample_names+=($sample_name)
+    mkdir -p condor_submission_files/$sample_name
+    mkdir -p logs/$sample_name
+
+
+
+# if fastq file longer than n_reads_per_chunk reads, split it into n_reads_per_chunk read chunks
+
+
+  echo "Counting reads in $sample_name to see if the fastq file(s) should be split into chunks"
+  n_reads=$(( $(zcat $(find $raw_dir/$sample_name/ -name "*.fastq.gz" | head -1) | wc -l) / 4 ))
+  n_chunks=$(( n_reads / n_reads_per_chunk ))
+  if [[ $(( n_reads % n_reads_per_chunk )) ]]; then
+    ((n_chunks ++))
+  fi
+  echo "n_reads: $n_reads, n_reads_per_chunk: $n_reads_per_chunk"
+
+  if [[ $n_reads -gt $n_reads_per_chunk ]]; then
+    echo "fastq files will be split into $(( $n_chunks - 1 )) chunks of $n_reads_per_chunk reads each + 1 chunk of $(( $n_reads % $n_reads_per_chunk )) reads"
+    write_split_job_submission_files
+
+    #write condor sub files for jobs to align each chunk
     for chunk in $(seq -w 00 $((n_chunks -1))); do
-      echo write_align_sub_file $sample_name $sample_name/split/${chunk} $chunk
-      write_align_sub_file $sample_name $sample_name/split/${chunk} $chunk
+      write_trim_jobs_submission_files  $chunk
+      write_align_sub_file $chunk
     done
-  else #just align the trimmed fastq files
-    write_align_sub_file $sample_name $sample_name
+  else # no splitting of fastq files
+    write_trim_jobs_submission_files
+    write_align_sub_file
   fi
 
  #TODO : condor job to unite and sort the bam files from each chunk
