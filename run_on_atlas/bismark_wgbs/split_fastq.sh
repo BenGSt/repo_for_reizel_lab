@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 samp_dir=$1
-n_reads_per_file=$(( 4 * $2 ))
+n_reads_per_file=$(( 4 * $2 )) #4 lines per read
 n_chunks=$3
 cd $samp_dir || exit 1
 
