@@ -206,14 +206,20 @@ write_split_job_submission_files(){
       cat << EOF > condor_submission_files/${sample_name}/split_fastq_${sample_name}.sub
 Initialdir = $(pwd)
 executable = $REPO_FOR_REIZEL_LAB/run_on_atlas/bismark_wgbs/split_fastq.sh
-Arguments = $(pwd)/$sample_name $n_reads_per_chunk $n_chunks
+Arguments = \$(args)
 request_cpus = 1
 RequestMemory = 250MB
 universe = vanilla
 log = $(pwd)/logs/$sample_name/${sample_name}_split_fastq.log
 output = $(pwd)/logs/$sample_name/${sample_name}_split_fastq.out
 error = $(pwd)/logs/$sample_name/${sample_name}_split_fastq.out
-queue
+queue args from (
+  if [[ $single_end -eq 1 ]]; then
+    echo -output-dir $(pwd)/$sample_name/$split/$chunk -chunks $n_chunks -reads-per-chunk $n_reads_per_chunk -input-fastq-file $(realpath $raw_dir/$sample_name/*.fastq.gz)
+  else
+    echo -output-dir $(pwd)/$sample_name/$split/$chunk -chunks $n_chunks -reads-per-chunk $n_reads_per_chunk -paired-input-fastq-files (realpath $raw_dir/$sample_name/*.fastq.gz)
+  fi
+)
 EOF
 }
 
