@@ -220,7 +220,7 @@ EOF
     #condor job to align each chunk
     for chunk in $(seq -w 00 $n_chunks); do
       echo write_align_sub_file $sample_name $sample_name/split/${chunk} $chunk
-      write_align_sub_file $sample_name $sample_name/split/${chunk}
+      write_align_sub_file $sample_name $sample_name/split/${chunk} $chunk
     done
   else #just align the trimmed fastq files
     write_align_sub_file $sample_name $sample_name
