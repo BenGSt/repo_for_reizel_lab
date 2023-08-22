@@ -189,7 +189,7 @@ EOF
 
 # if fastq file longer than n_reads_per_chunk reads, split it into n_reads_per_chunk read chunks
 
-  n_reads=$(( $(zcat $(find $raw_dir/$sample_name/ -name "*.fastq.gz") | wc -l) / 4 ))
+  n_reads=$(( $(zcat $(find $raw_dir/$sample_name/ -name "*.fastq.gz" | head -1) | wc -l) / 4 ))
   n_chunks=$(( $n_reads / $n_reads_per_chunk + 1 ))
   if trimmed [[ $n_reads -gt $n_reads_per_chunk ]]; then
     cat << EOF > condor_submission_files/${sample_name}/split_fastq_${sample_name}.sub
