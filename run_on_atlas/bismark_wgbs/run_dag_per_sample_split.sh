@@ -136,7 +136,13 @@ main() {
 write_align_sub_file(){
   samp=$1
   samp_path=$2
-  cat <<EOF > condor_submission_files/${samp}/bismark_align_job_${samp}.sub
+  chunk=$3
+  if [[ $chunk ]]; then
+    filename=condor_submission_files/${samp}/bismark_align_job_${samp}_${chunk}.sub
+  else
+    filename=condor_submission_files/${samp}/bismark_align_job_${samp}.sub
+  fi
+  cat <<EOF > $filename
 Initialdir = $(pwd)
 executable = $REPO_FOR_REIZEL_LAB/run_on_atlas/bismark_wgbs/bismark_align.sh
 Arguments = \$(args)
@@ -191,7 +197,7 @@ EOF
 
 # if fastq file longer than n_reads_per_chunk reads, split it into n_reads_per_chunk read chunks
 
-  echo "Counting reads in $sample_name/ to see if the fastq file(s) should be split into chunks"
+  echo "Counting reads in $sample_name to see if the fastq file(s) should be split into chunks"
   n_reads=$(( $(zcat $(find $raw_dir/$sample_name/ -name "*.fastq.gz" | head -1) | wc -l) / 4 ))
   n_chunks=$(( $n_reads / $n_reads_per_chunk + 1 ))
   echo "n_reads: $n_reads, n_reads_per_chunk: $n_reads_per_chunk"
@@ -213,7 +219,7 @@ EOF
 
     #condor job to align each chunk
     for chunk in $(seq -w 00 $n_chunks); do
-      echo write_align_sub_file $sample_name $sample_name/split/${chunk}
+      echo write_align_sub_file $sample_name $sample_name/split/${chunk} $chunk
       write_align_sub_file $sample_name $sample_name/split/${chunk}
     done
   else #just align the trimmed fastq files
