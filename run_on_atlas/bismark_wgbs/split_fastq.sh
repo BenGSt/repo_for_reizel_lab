@@ -15,7 +15,7 @@ main() {
   fi
 
   for fastq in "${to_split[@]}"; do
-    split -dl $n_lines_per_file <(pigz -p 4 -cd $fastq) split/$(echo $fastq | sed 's/.fastq.gz|fq.gz//')_chunk_ --additional-suffix=.fq
+    split -dl $n_lines_per_file <(pigz -p 4 -cd $fastq) split/$(echo $(basename $fastq) | sed 's/.fastq.gz\|fq.gz//')_chunk_ --additional-suffix=.fq
   done
 
   cd split
