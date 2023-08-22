@@ -133,6 +133,32 @@ main() {
 
 }
 
+write_align_sub_file(){
+  samp=$1
+  samp_path=$2
+  cat <<EOF > condor_submission_files/${samp}/bismark_align_job_${samp}.sub
+Initialdir = $(pwd)
+executable = $REPO_FOR_REIZEL_LAB/run_on_atlas/bismark_wgbs/bismark_align.sh
+Arguments = \$(args)
+request_cpus = 4
+RequestMemory = 40GB
+universe = vanilla
+log = $(pwd)/logs/$samp/\$(name)_bismark_align.log
+output = $(pwd)/logs/$samp/\$(name)_bismark_align.out
+error = $(pwd)/logs/$samp/\$(name)_bismark_align.out
+queue name, args from (
+$(
+
+      if [[ $single_end -eq 1 ]]; then
+        echo $samp_path, -output-dir $(pwd)/$samp -single-end $non_directional -genome $genome $dovetail
+      else
+        echo $samp_path, -output-dir $(pwd)/$samp -paired-end $non_directional -genome $genome $dovetail
+      fi
+    )
+)
+EOF
+}
+
 write_condor_submission_files() { # <raw_dir>
   raw_dir=$1
   sample_names=()
@@ -161,37 +187,17 @@ $(
 )
 EOF
 
-write_align_sub_file(){
-  samp=$1
-  samp_path=$2
-  cat <<EOF > condor_submission_files/${samp}/bismark_align_job_${samp}.sub
-Initialdir = $(pwd)
-executable = $REPO_FOR_REIZEL_LAB/run_on_atlas/bismark_wgbs/bismark_align.sh
-Arguments = \$(args)
-request_cpus = 10
-RequestMemory = 40GB
-universe = vanilla
-log = $(pwd)/logs/$samp/\$(name)_bismark_align.log
-output = $(pwd)/logs/$samp/\$(name)_bismark_align.out
-error = $(pwd)/logs/$samp/\$(name)_bismark_align.out
-queue name, args from (
-$(
 
-      if [[ $single_end -eq 1 ]]; then
-        echo $samp_path, -output-dir $(pwd)/$samp -single-end $non_directional -genome $genome $dovetail
-      else
-        echo $samp_path, -output-dir $(pwd)/$samp -paired-end $non_directional -genome $genome $dovetail
-      fi
-    )
-)
-EOF
-}
 
 # if fastq file longer than n_reads_per_chunk reads, split it into n_reads_per_chunk read chunks
 
+  echo "Counting reads in $raw_dir/$sample_name/ to see if fastq should be split into chunks"
   n_reads=$(( $(zcat $(find $raw_dir/$sample_name/ -name "*.fastq.gz" | head -1) | wc -l) / 4 ))
   n_chunks=$(( $n_reads / $n_reads_per_chunk + 1 ))
-  if trimmed [[ $n_reads -gt $n_reads_per_chunk ]]; then
+  echo "n_reads: $n_reads, n_reads_per_chunk: $n_reads_per_chunk"
+
+  if [[ $n_reads -gt $n_reads_per_chunk ]]; then
+    echo "fastq files will be split into $n_chunks chunks of $n_reads_per_chunk reads each"
     cat << EOF > condor_submission_files/${sample_name}/split_fastq_${sample_name}.sub
 Initialdir = $(pwd)
 executable = $REPO_FOR_REIZEL_LAB/run_on_atlas/bismark_wgbs/split_fastq.sh
