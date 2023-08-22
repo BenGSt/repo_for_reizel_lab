@@ -105,9 +105,6 @@ trim_illumina_adapter_single_end() #<R1>
 }
 
 
-
-
-
 arg_parse()
 {
   if [[ $# -eq 0 ]]; then
