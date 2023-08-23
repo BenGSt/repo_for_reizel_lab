@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 
 main() {
-  source /Local/bfe_reizel/anaconda3/bin/activate wgbs_bismark_pipeline_2023
   arg_parse "$@"
   mkdir -p $output_dir
   cd $output_dir
@@ -15,11 +14,11 @@ main() {
   fi
 
   for fastq in "${to_split[@]}"; do
-    split -dl $n_lines_per_file <(pigz -p 4 -cd $fastq) split/$(echo $(basename $fastq) | sed 's/.fastq.gz\|fq.gz//')_chunk_ --additional-suffix=.fq
+    split -dl $n_lines_per_file <(zcat $fastq) split/$(echo $(basename $fastq) | sed 's/.fastq.gz\|fq.gz//')_chunk_ --additional-suffix=.fq &
   done
 
   cd split
-  for chunk in $(seq -w 00 $n_chunks); do
+  for chunk in $(seq -w 00 $((n_chunks - 1))); do
     mkdir $chunk
     mv *$chunk.fq $chunk
   done

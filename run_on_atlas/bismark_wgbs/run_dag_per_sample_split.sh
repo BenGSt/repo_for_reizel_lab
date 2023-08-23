@@ -193,22 +193,24 @@ error = $(pwd)/logs/$sample_name/\$(name)_trim.out
 queue name, args from (
 $(
       if [[ $single_end -eq 1 ]]; then
-        echo $sample_name$sep$chunk, \" -output-dir $(pwd)/$sample_name/$split/$chunk -input-fastq-file $(realpath $raw_dir/$sample_name/*.fastq.gz) $extra_trim_opts\"
+        echo $sample_name$sep$chunk, \" -output-dir $(pwd)/$sample_name/$split/$chunk -input-fastq-file $($(pwd)/$sample_name/$split/$chunk/*.fq) $extra_trim_opts\"
       else
-        echo $sample_name$sep$chunk, \" -output-dir $(pwd)/$sample_name/$split/$chunk -paired-input-fastq-files $(realpath $raw_dir/$sample_name/*.fastq.gz) $extra_trim_opts\"
+        echo $sample_name$sep$chunk, \" -output-dir $(pwd)/$sample_name/$split/$chunk -paired-input-fastq-files $($(pwd)/$sample_name/$split/$chunk/*.fq) $extra_trim_opts\"
       fi
     )
 )
+#NOTE: If storage turns out to be a bottle neck, may want to gzip fq files after trimming (and / or after splitting)
+#      to save disk space (at the cost of more cpu time).
+
 EOF
 }
 
 write_split_job_submission_files(){
       cat << EOF > condor_submission_files/${sample_name}/split_fastq_${sample_name}.sub
-getenv = True
 Initialdir = $(pwd)
 executable = $REPO_FOR_REIZEL_LAB/run_on_atlas/bismark_wgbs/split_fastq.sh
 Arguments = \$(args)
-request_cpus = 4
+request_cpus = 2
 RequestMemory = 250MB
 universe = vanilla
 log = $(pwd)/logs/$sample_name/${sample_name}_split_fastq.log
@@ -223,6 +225,7 @@ queue args from (
   fi
   )
 )
+#NOTE: may want to gzip fq files after splitting to save disk space (at the cost of more cpu time)
 EOF
 }
 
