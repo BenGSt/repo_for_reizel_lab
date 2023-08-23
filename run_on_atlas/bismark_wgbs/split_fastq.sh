@@ -23,6 +23,7 @@ main() {
   done
 
   wait
+  rm -v fifo*
   cd split
 
   for chunk in $(seq -w 00 $((n_chunks - 1))); do
