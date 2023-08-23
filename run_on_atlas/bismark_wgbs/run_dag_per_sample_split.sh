@@ -181,9 +181,9 @@ error = $(pwd)/logs/$sample_name/\$(name)_trim.out
 queue name, args from (
 $(
       if [[ $single_end -eq 1 ]]; then
-        echo $sample_name$sep$chunk, \" -output-dir $(pwd)/$sample_name/$split/$chunk -input-fastq-file $(#TODO) $extra_trim_opts\"
+        echo $sample_name$sep$chunk, \" -output-dir $(pwd)/$sample_name/$split/$chunk -input-fastq-file #TODO $extra_trim_opts\"
       else
-        echo $sample_name$sep$chunk, \" -output-dir $(pwd)/$sample_name/$split/$chunk -paired-input-fastq-files $($(pwd)/$sample_name/$split/$chunk/*.fq) $extra_trim_opts\"
+        echo $sample_name$sep$chunk, \" -output-dir $(pwd)/$sample_name/$split/$chunk -paired-input-fastq-files #TODO $extra_trim_opts\"
       fi
     )
 )

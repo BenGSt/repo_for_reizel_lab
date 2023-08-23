@@ -14,11 +14,13 @@ main() {
   fi
 
   for fastq in "${to_split[@]}"; do
-    echo split -dl $n_lines_per_file <(zcat $fastq) split/$(echo $(basename $fastq) | sed 's/.fastq.gz\|fq.gz//')_chunk_ --additional-suffix=.fq &
+    echo split -dl $n_lines_per_file <(zcat $fastq) split/$(echo $(basename $fastq) | sed 's/.fastq.gz\|fq.gz//')_chunk_ --additional-suffix=.fq
     split -dl $n_lines_per_file <(zcat $fastq) split/$(echo $(basename $fastq) | sed 's/.fastq.gz\|fq.gz//')_chunk_ --additional-suffix=.fq &
   done
 
+  wait
   cd split
+
   for chunk in $(seq -w 00 $((n_chunks - 1))); do
     mkdir $chunk
     mv *$chunk.fq $chunk
