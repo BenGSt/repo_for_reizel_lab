@@ -16,10 +16,10 @@ main() {
   n=0
   for fastq in "${to_split[@]}"; do
     mkfifo fifo$n
-    gzip -dc $fastq >fifo$n &
-    ((n++))
+    gzip -dc $fastq > fifo$n &
     echo split -dl $n_lines_per_file fifo$n split/$(echo $(basename $fastq) | sed 's/.fastq.gz\|fq.gz//')_chunk_ --additional-suffix=.fq
     split -dl $n_lines_per_file fifo$n split/$(echo $(basename $fastq) | sed 's/.fastq.gz\|fq.gz//')_chunk_ --additional-suffix=.fq &
+    ((n++))
   done
 
   wait
