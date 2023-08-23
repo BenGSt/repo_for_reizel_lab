@@ -373,7 +373,7 @@ main_write_condor_submission_files() { # <raw_dir>
       mkdir -p logs/$sample_name
 
       # if fastq file longer than n_reads_per_chunk reads, split it into n_reads_per_chunk read chunks
-      echo "Counting reads in $sample_name to see if the fastq file(s) should be split into chunks"
+      echo Counting reads in $sample_name to see if the fastq file(s) should be split into chunks
       #  n_reads=$(( $(zcat $(find $raw_dir/$sample_name/ -name "*.fastq.gz" | head -1) | wc -l) / 4 ))
       n_reads=$(($(pigz -cd $(find $raw_dir/$sample_name/ -name "*.fastq.gz" | head -1) | wc -l) / 4))
       n_chunks=$((n_reads / n_reads_per_chunk))
