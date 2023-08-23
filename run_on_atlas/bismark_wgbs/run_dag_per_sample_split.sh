@@ -138,7 +138,7 @@ write_split_job_submission_file(){
 Initialdir = $(pwd)
 executable = $REPO_FOR_REIZEL_LAB/run_on_atlas/bismark_wgbs/split_fastq.sh
 Arguments = \$(args)
-request_cpus = 2
+request_cpus = 3
 RequestMemory = 250MB
 universe = vanilla
 log = $(pwd)/logs/$sample_name/${sample_name}_split_fastq.log
