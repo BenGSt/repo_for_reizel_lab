@@ -365,15 +365,16 @@ EOF
 main_write_condor_submission_files() { # <raw_dir>
   raw_dir=$1
   sample_names=()
-#  for sample_name in $(find -L $raw_dir -type d | awk -F / 'NR>1{print $NF}' | sort); do #try to replace this loop with xargs
-  find -L $raw_dir -type d | awk -F / 'NR>1{print $NF}' | sort | xargs -n1 -P4 sh -c "for sample_name in $0; do
+  for sample_name in $(find -L $raw_dir -type d | awk -F / 'NR>1{print $NF}' | sort); do
+  #TODO: try to replace this loop with xargs
+#  find -L $raw_dir -type d | awk -F / 'NR>1{print $NF}' | sort | xargs -n1 -P4 sh -c "
     {
       sample_names+=($sample_name)
       mkdir -p condor_submission_files/$sample_name
       mkdir -p logs/$sample_name
 
       # if fastq file longer than n_reads_per_chunk reads, split it into n_reads_per_chunk read chunks
-      echo Counting reads in $sample_name to see if the fastq file(s) should be split into chunks
+      echo "Counting reads in $sample_name to see if the fastq file(s) should be split into chunks"
       #  n_reads=$(( $(zcat $(find $raw_dir/$sample_name/ -name "*.fastq.gz" | head -1) | wc -l) / 4 ))
       n_reads=$(($(pigz -cd $(find $raw_dir/$sample_name/ -name "*.fastq.gz" | head -1) | wc -l) / 4))
       n_chunks=$((n_reads / n_reads_per_chunk))
@@ -405,7 +406,7 @@ main_write_condor_submission_files() { # <raw_dir>
       write_bismark2report_job_submission_file
       write_sample_dag_file
     }
-    done"
+    done
 
   write_multiqc_job_submission_file
 
