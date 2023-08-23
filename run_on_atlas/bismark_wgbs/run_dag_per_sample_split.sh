@@ -371,11 +371,11 @@ write_condor_submission_files() { # <raw_dir>
     write_split_job_submission_files
     #write condor sub files for jobs to align each chunk
     for chunk in $(seq -w 00 $((n_chunks -1))); do
-      write_trim_jobs_submission_files  $chunk
+      write_trim_jobs_submission_file  $chunk
       write_align_sub_file $chunk
     done
   else # no splitting of fastq files
-    write_trim_jobs_submission_files
+    write_trim_jobs_submission_file
     write_align_sub_file
   fi
 
