@@ -133,6 +133,66 @@ main() {
 
 }
 
+write_split_job_submission_file(){
+      cat << EOF > condor_submission_files/${sample_name}/split_fastq_${sample_name}.sub
+Initialdir = $(pwd)
+executable = $REPO_FOR_REIZEL_LAB/run_on_atlas/bismark_wgbs/split_fastq.sh
+Arguments = \$(args)
+request_cpus = 2
+RequestMemory = 250MB
+universe = vanilla
+log = $(pwd)/logs/$sample_name/${sample_name}_split_fastq.log
+output = $(pwd)/logs/$sample_name/${sample_name}_split_fastq.out
+error = $(pwd)/logs/$sample_name/${sample_name}_split_fastq.out
+queue args from (
+  $(
+  if [[ $single_end -eq 1 ]]; then
+    echo -output-dir $(pwd)/$sample_name/$split/$chunk -chunks $n_chunks -reads-per-chunk $n_reads_per_chunk -input-fastq-file $(realpath $raw_dir/$sample_name/*.fastq.gz)
+  else
+    echo -output-dir $(pwd)/$sample_name/$split/$chunk -chunks $n_chunks -reads-per-chunk $n_reads_per_chunk -paired-input-fastq-files $(realpath $raw_dir/$sample_name/*.fastq.gz)
+  fi
+  )
+)
+#NOTE: may want to gzip fq files after splitting to save disk space (at the cost of more cpu time)
+EOF
+}
+
+write_trim_jobs_submission_file(){
+  split=
+  sep=
+  chunk=$1
+  if [[ $chunk ]]; then
+    split="split"
+    sep="_"
+    filename=condor_submission_files/${sample_name}/trim_job_${sample_name}.sub_${chunk}.sub
+  else
+    filename=condor_submission_files/${sample_name}/trim_job_${sample_name}.sub
+  fi
+      cat <<EOF > $filename
+Initialdir = $(pwd)
+executable = $REPO_FOR_REIZEL_LAB/run_on_atlas/bismark_wgbs/trim_illumina_adaptors.sh
+Arguments = \$(args)
+request_cpus = 8
+RequestMemory = 500MB
+universe = vanilla
+log = $(pwd)/logs/$sample_name/\$(name)_trim.log
+output = $(pwd)/logs/$sample_name/\$(name)_trim.out
+error = $(pwd)/logs/$sample_name/\$(name)_trim.out
+queue name, args from (
+$(
+      if [[ $single_end -eq 1 ]]; then
+        echo $sample_name$sep$chunk, \" -output-dir $(pwd)/$sample_name/$split/$chunk -input-fastq-file $(#TODO) $extra_trim_opts\"
+      else
+        echo $sample_name$sep$chunk, \" -output-dir $(pwd)/$sample_name/$split/$chunk -paired-input-fastq-files $($(pwd)/$sample_name/$split/$chunk/*.fq) $extra_trim_opts\"
+      fi
+    )
+)
+#NOTE: If storage turns out to be a bottle neck, may want to gzip fq files after trimming (and / or after splitting)
+#      to save disk space (at the cost of more cpu time).
+
+EOF
+}
+
 write_align_sub_file(){
   #unset vars
   split=
@@ -169,67 +229,7 @@ $(
 EOF
 }
 
-write_trim_jobs_submission_files(){
-  split=
-  sep=
-  chunk=$1
-  if [[ $chunk ]]; then
-    split="split"
-    sep="_"
-    filename=condor_submission_files/${sample_name}/trim_job_${sample_name}.sub_${chunk}.sub
-  else
-    filename=condor_submission_files/${sample_name}/trim_job_${sample_name}.sub
-  fi
-      cat <<EOF > $filename
-Initialdir = $(pwd)
-executable = $REPO_FOR_REIZEL_LAB/run_on_atlas/bismark_wgbs/trim_illumina_adaptors.sh
-Arguments = \$(args)
-request_cpus = 8
-RequestMemory = 500MB
-universe = vanilla
-log = $(pwd)/logs/$sample_name/\$(name)_trim.log
-output = $(pwd)/logs/$sample_name/\$(name)_trim.out
-error = $(pwd)/logs/$sample_name/\$(name)_trim.out
-queue name, args from (
-$(
-      if [[ $single_end -eq 1 ]]; then
-        echo $sample_name$sep$chunk, \" -output-dir $(pwd)/$sample_name/$split/$chunk -input-fastq-file $($(pwd)/$sample_name/$split/$chunk/*.fq) $extra_trim_opts\"
-      else
-        echo $sample_name$sep$chunk, \" -output-dir $(pwd)/$sample_name/$split/$chunk -paired-input-fastq-files $($(pwd)/$sample_name/$split/$chunk/*.fq) $extra_trim_opts\"
-      fi
-    )
-)
-#NOTE: If storage turns out to be a bottle neck, may want to gzip fq files after trimming (and / or after splitting)
-#      to save disk space (at the cost of more cpu time).
-
-EOF
-}
-
-write_split_job_submission_files(){
-      cat << EOF > condor_submission_files/${sample_name}/split_fastq_${sample_name}.sub
-Initialdir = $(pwd)
-executable = $REPO_FOR_REIZEL_LAB/run_on_atlas/bismark_wgbs/split_fastq.sh
-Arguments = \$(args)
-request_cpus = 2
-RequestMemory = 250MB
-universe = vanilla
-log = $(pwd)/logs/$sample_name/${sample_name}_split_fastq.log
-output = $(pwd)/logs/$sample_name/${sample_name}_split_fastq.out
-error = $(pwd)/logs/$sample_name/${sample_name}_split_fastq.out
-queue args from (
-  $(
-  if [[ $single_end -eq 1 ]]; then
-    echo -output-dir $(pwd)/$sample_name/$split/$chunk -chunks $n_chunks -reads-per-chunk $n_reads_per_chunk -input-fastq-file $(realpath $raw_dir/$sample_name/*.fastq.gz)
-  else
-    echo -output-dir $(pwd)/$sample_name/$split/$chunk -chunks $n_chunks -reads-per-chunk $n_reads_per_chunk -paired-input-fastq-files $(realpath $raw_dir/$sample_name/*.fastq.gz)
-  fi
-  )
-)
-#NOTE: may want to gzip fq files after splitting to save disk space (at the cost of more cpu time)
-EOF
-}
-
-write_unite_and_sort_bam_job_submission_files(){
+write_unite_and_sort_bam_job_submission_file(){
   cat << EOF > condor_submission_files/${sample_name}/unite_and_sort_bam_${sample_name}.sub
 Initialdir = $(pwd)
 executable = $REPO_FOR_REIZEL_LAB/run_on_atlas/bismark_wgbs/unite_and_sort_bam.sh
@@ -244,6 +244,109 @@ queue
 EOF
 }
 
+write_deduplicate_job_submission_file(){
+    cat <<EOF > condor_submission_files/${sample_name}/deduplicate_job_${sample_name}.sub
+Initialdir = $(pwd)
+executable = $REPO_FOR_REIZEL_LAB/run_on_atlas/bismark_wgbs/deduplicate.sh
+Arguments = \$(args)
+request_cpus = 2
+RequestMemory = 25GB
+universe = vanilla
+log = $(pwd)/logs/$sample_name/\$(name)_deduplicate.log
+output = $(pwd)/logs/$sample_name/\$(name)_deduplicate.out
+error = $(pwd)/logs/$sample_name/\$(name)_deduplicate.out
+queue name, args from (
+ $sample_name, $(pwd)/$sample_name
+)
+EOF
+}
+
+write_methylation_calling_job_submission_file(){
+    cat <<EOF > condor_submission_files/${sample_name}/methylation_calling_job_${sample_name}.sub
+Initialdir = $(pwd)
+executable = $REPO_FOR_REIZEL_LAB/run_on_atlas/bismark_wgbs/methylation_calling.sh
+Arguments = \$(args)
+request_cpus = 10
+RequestMemory = 4GB
+universe = vanilla
+log = $(pwd)/logs/$sample_name/\$(name)_methylation_calling.log
+output = $(pwd)/logs/$sample_name/\$(name)_methylation_calling.out
+error = $(pwd)/logs/$sample_name/\$(name)_methylation_calling.out
+queue name, args from (
+  $sample_name, -output-dir $(pwd)/$sample_name $ignore_r2 $keep_trimmed_fq $extra_meth_opts
+)
+EOF
+}
+
+write_bam2nuc_job_submission_file(){
+    cat <<EOF > condor_submission_files/${sample_name}/bam2nuc_job_${sample_name}.sub
+Initialdir = $(pwd)
+executable = $REPO_FOR_REIZEL_LAB/run_on_atlas/bismark_wgbs/nucleotide_coverage_report.sh
+Arguments = \$(args)
+request_cpus = 2
+RequestMemory = 10GB
+universe = vanilla
+log = $(pwd)/logs/sample_name/\$(name)_bam2nuc.log
+output = $(pwd)/logs/sample_name/\$(name)_bam2nuc.out
+error = $(pwd)/logs/sample_name/\$(name)_bam2nuc.out
+queue name, args from (
+  $sample_name, -output-dir $(pwd)/$sample_name -genome $genome
+)
+EOF
+}
+
+write_make_tiles_job_submission_file(){
+    cat <<EOF > condor_submission_files/${sample_name}/make_tiles_${sample_name}.sub
+Initialdir = $(pwd)
+executable = $REPO_FOR_REIZEL_LAB/run_on_atlas/bismark_wgbs/make_tiles.sh
+Arguments = \$(args)
+request_cpus = 1
+RequestMemory = 30GB
+universe = vanilla
+log = $(pwd)/logs/$sample_name/(name)_make_tiles.log
+output = $(pwd)/logs/$sample_name/(name)_make_tiles.out
+error = $(pwd)/logs/$sample_name/(name)_make_tiles.out
+queue name, args from (
+  $sample_name, -output-dir $(pwd)/$sample_name -genome $genome
+)
+EOF
+}
+
+write_bismark2report_job_submission_file(){
+    cat <<EOF > condor_submission_files/${sample_name}/bismark2report_job_${sample_name}.sub
+Initialdir = $(pwd)
+executable = $REPO_FOR_REIZEL_LAB/run_on_atlas/bismark_wgbs/bismark2report.sh
+Arguments = \$(args)
+request_cpus = 1
+RequestMemory = 30GB
+universe = vanilla
+log = $(pwd)/logs/$sample_name/\$(name)_bismark2report.log
+output = $(pwd)/logs/$sample_name/\$(name)_bismark2report.out
+error = $(pwd)/logs/$sample_name/\$(name)_bismark2report.out
+queue name, args from (
+  $sample_name, -output-dir $(pwd)/$sample_name
+)
+EOF
+}
+
+write_sample_dag_file(){
+    cat <<EOF > condor_submission_files/${sample_name}/bismark_wgbs_${sample_name}.dag
+JOB trim_and_qc $(realpath ./condor_submission_files/$sample_name/trim_job_${sample_name}.sub)
+JOB bismark_align $(realpath ./condor_submission_files/$sample_name/bismark_align_job_${sample_name}.sub)
+JOB deduplicate $(realpath ./condor_submission_files/$sample_name/deduplicate_job_${sample_name}.sub)
+JOB meth_call $(realpath ./condor_submission_files/$sample_name/methylation_calling_job_${sample_name}.sub)
+JOB make_tiles $(realpath ./condor_submission_files/$sample_name/make_tiles_${sample_name}.sub)
+JOB bam2nuc $(realpath ./condor_submission_files/$sample_name/bam2nuc_job_${sample_name}.sub)
+JOB bismark2report $(realpath ./condor_submission_files/$sample_name/bismark2report_job_${sample_name}.sub)
+
+PARENT trim_and_qc  CHILD bismark_align
+PARENT bismark_align  CHILD deduplicate
+PARENT deduplicate  CHILD meth_call bam2nuc
+PARENT meth_call  CHILD make_tiles
+PARENT meth_call bam2nuc  CHILD bismark2report
+EOF
+}
+
 write_condor_submission_files() { # <raw_dir>
   raw_dir=$1
   sample_names=()
@@ -255,7 +358,7 @@ write_condor_submission_files() { # <raw_dir>
   # if fastq file longer than n_reads_per_chunk reads, split it into n_reads_per_chunk read chunks
   echo "Counting reads in $sample_name to see if the fastq file(s) should be split into chunks"
 #  n_reads=$(( $(zcat $(find $raw_dir/$sample_name/ -name "*.fastq.gz" | head -1) | wc -l) / 4 ))
-  n_reads=$(( $(pigz -p 4 -c -d $(find $raw_dir/$sample_name/ -name "*.fastq.gz" | head -1) | wc -l) / 4 ))
+  n_reads=$(( $(pigz -p 8 -c -d $(find $raw_dir/$sample_name/ -name "*.fastq.gz" | head -1) | wc -l) / 4 ))
   n_chunks=$(( n_reads / n_reads_per_chunk ))
 
   if [[ $(( n_reads % n_reads_per_chunk )) ]]; then
@@ -276,101 +379,15 @@ write_condor_submission_files() { # <raw_dir>
     write_align_sub_file
   fi
 
- #TODO : condor job to unite and sort the bam files from each chunk
+ #TODO : write_unite_and_sort_bam_job_submission_file?
+ #TODO: or use deduplicate job to use the split files with one merged deduplicated output
+  write_deduplicate_job_submission_file
+  write_methylation_calling_job_submission_file
+  write_bam2nuc_job_submission_file
+  write_make_tiles_job_submission_file
+  wrtie_write_bismark2report_job_submission_file
+  write_sample_dag_file
 
-
-    cat <<EOF > condor_submission_files/${sample_name}/deduplicate_job_${sample_name}.sub
-Initialdir = $(pwd)
-executable = $REPO_FOR_REIZEL_LAB/run_on_atlas/bismark_wgbs/deduplicate.sh
-Arguments = \$(args)
-request_cpus = 2
-RequestMemory = 25GB
-universe = vanilla
-log = $(pwd)/logs/$sample_name/\$(name)_deduplicate.log
-output = $(pwd)/logs/$sample_name/\$(name)_deduplicate.out
-error = $(pwd)/logs/$sample_name/\$(name)_deduplicate.out
-queue name, args from (
- $sample_name, $(pwd)/$sample_name
-)
-EOF
-
-    cat <<EOF > condor_submission_files/${sample_name}/methylation_calling_job_${sample_name}.sub
-Initialdir = $(pwd)
-executable = $REPO_FOR_REIZEL_LAB/run_on_atlas/bismark_wgbs/methylation_calling.sh
-Arguments = \$(args)
-request_cpus = 10
-RequestMemory = 4GB
-universe = vanilla
-log = $(pwd)/logs/$sample_name/\$(name)_methylation_calling.log
-output = $(pwd)/logs/$sample_name/\$(name)_methylation_calling.out
-error = $(pwd)/logs/$sample_name/\$(name)_methylation_calling.out
-queue name, args from (
-  $sample_name, -output-dir $(pwd)/$sample_name $ignore_r2 $keep_trimmed_fq $extra_meth_opts
-)
-EOF
-
-    cat <<EOF > condor_submission_files/${sample_name}/bam2nuc_job_${sample_name}.sub
-Initialdir = $(pwd)
-executable = $REPO_FOR_REIZEL_LAB/run_on_atlas/bismark_wgbs/nucleotide_coverage_report.sh
-Arguments = \$(args)
-request_cpus = 2
-RequestMemory = 10GB
-universe = vanilla
-log = $(pwd)/logs/sample_name/\$(name)_bam2nuc.log
-output = $(pwd)/logs/sample_name/\$(name)_bam2nuc.out
-error = $(pwd)/logs/sample_name/\$(name)_bam2nuc.out
-queue name, args from (
-  $sample_name, -output-dir $(pwd)/$sample_name -genome $genome
-)
-EOF
-
-    cat <<EOF > condor_submission_files/${sample_name}/make_tiles_${sample_name}.sub
-Initialdir = $(pwd)
-executable = $REPO_FOR_REIZEL_LAB/run_on_atlas/bismark_wgbs/make_tiles.sh
-Arguments = \$(args)
-request_cpus = 1
-RequestMemory = 30GB
-universe = vanilla
-log = $(pwd)/logs/$sample_name/(name)_make_tiles.log
-output = $(pwd)/logs/$sample_name/(name)_make_tiles.out
-error = $(pwd)/logs/$sample_name/(name)_make_tiles.out
-queue name, args from (
-  $sample_name, -output-dir $(pwd)/$sample_name -genome $genome
-)
-EOF
-
-
-    cat <<EOF > condor_submission_files/${sample_name}/bismark2report_job_${sample_name}.sub
-Initialdir = $(pwd)
-executable = $REPO_FOR_REIZEL_LAB/run_on_atlas/bismark_wgbs/bismark2report.sh
-Arguments = \$(args)
-request_cpus = 1
-RequestMemory = 30GB
-universe = vanilla
-log = $(pwd)/logs/$sample_name/\$(name)_bismark2report.log
-output = $(pwd)/logs/$sample_name/\$(name)_bismark2report.out
-error = $(pwd)/logs/$sample_name/\$(name)_bismark2report.out
-queue name, args from (
-  $sample_name, -output-dir $(pwd)/$sample_name
-)
-EOF
-
-
-    cat <<EOF > condor_submission_files/${sample_name}/bismark_wgbs_${sample_name}.dag
-JOB trim_and_qc $(realpath ./condor_submission_files/$sample_name/trim_job_${sample_name}.sub)
-JOB bismark_align $(realpath ./condor_submission_files/$sample_name/bismark_align_job_${sample_name}.sub)
-JOB deduplicate $(realpath ./condor_submission_files/$sample_name/deduplicate_job_${sample_name}.sub)
-JOB meth_call $(realpath ./condor_submission_files/$sample_name/methylation_calling_job_${sample_name}.sub)
-JOB make_tiles $(realpath ./condor_submission_files/$sample_name/make_tiles_${sample_name}.sub)
-JOB bam2nuc $(realpath ./condor_submission_files/$sample_name/bam2nuc_job_${sample_name}.sub)
-JOB bismark2report $(realpath ./condor_submission_files/$sample_name/bismark2report_job_${sample_name}.sub)
-
-PARENT trim_and_qc  CHILD bismark_align
-PARENT bismark_align  CHILD deduplicate
-PARENT deduplicate  CHILD meth_call bam2nuc
-PARENT meth_call  CHILD make_tiles
-PARENT meth_call bam2nuc  CHILD bismark2report
-EOF
 
   done
 
