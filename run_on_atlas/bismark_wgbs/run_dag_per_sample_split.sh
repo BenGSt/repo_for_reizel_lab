@@ -366,9 +366,8 @@ main_write_condor_submission_files() { # <raw_dir>
   raw_dir=$1
   sample_names=()
 #  for sample_name in $(find -L $raw_dir -type d | awk -F / 'NR>1{print $NF}' | sort); do #try to replace this loop with xargs
-  find -L $raw_dir -type d | awk -F / 'NR>1{print $NF}' | sort | xargs -n1 -P4 sh -c '
+  find -L $raw_dir -type d | awk -F / 'NR>1{print $NF}' | sort | xargs -n1 -P4 sh -c "for sample_name in $0; do
     {
-      sample_name=$0 #for xargs
       sample_names+=($sample_name)
       mkdir -p condor_submission_files/$sample_name
       mkdir -p logs/$sample_name
@@ -405,9 +404,8 @@ main_write_condor_submission_files() { # <raw_dir>
       write_make_tiles_job_submission_file
       write_bismark2report_job_submission_file
       write_sample_dag_file
-    }'
-#  done #for loop, not xargs
-
+    }
+    done"
 
   write_multiqc_job_submission_file
 
