@@ -13,9 +13,13 @@ main() {
     to_split=($input_fastq_1 $input_fastq_2)
   fi
 
+  n=0
   for fastq in "${to_split[@]}"; do
-    echo split -dl $n_lines_per_file <(zcat $fastq) split/$(echo $(basename $fastq) | sed 's/.fastq.gz\|fq.gz//')_chunk_ --additional-suffix=.fq
-    split -dl $n_lines_per_file <(zcat $fastq) split/$(echo $(basename $fastq) | sed 's/.fastq.gz\|fq.gz//')_chunk_ --additional-suffix=.fq &
+    mkfifo fifo$n
+    gzip -dc $fastq >fifo$n &
+    ((n++))
+    echo split -dl $n_lines_per_file fifo$n split/$(echo $(basename $fastq) | sed 's/.fastq.gz\|fq.gz//')_chunk_ --additional-suffix=.fq
+    split -dl $n_lines_per_file fifo$n split/$(echo $(basename $fastq) | sed 's/.fastq.gz\|fq.gz//')_chunk_ --additional-suffix=.fq &
   done
 
   wait
