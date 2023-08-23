@@ -5,7 +5,7 @@ REPO_FOR_REIZEL_LAB=/storage/bfe_reizel/bengst/repo_for_reizel_lab
 help() {
   echo Run The WGBS bismark pipeline \(separate dag for each sample\):
   echo USAGE: "$(echo "$0" | awk -F / '{print$NF}')" \{-single-end or -paired-end\} -raw-data-dir \<raw_data_dir\> \
-    -genome \<mm10 or hg38\>   \[optional\]
+    -genome \<mm10 or hg38\> \[optional\]
   echo
   echo raw_data_dir should contain a dir for each sample containing it\'s fastq files.
   echo -non-directional
@@ -117,24 +117,22 @@ EOF
 
 main() {
   if [[ $# -gt 2 ]]; then #don't (re)write cmd.txt if no args
-    echo \# the command used to prepare the jobs. Note that parentheses are lost > cmd.txt
-    echo \# and need to be added to rerun: -extra-trim-galore-options \"multiple quoted options\" >> cmd.txt
-    echo "$0" "$@" >> cmd.txt #TODO: preserve quotes that may be in args
+    echo \# the command used to prepare the jobs. Note that parentheses are lost >cmd.txt
+    echo \# and need to be added to rerun: -extra-trim-galore-options \"multiple quoted options\" >>cmd.txt
+    echo "$0" "$@" >>cmd.txt #TODO: preserve quotes that may be in args
   fi
 
   n_reads_per_chunk=100000000 #default value (may be overwritten by arg_parse)
   arg_parse "$@"
   mkdir logs
-  write_condor_submission_files $raw_data_dir
+  main_write_condor_submission_files $raw_data_dir
 
   echo Submit the jobs by running: condor_submit_dag ./condor_submission_files/submit_all_bismark_wgbs.dag
   echo Good Luck!
-  #TODO: single end read option
-
 }
 
-write_split_job_submission_file(){
-      cat << EOF > condor_submission_files/${sample_name}/split_fastq_${sample_name}.sub
+write_split_job_submission_file() {
+  cat <<EOF >condor_submission_files/${sample_name}/split_fastq_${sample_name}.sub
 Initialdir = $(pwd)
 executable = $REPO_FOR_REIZEL_LAB/run_on_atlas/bismark_wgbs/split_fastq.sh
 Arguments = \$(args)
@@ -146,18 +144,18 @@ output = $(pwd)/logs/$sample_name/${sample_name}_split_fastq.out
 error = $(pwd)/logs/$sample_name/${sample_name}_split_fastq.out
 queue args from (
   $(
-  if [[ $single_end -eq 1 ]]; then
-    echo -output-dir $(pwd)/$sample_name/$split/$chunk -chunks $n_chunks -reads-per-chunk $n_reads_per_chunk -input-fastq-file $(realpath $raw_dir/$sample_name/*.fastq.gz)
-  else
-    echo -output-dir $(pwd)/$sample_name/$split/$chunk -chunks $n_chunks -reads-per-chunk $n_reads_per_chunk -paired-input-fastq-files $(realpath $raw_dir/$sample_name/*.fastq.gz)
-  fi
+    if [[ $single_end -eq 1 ]]; then
+      echo -output-dir $(pwd)/$sample_name/$split/$chunk -chunks $n_chunks -reads-per-chunk $n_reads_per_chunk -input-fastq-file $(realpath $raw_dir/$sample_name/*.fastq.gz)
+    else
+      echo -output-dir $(pwd)/$sample_name/$split/$chunk -chunks $n_chunks -reads-per-chunk $n_reads_per_chunk -paired-input-fastq-files $(realpath $raw_dir/$sample_name/*.fastq.gz)
+    fi
   )
 )
 #NOTE: may want to gzip fq files after splitting to save disk space (at the cost of more cpu time)
 EOF
 }
 
-write_trim_jobs_submission_file(){
+write_trim_jobs_submission_file() {
   split=
   sep=
   chunk=$1
@@ -168,7 +166,7 @@ write_trim_jobs_submission_file(){
   else
     filename=condor_submission_files/${sample_name}/trim_job_${sample_name}.sub
   fi
-      cat <<EOF > $filename
+  cat <<EOF >$filename
 Initialdir = $(pwd)
 executable = $REPO_FOR_REIZEL_LAB/run_on_atlas/bismark_wgbs/trim_illumina_adaptors.sh
 Arguments = \$(args)
@@ -180,12 +178,12 @@ output = $(pwd)/logs/$sample_name/\$(name)_trim.out
 error = $(pwd)/logs/$sample_name/\$(name)_trim.out
 queue name, args from (
 $(
-      if [[ $single_end -eq 1 ]]; then
-        echo $sample_name$sep$chunk, \" -output-dir $(pwd)/$sample_name/$split/$chunk -input-fastq-file $(pwd)/$sample_name/$split/$chunk/\*.fq $extra_trim_opts\"
-      else
-        echo $sample_name$sep$chunk, \" -output-dir $(pwd)/$sample_name/$split/$chunk -paired-input-fastq-files $(pwd)/$sample_name/$split/$chunk/\*.fq $extra_trim_opts\"
-      fi
-    )
+    if [[ $single_end -eq 1 ]]; then
+      echo $sample_name$sep$chunk, \" -output-dir $(pwd)/$sample_name/$split/$chunk -input-fastq-file $(pwd)/$sample_name/$split/$chunk/\*.fq $extra_trim_opts\"
+    else
+      echo $sample_name$sep$chunk, \" -output-dir $(pwd)/$sample_name/$split/$chunk -paired-input-fastq-files $(pwd)/$sample_name/$split/$chunk/\*.fq $extra_trim_opts\"
+    fi
+  )
 )
 #NOTE: If storage turns out to be a bottle neck, may want to gzip fq files after trimming (and / or after splitting)
 #      to save disk space (at the cost of more cpu time).
@@ -193,7 +191,7 @@ $(
 EOF
 }
 
-write_align_sub_file(){
+write_align_sub_file() {
   #unset vars
   split=
   sep=
@@ -206,7 +204,7 @@ write_align_sub_file(){
   else
     filename=condor_submission_files/${sample_name}/bismark_align_job_${sample_name}.sub
   fi
-  cat <<EOF > $filename
+  cat <<EOF >$filename
 Initialdir = $(pwd)
 executable = $REPO_FOR_REIZEL_LAB/run_on_atlas/bismark_wgbs/bismark_align.sh
 Arguments = \$(args)
@@ -219,18 +217,18 @@ error = $(pwd)/logs/$samp/\$(name)_bismark_align.out
 queue name, args from (
 $(
 
-      if [[ $single_end -eq 1 ]]; then
-        echo $sample_name$sep$chunk, -output-dir $(pwd)/$sample_name/$split/$chunk -single-end $non_directional -genome $genome $dovetail
-      else
-        echo $sample_name$sep$chunk, -output-dir $(pwd)/$sample_name/$split/$chunk -paired-end $non_directional -genome $genome $dovetail
-      fi
-    )
+    if [[ $single_end -eq 1 ]]; then
+      echo $sample_name$sep$chunk, -output-dir $(pwd)/$sample_name/$split/$chunk -single-end $non_directional -genome $genome $dovetail
+    else
+      echo $sample_name$sep$chunk, -output-dir $(pwd)/$sample_name/$split/$chunk -paired-end $non_directional -genome $genome $dovetail
+    fi
+  )
 )
 EOF
 }
 
-write_unite_and_sort_bam_job_submission_file(){
-  cat << EOF > condor_submission_files/${sample_name}/unite_and_sort_bam_${sample_name}.sub
+write_unite_and_sort_bam_job_submission_file() {
+  cat <<EOF >condor_submission_files/${sample_name}/unite_and_sort_bam_${sample_name}.sub
 Initialdir = $(pwd)
 executable = $REPO_FOR_REIZEL_LAB/run_on_atlas/bismark_wgbs/unite_and_sort_bam.sh
 Arguments = $(pwd)/$sample_name
@@ -244,8 +242,8 @@ queue
 EOF
 }
 
-write_deduplicate_job_submission_file(){
-    cat <<EOF > condor_submission_files/${sample_name}/deduplicate_job_${sample_name}.sub
+write_deduplicate_job_submission_file() {
+  cat <<EOF >condor_submission_files/${sample_name}/deduplicate_job_${sample_name}.sub
 Initialdir = $(pwd)
 executable = $REPO_FOR_REIZEL_LAB/run_on_atlas/bismark_wgbs/deduplicate.sh
 Arguments = \$(args)
@@ -261,8 +259,8 @@ queue name, args from (
 EOF
 }
 
-write_methylation_calling_job_submission_file(){
-    cat <<EOF > condor_submission_files/${sample_name}/methylation_calling_job_${sample_name}.sub
+write_methylation_calling_job_submission_file() {
+  cat <<EOF >condor_submission_files/${sample_name}/methylation_calling_job_${sample_name}.sub
 Initialdir = $(pwd)
 executable = $REPO_FOR_REIZEL_LAB/run_on_atlas/bismark_wgbs/methylation_calling.sh
 Arguments = \$(args)
@@ -278,8 +276,8 @@ queue name, args from (
 EOF
 }
 
-write_bam2nuc_job_submission_file(){
-    cat <<EOF > condor_submission_files/${sample_name}/bam2nuc_job_${sample_name}.sub
+write_bam2nuc_job_submission_file() {
+  cat <<EOF >condor_submission_files/${sample_name}/bam2nuc_job_${sample_name}.sub
 Initialdir = $(pwd)
 executable = $REPO_FOR_REIZEL_LAB/run_on_atlas/bismark_wgbs/nucleotide_coverage_report.sh
 Arguments = \$(args)
@@ -295,8 +293,8 @@ queue name, args from (
 EOF
 }
 
-write_make_tiles_job_submission_file(){
-    cat <<EOF > condor_submission_files/${sample_name}/make_tiles_${sample_name}.sub
+write_make_tiles_job_submission_file() {
+  cat <<EOF >condor_submission_files/${sample_name}/make_tiles_${sample_name}.sub
 Initialdir = $(pwd)
 executable = $REPO_FOR_REIZEL_LAB/run_on_atlas/bismark_wgbs/make_tiles.sh
 Arguments = \$(args)
@@ -312,8 +310,8 @@ queue name, args from (
 EOF
 }
 
-write_bismark2report_job_submission_file(){
-    cat <<EOF > condor_submission_files/${sample_name}/bismark2report_job_${sample_name}.sub
+write_bismark2report_job_submission_file() {
+  cat <<EOF >condor_submission_files/${sample_name}/bismark2report_job_${sample_name}.sub
 Initialdir = $(pwd)
 executable = $REPO_FOR_REIZEL_LAB/run_on_atlas/bismark_wgbs/bismark2report.sh
 Arguments = \$(args)
@@ -329,8 +327,25 @@ queue name, args from (
 EOF
 }
 
-write_sample_dag_file(){
-    cat <<EOF > condor_submission_files/${sample_name}/bismark_wgbs_${sample_name}.dag
+write_multiqc_job_submission_file() {
+  cat <<EOF >condor_submission_files/multiqc_job.sub
+Initialdir = $(pwd)
+executable = $REPO_FOR_REIZEL_LAB/run_on_atlas/bismark_wgbs/run_multiqc.sh
+Arguments = \$(args)
+request_cpus = 1
+RequestMemory = 500MB
+universe = vanilla
+log = $(pwd)/logs/multiqc_job.log
+output = $(pwd)/logs/multiqc_job.out
+error = $(pwd)/logs/multiqc_job.out
+queue args from (
+  "$keep_bam -multiqc-args '$(pwd) --outdir multiqc'"
+)
+EOF
+}
+
+write_sample_dag_file() {
+  cat <<EOF >condor_submission_files/${sample_name}/bismark_wgbs_${sample_name}.dag
 JOB trim_and_qc $(realpath ./condor_submission_files/$sample_name/trim_job_${sample_name}.sub)
 JOB bismark_align $(realpath ./condor_submission_files/$sample_name/bismark_align_job_${sample_name}.sub)
 JOB deduplicate $(realpath ./condor_submission_files/$sample_name/deduplicate_job_${sample_name}.sub)
@@ -347,64 +362,54 @@ PARENT meth_call bam2nuc  CHILD bismark2report
 EOF
 }
 
-write_condor_submission_files() { # <raw_dir>
+main_write_condor_submission_files() { # <raw_dir>
   raw_dir=$1
   sample_names=()
-  for sample_name in $(find -L $raw_dir -type d | awk -F / 'NR>1{print $NF}' | sort); do
-    sample_names+=($sample_name)
-    mkdir -p condor_submission_files/$sample_name
-    mkdir -p logs/$sample_name
+#  for sample_name in $(find -L $raw_dir -type d | awk -F / 'NR>1{print $NF}' | sort); do #try to replace this loop with xargs
+  find -L $raw_dir -type d | awk -F / 'NR>1{print $NF}' | sort | xargs -n1 -P4 sh -c '
+    {
+      sample_name=$0 #for xargs
+      sample_names+=($sample_name)
+      mkdir -p condor_submission_files/$sample_name
+      mkdir -p logs/$sample_name
 
-  # if fastq file longer than n_reads_per_chunk reads, split it into n_reads_per_chunk read chunks
-  echo "Counting reads in $sample_name to see if the fastq file(s) should be split into chunks"
-#  n_reads=$(( $(zcat $(find $raw_dir/$sample_name/ -name "*.fastq.gz" | head -1) | wc -l) / 4 ))
-  n_reads=$(( $(pigz -p 8 -c -d $(find $raw_dir/$sample_name/ -name "*.fastq.gz" | head -1) | wc -l) / 4 ))
-  n_chunks=$(( n_reads / n_reads_per_chunk ))
+      # if fastq file longer than n_reads_per_chunk reads, split it into n_reads_per_chunk read chunks
+      echo "Counting reads in $sample_name to see if the fastq file(s) should be split into chunks"
+      #  n_reads=$(( $(zcat $(find $raw_dir/$sample_name/ -name "*.fastq.gz" | head -1) | wc -l) / 4 ))
+      n_reads=$(($(pigz -cd $(find $raw_dir/$sample_name/ -name "*.fastq.gz" | head -1) | wc -l) / 4))
+      n_chunks=$((n_reads / n_reads_per_chunk))
 
-  if [[ $(( n_reads % n_reads_per_chunk )) ]]; then
-    ((n_chunks ++)) # add one more chunk for the remainder reads
-  fi
-  echo "n_reads: $n_reads, n_reads_per_chunk: $n_reads_per_chunk"
+      if [[ $((n_reads % n_reads_per_chunk)) ]]; then
+        ((n_chunks++)) # add one more chunk for the remainder reads
+      fi
+      echo "n_reads: $n_reads, n_reads_per_chunk: $n_reads_per_chunk"
 
-  if [[ $n_reads -gt $n_reads_per_chunk ]]; then
-    echo "fastq files will be split into $(( n_chunks - 1 )) chunks of $n_reads_per_chunk reads each + 1 chunk of $(( n_reads % n_reads_per_chunk )) reads"
-    write_split_job_submission_file
-    #write condor sub files for jobs to align each chunk
-    for chunk in $(seq -w 00 $((n_chunks -1))); do
-      write_trim_jobs_submission_file  $chunk
-      write_align_sub_file $chunk
-    done
-  else # no splitting of fastq files
-    write_trim_jobs_submission_file
-    write_align_sub_file
-  fi
+      if [[ $n_reads -gt $n_reads_per_chunk ]]; then
+        echo "fastq files will be split into $((n_chunks - 1)) chunks of $n_reads_per_chunk reads each + 1 chunk of $((n_reads % n_reads_per_chunk)) reads"
+        write_split_job_submission_file
+        #write condor sub files for jobs to align each chunk
+        for chunk in $(seq -w 00 $((n_chunks - 1))); do
+          write_trim_jobs_submission_file $chunk
+          write_align_sub_file $chunk
+        done
+      else # no splitting of fastq files
+        write_trim_jobs_submission_file
+        write_align_sub_file
+      fi
 
- #TODO : write_unite_and_sort_bam_job_submission_file?
- #TODO: or use deduplicate job to use the split files with one merged deduplicated output
-  write_deduplicate_job_submission_file
-  write_methylation_calling_job_submission_file
-  write_bam2nuc_job_submission_file
-  write_make_tiles_job_submission_file
-  write_bismark2report_job_submission_file
-  write_sample_dag_file
+      #TODO : write_unite_and_sort_bam_job_submission_file?
+      #TODO: or use deduplicate job to use the split files with one merged deduplicated output
+      write_deduplicate_job_submission_file
+      write_methylation_calling_job_submission_file
+      write_bam2nuc_job_submission_file
+      write_make_tiles_job_submission_file
+      write_bismark2report_job_submission_file
+      write_sample_dag_file
+    }'
+#  done #for loop, not xargs
 
 
-  done
-
-  cat <<EOF > condor_submission_files/multiqc_job.sub
-Initialdir = $(pwd)
-executable = $REPO_FOR_REIZEL_LAB/run_on_atlas/bismark_wgbs/run_multiqc.sh
-Arguments = \$(args)
-request_cpus = 1
-RequestMemory = 500MB
-universe = vanilla
-log = $(pwd)/logs/multiqc_job.log
-output = $(pwd)/logs/multiqc_job.out
-error = $(pwd)/logs/multiqc_job.out
-queue args from (
-  "$keep_bam -multiqc-args '$(pwd) --outdir multiqc'"
-)
-EOF
+  write_multiqc_job_submission_file
 
   #Write the top level submission file to submit all dags
   rm -f ./condor_submission_files/submit_all_bismark_wgbs.dag #incase rerunning the script without delete
@@ -414,46 +419,46 @@ EOF
 
   i=0
   for dag in $sample_dags; do
-    echo SUBDAG EXTERNAL ${sample_names[$i]} $dag >> $fileout
-    echo PRIORITY ${sample_names[$i]} $i >> $fileout
+    echo SUBDAG EXTERNAL ${sample_names[$i]} $dag >>$fileout
+    echo PRIORITY ${sample_names[$i]} $i >>$fileout
     echo >>$fileout
     ((i++))
   done
-  echo JOB multiqc $(realpath ./condor_submission_files/multiqc_job.sub) >> $fileout
-  echo  >> $fileout
+  echo JOB multiqc $(realpath ./condor_submission_files/multiqc_job.sub) >>$fileout
+  echo >>$fileout
   # Old version - all samples submitted at once
-  echo PARENT $(for ((k=0; k<=$i; k++)); do printf "%s " ${sample_names[$k]}; done) CHILD multiqc >> $fileout
+  echo PARENT $(for ((k = 0; k <= $i; k++)); do printf "%s " ${sample_names[$k]}; done) CHILD multiqc >>$fileout
 
-  # New version - Because Atlas' policy of holding jobs that have been submitted more than 3 days ago, break up samples
+  # Another version - Because Atlas' policy of holding jobs that have been submitted more than 3 days ago, break up samples
   # into groups of NUM_PARALLEL_SAMP and have them as parent and child s.t. the next 3 are submitted only after the
   # previous 3 have completed.
-#  NUM_PARALLEL_SAMP=3 #the number of samples that run in parallel
-#  n_samp=${#sample_names[@]}
-#  j=0
-#  if (($NUM_PARALLEL_SAMP > $n_samp)); then
-#    printf "PARENT "
-#    for ((k = 0; k < n_samp; k++)); do printf "%s " ${sample_names[$k]} >> $fileout; done
-#    echo CHILD multiqc >> $fileout
-#  else
-#    for ((j = 0; j < ($n_samp / NUM_PARALLEL_SAMP); j++)); do
-#      printf "PARENT %s %s %s " $(for ((k = 0; k < NUM_PARALLEL_SAMP; k++)); do echo ${sample_names[$j * 3 + $k]}; done) >> $fileout
-#      if ((j != ($n_samp / NUM_PARALLEL_SAMP) - 1)); then
-#        printf "CHILD %s %s %s\n" $(for ((k = NUM_PARALLEL_SAMP; k < 2 * NUM_PARALLEL_SAMP; k++)); do echo ${sample_names[$j * 3 + $k]}; done) >> $fileout
-#      else
-#        if (($n_samp % $NUM_PARALLEL_SAMP)); then
-#          printf "CHILD " >> $fileout
-#          for ((k = NUM_PARALLEL_SAMP; k < NUM_PARALLEL_SAMP + ($n_samp % $NUM_PARALLEL_SAMP); k++)); do
-#            printf "%s " ${sample_names[$k]} >> $fileout
-#          done
-#          printf "\nPARENT " >> $fileout
-#          for ((k = NUM_PARALLEL_SAMP; k < NUM_PARALLEL_SAMP + ($n_samp % $NUM_PARALLEL_SAMP); k++)); do
-#            printf "%s " ${sample_names[$k]} >> $fileout
-#          done
-#        fi
-#        echo CHILD multiqc >> $fileout
-#      fi
-#    done
-#  fi
+  #  NUM_PARALLEL_SAMP=3 #the number of samples that run in parallel
+  #  n_samp=${#sample_names[@]}
+  #  j=0
+  #  if (($NUM_PARALLEL_SAMP > $n_samp)); then
+  #    printf "PARENT "
+  #    for ((k = 0; k < n_samp; k++)); do printf "%s " ${sample_names[$k]} >> $fileout; done
+  #    echo CHILD multiqc >> $fileout
+  #  else
+  #    for ((j = 0; j < ($n_samp / NUM_PARALLEL_SAMP); j++)); do
+  #      printf "PARENT %s %s %s " $(for ((k = 0; k < NUM_PARALLEL_SAMP; k++)); do echo ${sample_names[$j * 3 + $k]}; done) >> $fileout
+  #      if ((j != ($n_samp / NUM_PARALLEL_SAMP) - 1)); then
+  #        printf "CHILD %s %s %s\n" $(for ((k = NUM_PARALLEL_SAMP; k < 2 * NUM_PARALLEL_SAMP; k++)); do echo ${sample_names[$j * 3 + $k]}; done) >> $fileout
+  #      else
+  #        if (($n_samp % $NUM_PARALLEL_SAMP)); then
+  #          printf "CHILD " >> $fileout
+  #          for ((k = NUM_PARALLEL_SAMP; k < NUM_PARALLEL_SAMP + ($n_samp % $NUM_PARALLEL_SAMP); k++)); do
+  #            printf "%s " ${sample_names[$k]} >> $fileout
+  #          done
+  #          printf "\nPARENT " >> $fileout
+  #          for ((k = NUM_PARALLEL_SAMP; k < NUM_PARALLEL_SAMP + ($n_samp % $NUM_PARALLEL_SAMP); k++)); do
+  #            printf "%s " ${sample_names[$k]} >> $fileout
+  #          done
+  #        fi
+  #        echo CHILD multiqc >> $fileout
+  #      fi
+  #    done
+  #  fi
 }
 
 arg_parse() {
