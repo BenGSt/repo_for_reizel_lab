@@ -368,7 +368,7 @@ write_condor_submission_files() { # <raw_dir>
 
   if [[ $n_reads -gt $n_reads_per_chunk ]]; then
     echo "fastq files will be split into $(( n_chunks - 1 )) chunks of $n_reads_per_chunk reads each + 1 chunk of $(( n_reads % n_reads_per_chunk )) reads"
-    write_split_job_submission_files
+    write_split_job_submission_file
     #write condor sub files for jobs to align each chunk
     for chunk in $(seq -w 00 $((n_chunks -1))); do
       write_trim_jobs_submission_file  $chunk
@@ -385,7 +385,7 @@ write_condor_submission_files() { # <raw_dir>
   write_methylation_calling_job_submission_file
   write_bam2nuc_job_submission_file
   write_make_tiles_job_submission_file
-  wrtie_write_bismark2report_job_submission_file
+  write_bismark2report_job_submission_file
   write_sample_dag_file
 
 
