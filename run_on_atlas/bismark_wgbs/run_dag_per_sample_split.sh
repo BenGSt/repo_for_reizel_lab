@@ -349,6 +349,7 @@ $(
       echo
     done
   )
+
 $(
     n=0
     for align_job in $(find ./condor_submission_files/$sample_name/ -name "bismark_align_job_${sample_name}*sub"); do
