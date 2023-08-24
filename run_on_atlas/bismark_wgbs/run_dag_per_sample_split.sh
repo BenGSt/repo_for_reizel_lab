@@ -274,9 +274,9 @@ Arguments = \$(args)
 request_cpus = 2
 RequestMemory = 10GB
 universe = vanilla
-log = $(pwd)/logs/sample_name/\$(name)_bam2nuc.log
-output = $(pwd)/logs/sample_name/\$(name)_bam2nuc.out
-error = $(pwd)/logs/sample_name/\$(name)_bam2nuc.out
+log = $(pwd)/logs/$sample_name/\$(name)_bam2nuc.log
+output = $(pwd)/logs/$sample_name/\$(name)_bam2nuc.out
+error = $(pwd)/logs/$sample_name/\$(name)_bam2nuc.out
 queue name, args from (
   $sample_name, -output-dir $(pwd)/$sample_name -genome $genome
 )
