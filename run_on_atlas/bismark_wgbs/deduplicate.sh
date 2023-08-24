@@ -23,7 +23,7 @@ main() #<sample_dir> <split>
 
   cd "$sample_dir" || exit 1
   if [[ $split ]]; then
-    deduplicate_bismark --multiple $(ls ./*bismark*bam | sort)
+    deduplicate_bismark --multiple $(find . -name "*bismark*bam" | sort) || exit 1
   else
     deduplicate_bismark ./*bismark*bam
   fi
