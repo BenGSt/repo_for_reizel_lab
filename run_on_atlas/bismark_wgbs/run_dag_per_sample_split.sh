@@ -399,8 +399,7 @@ main_write_condor_submission_files() { # <raw_dir>
     #TODO: try to replace this loop with xargs
     #  find -L $raw_dir -type d | awk -F / 'NR>1{print $NF}' | sort | xargs -n1 -P4 sh -c "
     {
-      split=
-      sep=
+      unset split sep chunk
       sample_names+=($sample_name)
       mkdir -p condor_submission_files/$sample_name
       mkdir -p logs/$sample_name
