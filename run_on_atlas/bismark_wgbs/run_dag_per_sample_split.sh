@@ -345,12 +345,14 @@ $(
     n=0
     for trim_job in $(find ./condor_submission_files/$sample_name/ -name "trim_job_${sample_name}*sub"); do
       echo JOB trim_and_qc_$((n++)) $(realpath $trim_job)
+      echo
     done
   )
 $(
     n=0
     for align_job in $(find ./condor_submission_files/$sample_name/ -name "bismark_align_job_${sample_name}*sub"); do
       echo JOB bismark_align_$((n++)) $(realpath $align_job)
+      echo
     done
     echo $((--n)) >temp_n_value
   )
@@ -371,7 +373,7 @@ EOF
       ) >>$outfile
   fi
   cat <<EOF >>$outfile
- $(
+$(
     n=$(cat temp_n_value)
     rm temp_n_value
     # trim_and_qc -> bismark_align
