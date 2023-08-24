@@ -362,7 +362,10 @@ JOB bismark2report $(realpath ./condor_submission_files/$sample_name/bismark2rep
 EOF
   if [[ $split ]]; then
     echo PARENT split_job CHILD \
-      $(n=$(cat temp_n_value); for i in $(seq -w 00 $n); do printf "trim_and_qc_%d " $i; done) >>$outfile
+      $(
+        n=$(cat temp_n_value)
+        for i in $(seq -w 00 $n); do printf "trim_and_qc_%d " $i; done
+      ) >>$outfile
   fi
   cat <<EOF >>$outfile
  $(
@@ -449,9 +452,9 @@ main_write_condor_submission_files() { # <raw_dir>
 
   #Write the top level submission file to submit all dags
   rm -f ./condor_submission_files/submit_all_bismark_wgbs.dag #incase rerunning the script without delete
-  sample_dags=$(realpath condor_submission_files/*.dag)
-  touch ./condor_submission_files/submit_all_bismark_wgbs.dag
+  sample_dags=$(find ./condor_submission_files/ -name "*.dag")
   fileout=condor_submission_files/submit_all_bismark_wgbs.dag
+  touch $fileout
 
   i=0
   for dag in $sample_dags; do
