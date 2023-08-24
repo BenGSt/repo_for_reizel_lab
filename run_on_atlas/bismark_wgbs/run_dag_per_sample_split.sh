@@ -361,6 +361,7 @@ main_write_condor_submission_files() { # <raw_dir>
     {
       split=
       sep=
+      remainder_msg=
       sample_names+=($sample_name)
       mkdir -p condor_submission_files/$sample_name
       mkdir -p logs/$sample_name
@@ -371,13 +372,14 @@ main_write_condor_submission_files() { # <raw_dir>
       n_reads=$(($(pigz -cd $(find $raw_dir/$sample_name/ -name "*.fastq.gz" | head -1) | wc -l) / 4))
       n_chunks=$((n_reads / n_reads_per_chunk))
 
-      if [[ $((n_reads % n_reads_per_chunk)) ]]; then
+      if [[ $((n_reads % n_reads_per_chunk)) -gt 0 ]]; then
         ((n_chunks++)) # add one more chunk for the remainder reads
+        remainder_msg=" + 1 chunk of $((n_reads % n_reads_per_chunk)) reads"
       fi
       echo "n_reads: $n_reads, n_reads_per_chunk: $n_reads_per_chunk"
 
       if [[ $n_reads -gt $n_reads_per_chunk ]]; then
-        echo "fastq files will be split into $((n_chunks - 1)) chunks of $n_reads_per_chunk reads each + 1 chunk of $((n_reads % n_reads_per_chunk)) reads"
+        echo "fastq files will be split into $((n_chunks - 1)) chunks of $n_reads_per_chunk reads each" "$remainder_msg"
         write_split_job_submission_file
         split="split"
         sep="_"
