@@ -311,24 +311,6 @@ queue name, args from (
 EOF
 }
 
-#TODO: delete this if all works
-#write_bismark2report_job_submission_file() {
-#  cat <<EOF >condor_submission_files/${sample_name}/bismark2report_job_${sample_name}.sub
-#Initialdir = $(pwd)
-#executable = $REPO_FOR_REIZEL_LAB/run_on_atlas/bismark_wgbs/bismark2report.sh
-#Arguments = \$(args)
-#request_cpus = 1
-#RequestMemory = 30GB
-#universe = vanilla
-#log = $(pwd)/logs/$sample_name/\$(name)_bismark2report.log
-#output = $(pwd)/logs/$sample_name/\$(name)_bismark2report.out
-#error = $(pwd)/logs/$sample_name/\$(name)_bismark2report.out
-#queue name, args from (
-#  $sample_name, -output-dir $(pwd)/$sample_name
-#)
-#EOF
-#}
-
 write_multiqc_job_submission_file() {
   cat <<EOF >condor_submission_files/multiqc_job.sub
 Initialdir = $(pwd)
