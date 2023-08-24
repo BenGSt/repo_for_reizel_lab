@@ -350,7 +350,6 @@ write_sample_dag_file() {
     done
     echo $n >temp_n_value
   )
-  n=$(cat temp_n_value)
 JOB deduplicate $(realpath ./condor_submission_files/$sample_name/deduplicate_job_${sample_name}.sub)
 JOB meth_call $(realpath ./condor_submission_files/$sample_name/methylation_calling_job_${sample_name}.sub)
 JOB make_tiles $(realpath ./condor_submission_files/$sample_name/make_tiles_${sample_name}.sub)
@@ -358,6 +357,8 @@ JOB bam2nuc $(realpath ./condor_submission_files/$sample_name/bam2nuc_job_${samp
 JOB bismark2report $(realpath ./condor_submission_files/$sample_name/bismark2report_job_${sample_name}.sub)
 
  $(
+    n=$(cat temp_n_value)
+    rm temp_n_value
     # trim_and_qc -> bismark_align
     printf "PARENT "
     for i in $(seq -w 00 $n); do
