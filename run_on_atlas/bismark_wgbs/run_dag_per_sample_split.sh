@@ -158,7 +158,7 @@ EOF
 write_trim_jobs_submission_file() {
   chunk=$1
   if [[ $chunk ]]; then
-    filename=condor_submission_files/${sample_name}/trim_job_${sample_name}.sub_${chunk}.sub
+    filename=condor_submission_files/${sample_name}/trim_job_${sample_name}_${chunk}.sub
   else
     filename=condor_submission_files/${sample_name}/trim_job_${sample_name}.sub
   fi
@@ -300,22 +300,23 @@ queue name, args from (
 EOF
 }
 
-write_bismark2report_job_submission_file() {
-  cat <<EOF >condor_submission_files/${sample_name}/bismark2report_job_${sample_name}.sub
-Initialdir = $(pwd)
-executable = $REPO_FOR_REIZEL_LAB/run_on_atlas/bismark_wgbs/bismark2report.sh
-Arguments = \$(args)
-request_cpus = 1
-RequestMemory = 30GB
-universe = vanilla
-log = $(pwd)/logs/$sample_name/\$(name)_bismark2report.log
-output = $(pwd)/logs/$sample_name/\$(name)_bismark2report.out
-error = $(pwd)/logs/$sample_name/\$(name)_bismark2report.out
-queue name, args from (
-  $sample_name, -output-dir $(pwd)/$sample_name
-)
-EOF
-}
+#TODO: delete this if all works
+#write_bismark2report_job_submission_file() {
+#  cat <<EOF >condor_submission_files/${sample_name}/bismark2report_job_${sample_name}.sub
+#Initialdir = $(pwd)
+#executable = $REPO_FOR_REIZEL_LAB/run_on_atlas/bismark_wgbs/bismark2report.sh
+#Arguments = \$(args)
+#request_cpus = 1
+#RequestMemory = 30GB
+#universe = vanilla
+#log = $(pwd)/logs/$sample_name/\$(name)_bismark2report.log
+#output = $(pwd)/logs/$sample_name/\$(name)_bismark2report.out
+#error = $(pwd)/logs/$sample_name/\$(name)_bismark2report.out
+#queue name, args from (
+#  $sample_name, -output-dir $(pwd)/$sample_name
+#)
+#EOF
+#}
 
 write_multiqc_job_submission_file() {
   cat <<EOF >condor_submission_files/multiqc_job.sub
@@ -336,16 +337,45 @@ EOF
 
 write_sample_dag_file() {
   cat <<EOF >condor_submission_files/${sample_name}/bismark_wgbs_${sample_name}.dag
-JOB trim_and_qc $(realpath ./condor_submission_files/$sample_name/trim_job_${sample_name}.sub)
-JOB bismark_align $(realpath ./condor_submission_files/$sample_name/bismark_align_job_${sample_name}.sub)
+  $(
+    n=0
+    for trim_job in $(find ./condor_submission_files/$sample_name/ -name "trim_job_${sample_name}*sub"); do
+      echo JOB trim_and_qc_$((n++)) $(realpath $trim_job)
+    done
+  )
+  $(
+    n=0
+    for align_job in $(find ./condor_submission_files/$sample_name/ -name "bismark_align_job_${sample_name}*sub"); do
+      echo JOB bismark_align_$((n++)) $(realpath $align_job)
+    done
+    export n
+  )
+
 JOB deduplicate $(realpath ./condor_submission_files/$sample_name/deduplicate_job_${sample_name}.sub)
 JOB meth_call $(realpath ./condor_submission_files/$sample_name/methylation_calling_job_${sample_name}.sub)
 JOB make_tiles $(realpath ./condor_submission_files/$sample_name/make_tiles_${sample_name}.sub)
 JOB bam2nuc $(realpath ./condor_submission_files/$sample_name/bam2nuc_job_${sample_name}.sub)
 JOB bismark2report $(realpath ./condor_submission_files/$sample_name/bismark2report_job_${sample_name}.sub)
 
-PARENT trim_and_qc  CHILD bismark_align
-PARENT bismark_align  CHILD deduplicate
+  $(
+    # trim_and_qc -> bismark_align
+    printf "PARENT "
+    for i in $(seq -w 00 $n); do
+      printf "trim_and_qc_%d " $i
+    done
+    printf "CHILD "
+    for i in $(seq -w 00 $n); do
+      printf "bismark_align_%d " $i
+    done
+    printf "\n"
+
+    # bismark_align -> deduplicate
+    printf "PARENT "
+    for i in $(seq -w 00 $n); do
+      printf "bismark_align_%d " $i
+    done
+    printf "CHILD deduplicate\n"
+  )
 PARENT deduplicate  CHILD meth_call bam2nuc
 PARENT meth_call  CHILD make_tiles
 PARENT meth_call bam2nuc  CHILD bismark2report
@@ -383,9 +413,10 @@ main_write_condor_submission_files() { # <raw_dir>
       if [[ $n_reads -gt $n_reads_per_chunk ]]; then
         echo "fastq files will be split into $n_full_chunks chunks of $n_reads_per_chunk reads each" "$remainder_msg"
         write_split_job_submission_file
+
+        #write condor sub files for jobs to trim and align each chunk
         split="split"
         sep="_"
-        #write condor sub files for jobs to align each chunk
         for chunk in $(seq -w 00 $((n_chunks - 1))); do
           write_trim_jobs_submission_file $chunk
           write_align_sub_file $chunk
@@ -395,13 +426,11 @@ main_write_condor_submission_files() { # <raw_dir>
         write_align_sub_file
       fi
 
-      #TODO : write_unite_and_sort_bam_job_submission_file?
-      #TODO: or use deduplicate job to use the split files with one merged deduplicated output
       write_deduplicate_job_submission_file
       write_methylation_calling_job_submission_file
       write_bam2nuc_job_submission_file
       write_make_tiles_job_submission_file
-      write_bismark2report_job_submission_file
+      #      write_bismark2report_job_submission_file #this is done in bam2nuc job #TODO: remove this function after testing
       write_sample_dag_file
     }
   done
