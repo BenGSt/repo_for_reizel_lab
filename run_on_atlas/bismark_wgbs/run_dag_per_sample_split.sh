@@ -361,25 +361,27 @@ main_write_condor_submission_files() { # <raw_dir>
     {
       split=
       sep=
-      remainder_msg=
       sample_names+=($sample_name)
       mkdir -p condor_submission_files/$sample_name
       mkdir -p logs/$sample_name
 
       # if fastq file longer than n_reads_per_chunk reads, split it into n_reads_per_chunk read chunks
       echo "Counting reads in $sample_name to see if the fastq file(s) should be split into chunks"
-      #  n_reads=$(( $(zcat $(find $raw_dir/$sample_name/ -name "*.fastq.gz" | head -1) | wc -l) / 4 ))
       n_reads=$(($(pigz -cd $(find $raw_dir/$sample_name/ -name "*.fastq.gz" | head -1) | wc -l) / 4))
       n_chunks=$((n_reads / n_reads_per_chunk))
 
       if [[ $((n_reads % n_reads_per_chunk)) -gt 0 ]]; then
         ((n_chunks++)) # add one more chunk for the remainder reads
+        n_full_chunks=$((n_chunks - 1))
         remainder_msg=" + 1 chunk of $((n_reads % n_reads_per_chunk)) reads"
+      else
+        n_full_chunks=$n_chunks
+        remainder_msg=
       fi
       echo "n_reads: $n_reads, n_reads_per_chunk: $n_reads_per_chunk"
 
       if [[ $n_reads -gt $n_reads_per_chunk ]]; then
-        echo "fastq files will be split into $((n_chunks - 1)) chunks of $n_reads_per_chunk reads each" "$remainder_msg"
+        echo "fastq files will be split into $n_full_chunks chunks of $n_reads_per_chunk reads each" "$remainder_msg"
         write_split_job_submission_file
         split="split"
         sep="_"
