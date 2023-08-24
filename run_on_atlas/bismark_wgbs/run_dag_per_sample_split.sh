@@ -127,18 +127,17 @@ main() {
   mkdir -p logs
   main_write_condor_submission_files $raw_data_dir
 
+  echo Submit all jobs by running: condor_submit_dag ./condor_submission_files/submit_all_bismark_wgbs.dag
+  echo
+  echo To run samples individually:
+  for dag in $(find ./condor_submission_files -name "*.dag" | grep -v submit_all); do
+    echo condor_submit_dag $dag
+  done
+  echo
   printf 'Submit all jobs now? (y/n) '
   read answer
   if [ "$answer" != "${answer#[Yy]}" ]; then # this grammar (the #[] operator) means that the variable $answer where any Y or y in 1st position will be dropped if they exist.
     condor_submit_dag ./condor_submission_files/submit_all_bismark_wgbs.dag
-  else
-    echo Submit all jobs by running: condor_submit_dag ./condor_submission_files/submit_all_bismark_wgbs.dag
-    echo
-    echo To run samples individually:
-    for dag in $(find ./condor_submission_files -name "*.dag" | grep -v submit_all); do
-      echo condor_submit_dag $dag
-    done
-    echo
   fi
   echo Good Luck!
 }
