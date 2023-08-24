@@ -339,6 +339,7 @@ write_sample_dag_file() {
   outfile=condor_submission_files/${sample_name}/bismark_wgbs_${sample_name}.dag
   if [[ $split ]]; then
     echo JOB split_job $(realpath ./condor_submission_files/${sample_name}/split_fastq_${sample_name}.sub) >$outfile
+    echo >>$outfile
   fi
   cat <<EOF >>$outfile
 $(
