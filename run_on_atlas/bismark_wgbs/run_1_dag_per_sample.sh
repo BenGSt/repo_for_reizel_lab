@@ -241,20 +241,20 @@ queue name, args from (
 EOF
 
 
-    cat <<EOF > condor_submission_files/bismark2report_job_${sample_name}.sub
-Initialdir = $(pwd)
-executable = $REPO_FOR_REIZEL_LAB/run_on_atlas/bismark_wgbs/bismark2report.sh
-Arguments = \$(args)
-request_cpus = 1
-RequestMemory = 30GB
-universe = vanilla
-log = $(pwd)/logs/\$(name)_bismark2report.log
-output = $(pwd)/logs/\$(name)_bismark2report.out
-error = $(pwd)/logs/\$(name)_bismark2report.out
-queue name, args from (
-  $sample_name, -output-dir $(pwd)/$sample_name
-)
-EOF
+#    cat <<EOF > condor_submission_files/bismark2report_job_${sample_name}.sub
+#Initialdir = $(pwd)
+#executable = $REPO_FOR_REIZEL_LAB/run_on_atlas/bismark_wgbs/bismark2report.sh
+#Arguments = \$(args)
+#request_cpus = 1
+#RequestMemory = 30GB
+#universe = vanilla
+#log = $(pwd)/logs/\$(name)_bismark2report.log
+#output = $(pwd)/logs/\$(name)_bismark2report.out
+#error = $(pwd)/logs/\$(name)_bismark2report.out
+#queue name, args from (
+#  $sample_name, -output-dir $(pwd)/$sample_name
+#)
+#EOF
 
 
     cat <<EOF > condor_submission_files/bismark_wgbs_${sample_name}.dag
@@ -270,7 +270,7 @@ PARENT trim_and_qc  CHILD bismark_align
 PARENT bismark_align  CHILD deduplicate
 PARENT deduplicate  CHILD meth_call bam2nuc
 PARENT meth_call  CHILD make_tiles
-PARENT meth_call bam2nuc  CHILD bismark2report
+#PARENT meth_call bam2nuc  CHILD bismark2report # removed this job, bismark2report is done in bam2nuc job
 EOF
 
   done
