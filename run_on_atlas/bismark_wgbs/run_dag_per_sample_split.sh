@@ -338,7 +338,7 @@ EOF
 write_sample_dag_file() {
   outfile=condor_submission_files/${sample_name}/bismark_wgbs_${sample_name}.dag
   if [[ $split ]]; then
-    echo JOB split $(realpath ./condor_submission_files/$sample_name/split_job_${sample_name}.sub) >$outfile
+    echo JOB split_job $(realpath ./condor_submission_files/$sample_name/split_job_${sample_name}.sub) >$outfile
   fi
   cat <<EOF >$outfile
   $(
@@ -361,7 +361,8 @@ JOB bam2nuc $(realpath ./condor_submission_files/$sample_name/bam2nuc_job_${samp
 JOB bismark2report $(realpath ./condor_submission_files/$sample_name/bismark2report_job_${sample_name}.sub)
 EOF
   if [[ $split ]]; then
-    echo PARENT split CHILD $(for i in $(seq -w 00 $n); do printf "trim_and_qc_%d " $i; done) >>$outfile
+    echo PARENT split_job CHILD \
+      $(n=$(cat temp_n_value); for i in $(seq -w 00 $n); do printf "trim_and_qc_%d " $i; done) >>$outfile
   fi
   cat <<EOF >>$outfile
  $(
