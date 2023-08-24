@@ -357,7 +357,7 @@ JOB make_tiles $(realpath ./condor_submission_files/$sample_name/make_tiles_${sa
 JOB bam2nuc $(realpath ./condor_submission_files/$sample_name/bam2nuc_job_${sample_name}.sub)
 JOB bismark2report $(realpath ./condor_submission_files/$sample_name/bismark2report_job_${sample_name}.sub)
 
-  $(
+ echo $(
     # trim_and_qc -> bismark_align
     printf "PARENT "
     for i in $(seq -w 00 $n); do
