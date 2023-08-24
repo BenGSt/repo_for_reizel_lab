@@ -400,8 +400,8 @@ $(
     done
     printf "CHILD deduplicate\n"
   )
-PARENT deduplicate  CHILD meth_call
-PARENT meth_call  CHILD make_tiles bam2nuc
+PARENT deduplicate CHILD meth_call
+PARENT meth_call CHILD make_tiles bam2nuc
 EOF
 }
 
