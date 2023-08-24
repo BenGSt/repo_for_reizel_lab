@@ -291,9 +291,9 @@ Arguments = \$(args)
 request_cpus = 1
 RequestMemory = 30GB
 universe = vanilla
-log = $(pwd)/logs/$sample_name/(name)_make_tiles.log
-output = $(pwd)/logs/$sample_name/(name)_make_tiles.out
-error = $(pwd)/logs/$sample_name/(name)_make_tiles.out
+log = $(pwd)/logs/$sample_name/\$(name)_make_tiles.log
+output = $(pwd)/logs/$sample_name/\$(name)_make_tiles.out
+error = $(pwd)/logs/$sample_name/\$(name)_make_tiles.out
 queue name, args from (
   $sample_name, -output-dir $(pwd)/$sample_name -genome $genome
 )
