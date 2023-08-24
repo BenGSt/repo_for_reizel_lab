@@ -341,13 +341,13 @@ write_sample_dag_file() {
     echo JOB split_job $(realpath ./condor_submission_files/$sample_name/split_job_${sample_name}.sub) >$outfile
   fi
   cat <<EOF >>$outfile
-  $(
+$(
     n=0
     for trim_job in $(find ./condor_submission_files/$sample_name/ -name "trim_job_${sample_name}*sub"); do
       echo JOB trim_and_qc_$((n++)) $(realpath $trim_job)
     done
   )
-  $(
+$(
     n=0
     for align_job in $(find ./condor_submission_files/$sample_name/ -name "bismark_align_job_${sample_name}*sub"); do
       echo JOB bismark_align_$((n++)) $(realpath $align_job)
