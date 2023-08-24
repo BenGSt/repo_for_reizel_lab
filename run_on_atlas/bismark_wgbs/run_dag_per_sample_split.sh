@@ -358,6 +358,8 @@ JOB deduplicate $(realpath ./condor_submission_files/$sample_name/deduplicate_jo
 JOB meth_call $(realpath ./condor_submission_files/$sample_name/methylation_calling_job_${sample_name}.sub)
 JOB make_tiles $(realpath ./condor_submission_files/$sample_name/make_tiles_${sample_name}.sub)
 JOB bam2nuc $(realpath ./condor_submission_files/$sample_name/bam2nuc_job_${sample_name}.sub)
+
+
 EOF
   if [[ $split ]]; then
     echo PARENT split_job CHILD \
