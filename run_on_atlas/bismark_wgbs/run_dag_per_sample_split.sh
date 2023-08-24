@@ -348,7 +348,7 @@ write_sample_dag_file() {
     for align_job in $(find ./condor_submission_files/$sample_name/ -name "bismark_align_job_${sample_name}*sub"); do
       echo JOB bismark_align_$((n++)) $(realpath $align_job)
     done
-    echo $n >temp_n_value
+    echo $((n--)) >temp_n_value
   )
 JOB deduplicate $(realpath ./condor_submission_files/$sample_name/deduplicate_job_${sample_name}.sub)
 JOB meth_call $(realpath ./condor_submission_files/$sample_name/methylation_calling_job_${sample_name}.sub)
