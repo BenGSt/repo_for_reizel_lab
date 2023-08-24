@@ -156,12 +156,8 @@ EOF
 }
 
 write_trim_jobs_submission_file() {
-  split=
-  sep=
   chunk=$1
   if [[ $chunk ]]; then
-    split="split"
-    sep="_"
     filename=condor_submission_files/${sample_name}/trim_job_${sample_name}.sub_${chunk}.sub
   else
     filename=condor_submission_files/${sample_name}/trim_job_${sample_name}.sub
@@ -192,14 +188,8 @@ EOF
 }
 
 write_align_sub_file() {
-  #unset vars
-  split=
-  sep=
-
   chunk=$1
   if [[ $chunk ]]; then
-    split="split"
-    sep="_"
     filename=condor_submission_files/${sample_name}/bismark_align_job_${sample_name}_${chunk}.sub
   else
     filename=condor_submission_files/${sample_name}/bismark_align_job_${sample_name}.sub
@@ -254,7 +244,7 @@ log = $(pwd)/logs/$sample_name/\$(name)_deduplicate.log
 output = $(pwd)/logs/$sample_name/\$(name)_deduplicate.out
 error = $(pwd)/logs/$sample_name/\$(name)_deduplicate.out
 queue name, args from (
- $sample_name, $(pwd)/$sample_name
+ $sample_name, $(pwd)/$sample_name $split
 )
 EOF
 }
@@ -366,9 +356,11 @@ main_write_condor_submission_files() { # <raw_dir>
   raw_dir=$1
   sample_names=()
   for sample_name in $(find -L $raw_dir -type d | awk -F / 'NR>1{print $NF}' | sort); do
-  #TODO: try to replace this loop with xargs
-#  find -L $raw_dir -type d | awk -F / 'NR>1{print $NF}' | sort | xargs -n1 -P4 sh -c "
+    #TODO: try to replace this loop with xargs
+    #  find -L $raw_dir -type d | awk -F / 'NR>1{print $NF}' | sort | xargs -n1 -P4 sh -c "
     {
+      split=
+      sep=
       sample_names+=($sample_name)
       mkdir -p condor_submission_files/$sample_name
       mkdir -p logs/$sample_name
@@ -387,6 +379,8 @@ main_write_condor_submission_files() { # <raw_dir>
       if [[ $n_reads -gt $n_reads_per_chunk ]]; then
         echo "fastq files will be split into $((n_chunks - 1)) chunks of $n_reads_per_chunk reads each + 1 chunk of $((n_reads % n_reads_per_chunk)) reads"
         write_split_job_submission_file
+        split="split"
+        sep="_"
         #write condor sub files for jobs to align each chunk
         for chunk in $(seq -w 00 $((n_chunks - 1))); do
           write_trim_jobs_submission_file $chunk
@@ -406,7 +400,7 @@ main_write_condor_submission_files() { # <raw_dir>
       write_bismark2report_job_submission_file
       write_sample_dag_file
     }
-    done
+  done
 
   write_multiqc_job_submission_file
 
