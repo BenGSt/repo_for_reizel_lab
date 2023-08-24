@@ -431,7 +431,7 @@ main_write_condor_submission_files() { # <raw_dir>
       write_bam2nuc_job_submission_file
       write_make_tiles_job_submission_file
       #      write_bismark2report_job_submission_file #this is done in bam2nuc job #TODO: remove this function after testing
-#      write_sample_dag_file
+      write_sample_dag_file
     }
   done
 
