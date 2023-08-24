@@ -201,9 +201,9 @@ Arguments = \$(args)
 request_cpus = 4
 RequestMemory = 40GB
 universe = vanilla
-log = $(pwd)/logs/$samp/\$(name)_bismark_align.log
-output = $(pwd)/logs/$samp/\$(name)_bismark_align.out
-error = $(pwd)/logs/$samp/\$(name)_bismark_align.out
+log = $(pwd)/logs/$sample_name/\$(name)_bismark_align.log
+output = $(pwd)/logs/$sample_name/\$(name)_bismark_align.out
+error = $(pwd)/logs/$sample_name/\$(name)_bismark_align.out
 queue name, args from (
 $(
 
