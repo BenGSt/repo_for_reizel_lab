@@ -4,6 +4,7 @@ main() {
   arg_parse "$@"
   mkdir -p $output_dir
   cd $output_dir
+  echo pwd: $PWD
   mkdir split
 
   # Split fastq files, N_READS_PER_FILE reads per file
