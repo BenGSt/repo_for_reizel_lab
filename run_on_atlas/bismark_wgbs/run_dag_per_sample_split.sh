@@ -422,6 +422,7 @@ main_write_condor_submission_files() { # <raw_dir>
 
       if [[ $n_reads -gt $n_reads_per_chunk ]]; then
         echo "fastq files will be split into $n_full_chunks chunks of $n_reads_per_chunk reads each" "$remainder_msg"
+        echo
         write_split_job_submission_file
 
         #write condor sub files for jobs to trim and align each chunk
