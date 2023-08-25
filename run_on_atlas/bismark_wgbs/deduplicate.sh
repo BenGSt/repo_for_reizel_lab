@@ -1,10 +1,19 @@
 #!/usr/bin/env bash
 
 
-main() #<sample_dir> <split>
+main() #<sample_dir> <split> {--paired-end|--single-end}
 {
   sample_dir=$1
   split=$2 #USAGE: set if input are multiple split fastq files (if run_data_split.sh was run)
+  if [[ $3 == "-paired-end" ]]; then
+    pe_or_se="-p"
+  elif [[ $3 == "-single-end" ]]; then
+    pe_or_se="-s"
+  else
+    echo "ERROR: must specify -paired-end or -single-end"
+    exit 1
+  fi
+
   source /Local/bfe_reizel/anaconda3/bin/activate wgbs_bismark_pipeline_2023
 	script_name=$(echo $0 | awk -F / '{print $NF}')
 
@@ -23,9 +32,9 @@ main() #<sample_dir> <split>
 
   cd "$sample_dir" || exit 1
   if [[ $split ]]; then
-    deduplicate_bismark --multiple $(find . -name "*bismark*bam" | sort) || exit 1
+    deduplicate_bismark --multiple $(find . -name "*bismark*bam" | sort) $pe_or_se
   else
-    deduplicate_bismark ./*bismark*bam
+    deduplicate_bismark ./*bismark*bam $pe_or_se
   fi
 
   # rename deduplicated bam file to remove chunk and val from name of paired end

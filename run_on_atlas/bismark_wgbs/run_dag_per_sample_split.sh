@@ -20,7 +20,7 @@ average methylation levels across read positions. If the results are biased, fix
 calling jobs again ignoring the biased bases, or running the pipeline again with trimmed reads. Each of these approaches
 has it's advantages and disadvantages. Ignoring aligned bases is faster. Trimming the reads may improve alignment if
 done correctly, consider trimming R1 and R2 symmetrically and/or using the "--dovetail" bismark option for the bowtie2
-aligner.
+aligner (--dovetail is actually the default).
 
 optional:
 -non-directional
@@ -230,6 +230,11 @@ EOF
 }
 
 write_deduplicate_job_submission_file() {
+  if [[ $single_end -eq 1 ]]; then
+    pe_or_se="-single-end"
+  else
+    pe_or_se="-paired-end"
+  fi
   cat <<EOF >condor_submission_files/${sample_name}/deduplicate_job_${sample_name}.sub
 Initialdir = $(pwd)
 executable = $REPO_FOR_REIZEL_LAB/run_on_atlas/bismark_wgbs/deduplicate.sh
@@ -241,7 +246,7 @@ log = $(pwd)/logs/$sample_name/\$(name)_deduplicate.log
 output = $(pwd)/logs/$sample_name/\$(name)_deduplicate.out
 error = $(pwd)/logs/$sample_name/\$(name)_deduplicate.out
 queue name, args from (
- $sample_name, $(pwd)/$sample_name $split
+ $sample_name, $(pwd)/$sample_name $split $pe_or_se
 )
 EOF
 }
@@ -338,8 +343,6 @@ $(
     done
     echo $((--n)) >temp_n_value
   )
-
-
 
 JOB deduplicate $(realpath ./condor_submission_files/$sample_name/deduplicate_job_${sample_name}.sub)
 
@@ -550,4 +553,8 @@ arg_parse() {
   done
 }
 
-main "$@"
+#allow the functions in this script to be sourced by other scripts
+#(in particular used by run_fix_mniasm.sh)
+if [[ $1 != "--source-only" ]]; then
+  main "$@"
+fi
