@@ -20,6 +20,8 @@ main() {
     #find the sample directories (the first node in the path) for which bam files exist
     for sample_name in $(find $biased_dir -name "*deduplicated*bam" | awk -F / '{print $(NF-1)}'); do
     {
+      echo DEBUG: sample_name=$sample_name
+      echo
       unset split sep chunk
       sample_names+=($sample_name)
       mkdir -p condor_submission_files/$sample_name
@@ -37,10 +39,15 @@ main() {
 
   #list jobs and the commands to run them
   #ask if user wants to run them now, if so, run them.
-  echo Unless you need them, it is recommended to delete the bam files when you are done.
-  echo To do so, run: rm -v $(find $biased_dir -name "*deduplicated*bam")
-  echo Please download your data and delete it from atlas as soon as you are done.
-  echo Good luck and happy clustering!
+  cat << EOF
+
+Unless you need them, it is recommended to delete the bam files when you are done.
+
+To do so, run: rm -v $(find $biased_dir -name "*deduplicated*bam")
+
+Please download your data and delete it from atlas as soon as you are done.
+!Good luck and happy clustering!
+EOF
 }
 
 help() {
