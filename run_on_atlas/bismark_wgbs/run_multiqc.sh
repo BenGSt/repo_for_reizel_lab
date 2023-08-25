@@ -2,6 +2,7 @@
 
 main()
 {
+  keep_bam=1 #default is to keep bam files
   arg_parse "$@"
   if [[ $keep_bam -eq 0 ]]; then
     rm -v $(find . -name "*.bam")
@@ -26,8 +27,8 @@ arg_parse()
         shift
         shift
         ;;
-      -keep-bam)
-        keep_bam=1
+      -delete-bam)
+        keep_bam=0
         shift
         ;;
       *)
@@ -41,9 +42,9 @@ arg_parse()
 help()
 {
   cat << EOF
-Delete deduplicated bam files and run multiqc on all samples.
+[Delete deduplicated bam files and] run multiqc on all samples.
 -multiqc-args
-[-keep-bam]
+[-delete-bam]
 
 EOF
 }

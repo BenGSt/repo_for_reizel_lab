@@ -228,21 +228,6 @@ $(
 EOF
 }
 
-write_unite_and_sort_bam_job_submission_file() {
-  cat <<EOF >condor_submission_files/${sample_name}/unite_and_sort_bam_${sample_name}.sub
-Initialdir = $(pwd)
-executable = $REPO_FOR_REIZEL_LAB/run_on_atlas/bismark_wgbs/unite_and_sort_bam.sh
-Arguments = $(pwd)/$sample_name
-request_cpus = 1
-RequestMemory = 250MB
-universe = vanilla
-log = $(pwd)/logs/$sample_name/${sample_name}_unite_and_sort_bam.log
-output = $(pwd)/logs/$sample_name/${sample_name}_unite_and_sort_bam.out
-error = $(pwd)/logs/$sample_name/${sample_name}_unite_and_sort_bam.out
-queue
-EOF
-}
-
 write_deduplicate_job_submission_file() {
   cat <<EOF >condor_submission_files/${sample_name}/deduplicate_job_${sample_name}.sub
 Initialdir = $(pwd)
@@ -399,6 +384,7 @@ EOF
 }
 
 main_write_condor_submission_files() { # <raw_dir>
+#TODO: refactor into nice readable functions
   raw_dir=$1
   sample_names=()
   for sample_name in $(find -L $raw_dir -type d | awk -F / 'NR>1{print $NF}' | sort); do
