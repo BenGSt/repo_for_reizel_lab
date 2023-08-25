@@ -324,9 +324,11 @@ write_sample_dag_file() {
   outfile=condor_submission_files/${sample_name}/bismark_wgbs_${sample_name}.dag
   if [[ $split ]]; then
     echo JOB split_job $(realpath ./condor_submission_files/${sample_name}/split_fastq_${sample_name}.sub) >$outfile
-    echo >>$outfile
+  else
+    touch $outfile #delete previous file's content if it exists
   fi
   cat <<EOF >>$outfile
+
 $(
     n=0
     for trim_job in $(find ./condor_submission_files/$sample_name/ -name "trim_job_${sample_name}*sub"); do
@@ -346,7 +348,7 @@ $(
 
 EOF
   if [[ ! $bias_fix ]]; then
-    echo JOB deduplicate $(realpath ./condor_submission_files/$sample_name/deduplicate_job_${sample_name}.sub)
+    echo JOB deduplicate $(realpath ./condor_submission_files/$sample_name/deduplicate_job_${sample_name}.sub) >>$outfile
   fi
   cat <<EOF >>$outfile
 
@@ -391,7 +393,7 @@ $(
 PARENT deduplicate CHILD meth_call
 EOF
   fi
-  echo PARENT meth_call CHILD make_tiles bam2nuc
+  echo PARENT meth_call CHILD make_tiles bam2nuc >>$outfile
 }
 
 count_reads_and_split() {
