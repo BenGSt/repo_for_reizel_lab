@@ -104,6 +104,7 @@ arg_parse()
         shift
         ;;
       *)
+        echo ERROR: unknown option: $1
         help
         exit 1
         ;;
