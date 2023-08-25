@@ -2,7 +2,7 @@
 # USAGE: run_fix_mbias.sh --biased_dir <path> --ignore_r1 <int> --ignore_r2  --ignore_3prime <int> --ignore_3prime_r2 <int> [--output-dir <output_dir>]
 
 REPO_FOR_REIZEL_LAB=/storage/bfe_reizel/bengst/repo_for_reizel_lab
-source $REPO_FOR_REIZRL_LAB/run_on_atlas/bismark_wgbs/run_dag_per_sample_split.sh --source-only
+source $REPO_FOR_REIZEL_LAB/run_on_atlas/bismark_wgbs/run_dag_per_sample_split.sh --source-only
 
 main() {
   extra_meth_opts="$ignore_r1 $ignore_r2 $ignore_3prime $ignore_3prime_r2"
@@ -36,7 +36,7 @@ main() {
   #list jobs and the commands to run them
   #ask if user wants to run them now, if so, run them.
   echo Unless you need them, it is recommended to delete the bam files when you are done.
-  echo To do so, run: rm -v $(find . -name '*.bam')
+  echo To do so, run: rm -v $(find . -name "*.bam")
   echo Please download your data and delete it from atlas as soon as you are done.
   echo Good luck and happy clustering!
 }
