@@ -325,7 +325,7 @@ write_sample_dag_file() {
   if [[ $split ]]; then
     echo JOB split_job $(realpath ./condor_submission_files/${sample_name}/split_fastq_${sample_name}.sub) >$outfile
   else
-    touch $outfile #delete previous file's content if it exists
+    truncate --size=0 $outfile #delete previous file's content if it exists
   fi
   cat <<EOF >>$outfile
 
