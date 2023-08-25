@@ -383,10 +383,42 @@ PARENT meth_call CHILD make_tiles bam2nuc
 EOF
 }
 
-main_write_condor_submission_files() { # <raw_dir>
-#TODO: refactor into nice readable functions
-  raw_dir=$1
-  sample_names=()
+count_reads_and_split() {
+  echo "Counting reads in $sample_name to see if the fastq file(s) should be split into chunks"
+  n_reads=$(($(pigz -cd $(find $raw_dir/$sample_name/ -name "*.fastq.gz" | head -1) | wc -l) / 4))
+  n_chunks=$((n_reads / n_reads_per_chunk))
+
+  if [[ $((n_reads % n_reads_per_chunk)) -gt 0 ]]; then
+    ((n_chunks++)) # add one more chunk for the remainder reads
+    n_full_chunks=$((n_chunks - 1))
+    remainder_msg=" + 1 chunk of $((n_reads % n_reads_per_chunk)) reads"
+  else
+    n_full_chunks=$n_chunks
+    remainder_msg=
+  fi
+  echo "n_reads: $n_reads, n_reads_per_chunk: $n_reads_per_chunk"
+}
+
+write_trim_and_align_sub_files() {
+  if [[ $n_reads -gt $n_reads_per_chunk ]]; then
+    echo "fastq files will be split into $n_full_chunks chunks of $n_reads_per_chunk reads each" "$remainder_msg"
+    echo
+    write_split_job_submission_file
+
+    #write condor sub files for jobs to trim and align each chunk
+    split="split"
+    sep="_"
+    for chunk in $(seq -w 00 $((n_chunks - 1))); do
+      write_trim_jobs_submission_file $chunk
+      write_align_sub_file $chunk
+    done
+  else # no splitting of fastq files
+    write_trim_jobs_submission_file
+    write_align_sub_file
+  fi
+}
+
+write_sub_files_for_each_sample() {
   for sample_name in $(find -L $raw_dir -type d | awk -F / 'NR>1{print $NF}' | sort); do
     #TODO: try to replace this loop with xargs
     #  find -L $raw_dir -type d | awk -F / 'NR>1{print $NF}' | sort | xargs -n1 -P4 sh -c "
@@ -396,50 +428,23 @@ main_write_condor_submission_files() { # <raw_dir>
       mkdir -p condor_submission_files/$sample_name
       mkdir -p logs/$sample_name
 
-      # if fastq file longer than n_reads_per_chunk reads, split it into n_reads_per_chunk read chunks
-      echo "Counting reads in $sample_name to see if the fastq file(s) should be split into chunks"
-      n_reads=$(($(pigz -cd $(find $raw_dir/$sample_name/ -name "*.fastq.gz" | head -1) | wc -l) / 4))
-      n_chunks=$((n_reads / n_reads_per_chunk))
+      # if fastq file is longer than n_reads_per_chunk reads, split it into chunks of length n_reads_per_chunk,
+      # given as an argument to this script, defaults to 100M.
+      count_reads_and_split
 
-      if [[ $((n_reads % n_reads_per_chunk)) -gt 0 ]]; then
-        ((n_chunks++)) # add one more chunk for the remainder reads
-        n_full_chunks=$((n_chunks - 1))
-        remainder_msg=" + 1 chunk of $((n_reads % n_reads_per_chunk)) reads"
-      else
-        n_full_chunks=$n_chunks
-        remainder_msg=
-      fi
-      echo "n_reads: $n_reads, n_reads_per_chunk: $n_reads_per_chunk"
-
-      if [[ $n_reads -gt $n_reads_per_chunk ]]; then
-        echo "fastq files will be split into $n_full_chunks chunks of $n_reads_per_chunk reads each" "$remainder_msg"
-        echo
-        write_split_job_submission_file
-
-        #write condor sub files for jobs to trim and align each chunk
-        split="split"
-        sep="_"
-        for chunk in $(seq -w 00 $((n_chunks - 1))); do
-          write_trim_jobs_submission_file $chunk
-          write_align_sub_file $chunk
-        done
-      else # no splitting of fastq files
-        write_trim_jobs_submission_file
-        write_align_sub_file
-      fi
+      #write sub files for trimming and aligning each chunk (or one sub file if no splitting)
+      write_trim_and_align_sub_files
 
       write_deduplicate_job_submission_file
       write_methylation_calling_job_submission_file
       write_bam2nuc_job_submission_file
       write_make_tiles_job_submission_file
-      #      write_bismark2report_job_submission_file #this is done in bam2nuc job #TODO: remove this function after testing
       write_sample_dag_file
     }
   done
+}
 
-  write_multiqc_job_submission_file
-
-  #Write the top level submission file to submit all dags
+write_top_level_dag() {
   rm -f ./condor_submission_files/submit_all_bismark_wgbs.dag #incase rerunning the script without delete
   sample_dags=$(find ./condor_submission_files/ -name "*.dag")
   fileout=condor_submission_files/submit_all_bismark_wgbs.dag
@@ -456,37 +461,17 @@ main_write_condor_submission_files() { # <raw_dir>
   echo >>$fileout
   # Old version - all samples submitted at once
   echo PARENT $(for ((k = 0; k <= $i; k++)); do printf "%s " ${sample_names[$k]}; done) CHILD multiqc >>$fileout
+}
 
-  # Another version - Because Atlas' policy of holding jobs that have been submitted more than 3 days ago, break up samples
-  # into groups of NUM_PARALLEL_SAMP and have them as parent and child s.t. the next 3 are submitted only after the
-  # previous 3 have completed.
-  #  NUM_PARALLEL_SAMP=3 #the number of samples that run in parallel
-  #  n_samp=${#sample_names[@]}
-  #  j=0
-  #  if (($NUM_PARALLEL_SAMP > $n_samp)); then
-  #    printf "PARENT "
-  #    for ((k = 0; k < n_samp; k++)); do printf "%s " ${sample_names[$k]} >> $fileout; done
-  #    echo CHILD multiqc >> $fileout
-  #  else
-  #    for ((j = 0; j < ($n_samp / NUM_PARALLEL_SAMP); j++)); do
-  #      printf "PARENT %s %s %s " $(for ((k = 0; k < NUM_PARALLEL_SAMP; k++)); do echo ${sample_names[$j * 3 + $k]}; done) >> $fileout
-  #      if ((j != ($n_samp / NUM_PARALLEL_SAMP) - 1)); then
-  #        printf "CHILD %s %s %s\n" $(for ((k = NUM_PARALLEL_SAMP; k < 2 * NUM_PARALLEL_SAMP; k++)); do echo ${sample_names[$j * 3 + $k]}; done) >> $fileout
-  #      else
-  #        if (($n_samp % $NUM_PARALLEL_SAMP)); then
-  #          printf "CHILD " >> $fileout
-  #          for ((k = NUM_PARALLEL_SAMP; k < NUM_PARALLEL_SAMP + ($n_samp % $NUM_PARALLEL_SAMP); k++)); do
-  #            printf "%s " ${sample_names[$k]} >> $fileout
-  #          done
-  #          printf "\nPARENT " >> $fileout
-  #          for ((k = NUM_PARALLEL_SAMP; k < NUM_PARALLEL_SAMP + ($n_samp % $NUM_PARALLEL_SAMP); k++)); do
-  #            printf "%s " ${sample_names[$k]} >> $fileout
-  #          done
-  #        fi
-  #        echo CHILD multiqc >> $fileout
-  #      fi
-  #    done
-  #  fi
+main_write_condor_submission_files() { # <raw_dir>
+  raw_dir=$1
+  sample_names=()
+
+  write_sub_files_for_each_sample
+  write_multiqc_job_submission_file
+
+  #Write the top level submission file to submit all dags
+  write_top_level_dag
 }
 
 arg_parse() {
