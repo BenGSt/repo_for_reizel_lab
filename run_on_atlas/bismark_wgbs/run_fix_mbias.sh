@@ -123,6 +123,12 @@ arg_parse() {
         ;;
     esac
   done
+
+  if [[ ! $biased_dir ]]; then
+    echo "--biased_dir is obligatory"
+    help
+    exit 1
+  fi
 }
 
 main "$@"
