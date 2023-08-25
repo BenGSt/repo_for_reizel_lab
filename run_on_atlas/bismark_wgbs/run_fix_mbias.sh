@@ -5,6 +5,7 @@ REPO_FOR_REIZEL_LAB=/storage/bfe_reizel/bengst/repo_for_reizel_lab
 source $REPO_FOR_REIZEL_LAB/run_on_atlas/bismark_wgbs/run_dag_per_sample_split.sh --source-only
 
 main() {
+  arg_parse "$@"
   extra_meth_opts="$ignore_r1 $ignore_r2 $ignore_3prime $ignore_3prime_r2"
   if [[ ! $output_dir ]]; then
     output_dir=${biased_dir}_mbias_fixed
