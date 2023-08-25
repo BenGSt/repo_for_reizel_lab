@@ -19,14 +19,7 @@ help()
 
 
 	optional:
-	-ignore_r2 <int>
-	  from Bismark User Guide:
-	  ignore the first <int> bp from the 5' end of Read 2 of paired-end sequencing results only.
-	  Since the first couple of bases in Read 2 of BS-Seq experiments show a severe bias towards non-methylation
-	  as a result of end-repairing sonicated fragments with unmethylated cytosines (see M-bias plot),
-	  it is recommended that the first couple of bp of Read 2 are removed before starting downstream analysis.
-	  Please see the section on M-bias plots in the Bismark User Guide for more details.
-  -extra-options "multiple double quoted options" (see Bismark manual)
+  -extra-options "multiple double quoted options" (e.g. --ignore <int>. See Bismark manual)
 EOF
 }
 
