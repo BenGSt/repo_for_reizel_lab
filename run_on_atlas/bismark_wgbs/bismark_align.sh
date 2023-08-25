@@ -1,9 +1,10 @@
 #!/bin/bash
 
-N_CORES=5
+N_CORES=3
 MEM=40GB
-N_PARALLEL_INSTANCES=1 #manual states ~5 cores per instance, But i'm seeing more on htcondor logs.
-                        # Also exceeding MEM too often. changing to 1 parallel instance. 14.03.2023
+N_PARALLEL_INSTANCES=1 #manual states ~5 cores per instance, But i'm seeing less on htcondor logs (~2.5)
+                       #maybe due to using unzipped fastq files
+                       # exceeding MEM too often. changing to 1 parallel instance. 14.03.2023
 
 
 

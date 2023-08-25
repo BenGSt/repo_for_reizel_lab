@@ -26,9 +26,10 @@ optional:
 -non-directional
   Use for non directional libraries. Instructs Bismark to align to OT, CTOT, OB, CTOB.
 
--keep-bam
-  Don't delete the deduplicated bam files. Useful for running methylation calling jobs again to fix m-bias without
-  trimming and rerunning the pipeline, and possibly other downstream analysis.
+-delete-bam
+  Delete the deduplicated bam files. Default is to keep them for running methylation calling jobs again to fix m-bias without
+  trimming and rerunning the pipeline, and possibly other downstream analysis. If not running methylation calling jobs again,
+  bam files should be deleted because they large and not needed for most downstream analysis (use the .cov files).
 
 -ignore_r2 <int>
   From Bismark User Guide:
@@ -209,7 +210,7 @@ write_align_sub_file() {
 Initialdir = $(pwd)
 executable = $REPO_FOR_REIZEL_LAB/run_on_atlas/bismark_wgbs/bismark_align.sh
 Arguments = \$(args)
-request_cpus = 4
+request_cpus = 3
 RequestMemory = 40GB
 universe = vanilla
 log = $(pwd)/logs/$sample_name/\$(name)_bismark_align.log
@@ -314,6 +315,7 @@ EOF
 }
 
 write_sample_dag_file() {
+  #TODO: refactor this to tidy readable code
   outfile=condor_submission_files/${sample_name}/bismark_wgbs_${sample_name}.dag
   if [[ $split ]]; then
     echo JOB split_job $(realpath ./condor_submission_files/${sample_name}/split_fastq_${sample_name}.sub) >$outfile
@@ -435,6 +437,7 @@ write_sub_files_for_each_sample() {
       #write sub files for trimming and aligning each chunk (or one sub file if no splitting)
       write_trim_and_align_sub_files
 
+      # the following sub files are not dependent on splitting
       write_deduplicate_job_submission_file
       write_methylation_calling_job_submission_file
       write_bam2nuc_job_submission_file

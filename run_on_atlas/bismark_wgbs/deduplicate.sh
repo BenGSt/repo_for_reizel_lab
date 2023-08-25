@@ -31,7 +31,7 @@ main() #<sample_dir> <split>
   # rename deduplicated bam file to remove chunk and val from name of paired end
   # and chunk and trimmed from se (for multiqc)
   dedup_bam=$(ls *deduplicated*bam)
-  new_bam_name=${dedup_bam/_chunk_[0-9]*_val_[0-9]_/}
+  new_bam_name=${dedup_bam/_chunk_[0-9]*_val_[0-9]/}
   new_bam_name=${new_bam_name/_chunk_[0-9]*_trimmed/}
   new_bam_name=${new_bam_name/_R[1-2]/}
   mv $dedup_bam $new_bam_name
