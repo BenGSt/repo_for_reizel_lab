@@ -327,27 +327,29 @@ write_sample_dag_file() {
   else
     truncate --size=0 $outfile #delete previous file's content if it exists
   fi
-  cat <<EOF >>$outfile
+
+  if [[ ! $bias_fix ]]; then
+    cat <<EOF >>$outfile
 
 $(
-    n=0
-    for trim_job in $(find ./condor_submission_files/$sample_name/ -name "trim_job_${sample_name}*sub"); do
-      echo JOB trim_and_qc_$((n++)) $(realpath $trim_job)
-      echo
-    done
-  )
+      n=0
+      for trim_job in $(find ./condor_submission_files/$sample_name/ -name "trim_job_${sample_name}*sub"); do
+        echo JOB trim_and_qc_$((n++)) $(realpath $trim_job)
+        echo
+      done
+    )
 
 $(
-    n=0
-    for align_job in $(find ./condor_submission_files/$sample_name/ -name "bismark_align_job_${sample_name}*sub"); do
-      echo JOB bismark_align_$((n++)) $(realpath $align_job)
-      echo
-    done
-    echo $((--n)) >temp_n_value
-  )
+      n=0
+      for align_job in $(find ./condor_submission_files/$sample_name/ -name "bismark_align_job_${sample_name}*sub"); do
+        echo JOB bismark_align_$((n++)) $(realpath $align_job)
+        echo
+      done
+      echo $((--n)) >temp_n_value
+    )
 
 EOF
-  if [[ ! $bias_fix ]]; then
+
     echo JOB deduplicate $(realpath ./condor_submission_files/$sample_name/deduplicate_job_${sample_name}.sub) >>$outfile
   fi
   cat <<EOF >>$outfile
