@@ -344,7 +344,11 @@ $(
     echo $((--n)) >temp_n_value
   )
 
-JOB deduplicate $(realpath ./condor_submission_files/$sample_name/deduplicate_job_${sample_name}.sub)
+EOF
+  if [[ ! $bias_fix ]]; then
+    echo JOB deduplicate $(realpath ./condor_submission_files/$sample_name/deduplicate_job_${sample_name}.sub)
+  fi
+  cat <<EOF >>$outfile
 
 JOB meth_call $(realpath ./condor_submission_files/$sample_name/methylation_calling_job_${sample_name}.sub)
 
@@ -354,38 +358,40 @@ JOB bam2nuc $(realpath ./condor_submission_files/$sample_name/bam2nuc_job_${samp
 
 
 EOF
-  if [[ $split ]]; then
-    echo PARENT split_job CHILD \
-      $(
-        n=$(cat temp_n_value)
-        for i in $(seq -w 00 $n); do printf "trim_and_qc_%d " $i; done
-      ) >>$outfile
-  fi
-  cat <<EOF >>$outfile
+  if [[ ! $bias_fix ]]; then
+    if [[ $split ]]; then
+      echo PARENT split_job CHILD \
+        $(
+          n=$(cat temp_n_value)
+          for i in $(seq -w 00 $n); do printf "trim_and_qc_%d " $i; done
+        ) >>$outfile
+    fi
+    cat <<EOF >>$outfile
 $(
-    n=$(cat temp_n_value)
-    rm temp_n_value
-    # trim_and_qc -> bismark_align
-    printf "PARENT "
-    for i in $(seq -w 00 $n); do
-      printf "trim_and_qc_%d " $i
-    done
-    printf "CHILD "
-    for i in $(seq -w 00 $n); do
-      printf "bismark_align_%d " $i
-    done
-    printf "\n"
+      n=$(cat temp_n_value)
+      rm temp_n_value
+      # trim_and_qc -> bismark_align
+      printf "PARENT "
+      for i in $(seq -w 00 $n); do
+        printf "trim_and_qc_%d " $i
+      done
+      printf "CHILD "
+      for i in $(seq -w 00 $n); do
+        printf "bismark_align_%d " $i
+      done
+      printf "\n"
 
-    # bismark_align -> deduplicate
-    printf "PARENT "
-    for i in $(seq -w 00 $n); do
-      printf "bismark_align_%d " $i
-    done
-    printf "CHILD deduplicate\n"
-  )
+      # bismark_align -> deduplicate
+      printf "PARENT "
+      for i in $(seq -w 00 $n); do
+        printf "bismark_align_%d " $i
+      done
+      printf "CHILD deduplicate\n"
+    )
 PARENT deduplicate CHILD meth_call
-PARENT meth_call CHILD make_tiles bam2nuc
 EOF
+  fi
+  echo PARENT meth_call CHILD make_tiles bam2nuc
 }
 
 count_reads_and_split() {
