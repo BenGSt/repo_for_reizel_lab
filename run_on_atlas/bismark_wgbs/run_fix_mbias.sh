@@ -25,6 +25,7 @@ main() {
       echo
       unset split sep chunk
       sample_names+=($sample_name)
+      echo DEBUG: mkdir -p $sample_name
       mkdir -p $sample_name
       mkdir -p condor_submission_files/$sample_name
       mkdir -p logs/$sample_name
