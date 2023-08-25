@@ -8,6 +8,7 @@ main() {
   arg_parse "$@"
   extra_meth_opts="$ignore_r1 $ignore_r2 $ignore_3prime $ignore_3prime_r2"
   if [[ ! $output_dir ]]; then
+    echo output_dir=${biased_dir}_mbias_fixed
     output_dir=${biased_dir}_mbias_fixed
   fi
   mkdir -p $output_dir
@@ -48,7 +49,7 @@ help() {
 obligatory options:
    --biased_dir <path>
 at least one of the following:
-   --ignore_r1 <int>
+   --ignore <int>
    --ignore_3prime <int>
 
    --ignore_r2 <int>
