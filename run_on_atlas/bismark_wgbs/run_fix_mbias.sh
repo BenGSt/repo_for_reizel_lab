@@ -7,7 +7,7 @@ source $REPO_FOR_REIZEL_LAB/run_on_atlas/bismark_wgbs/run_dag_per_sample_split.s
 main() {
   bias_fix=1 #for write_sample_dag_file()
   arg_parse "$@"
-  extra_meth_opts=\'"$ignore_r1 $ignore_r2 $ignore_3prime $ignore_3prime_r2"\'
+  extra_meth_opts="-extra-options \'$ignore_r1 $ignore_r2 $ignore_3prime $ignore_3prime_r2\'"
   if [[ ! $output_dir ]]; then
     echo output_dir=${biased_dir}_mbias_fixed
     output_dir=${biased_dir}_mbias_fixed
