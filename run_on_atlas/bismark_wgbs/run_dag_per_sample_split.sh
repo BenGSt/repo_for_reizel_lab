@@ -288,6 +288,7 @@ EOF
 }
 
 write_make_tiles_job_submission_file() {
+  echo DEBUG: write_make_tiles_job_submission_file: \$1: $1
   if [ $1 == "-override_genome" ]; then
     genome=$2
   fi
