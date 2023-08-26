@@ -252,6 +252,8 @@ EOF
 }
 
 write_methylation_calling_job_submission_file() {
+  bam_dir=$1 #bam_dir is the directory containing the bam files to be used during m-bias correction (run_mbias.sh)
+  echo DEBUG: bam_dir: $bam_dir
   cat <<EOF >condor_submission_files/${sample_name}/methylation_calling_job_${sample_name}.sub
 Initialdir = $(pwd)
 executable = $REPO_FOR_REIZEL_LAB/run_on_atlas/bismark_wgbs/methylation_calling.sh
@@ -263,7 +265,7 @@ log = $(pwd)/logs/$sample_name/\$(name)_methylation_calling.log
 output = $(pwd)/logs/$sample_name/\$(name)_methylation_calling.out
 error = $(pwd)/logs/$sample_name/\$(name)_methylation_calling.out
 queue name, args from (
-  $sample_name, " -output-dir $(pwd)/$sample_name $keep_trimmed_fq $extra_meth_opts "
+  $sample_name, " -output-dir $(pwd)/$sample_name $keep_trimmed_fq $extra_meth_opts $bam_dir"
 )
 EOF
 }

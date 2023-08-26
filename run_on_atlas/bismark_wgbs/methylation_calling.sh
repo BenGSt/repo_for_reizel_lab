@@ -20,6 +20,7 @@ help()
 
 	optional:
   -extra-options "multiple double quoted options" (e.g. --ignore <int>. See Bismark manual)
+  -bam-dir <path> Use for m-bias fix (when the bam files are in a different directory than the output directory).
 EOF
 }
 
@@ -69,7 +70,12 @@ main()
 
 methylation_calling()
 {
-  alignment_output=$(find . -name '*bismark*deduplicated*bam')
+  #if bam_dir is an empty string (i.e. not set), find the bam files in the current directory
+  if [[ -z $bam_dir ]]; then
+    alignment_output=$(find . -name '*bismark*deduplicated*bam')
+  else
+    alignment_output=$(find $bam_dir -name '*bismark*deduplicated*bam')
+  fi
   echo $alignment_output | grep 'pe' && paired="-p" || paired=""
   command=$(echo bismark_methylation_extractor --bedgraph $paired $ignore_r2 --multicore $N_PARALLEL_INSTANCES --gzip --buffer_size $BUFFER_SIZE $extra $alignment_output)
 
@@ -100,6 +106,11 @@ arg_parse()
         ;;
       -extra-options)
         extra=$2
+        shift
+        shift
+        ;;
+      -bam-dir)
+        bam_dir=$2
         shift
         shift
         ;;

@@ -31,7 +31,7 @@ main() {
       mkdir -p logs/$sample_name
 
       # the following sub files are not dependent on splitting
-      write_methylation_calling_job_submission_file
+      write_methylation_calling_job_submission_file "-bam-dir $biased_dir/$sample_name"
       write_bam2nuc_job_submission_file
       write_make_tiles_job_submission_file
       write_sample_dag_file
