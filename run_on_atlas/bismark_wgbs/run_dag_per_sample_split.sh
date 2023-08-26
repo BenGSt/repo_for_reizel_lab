@@ -253,7 +253,6 @@ EOF
 
 write_methylation_calling_job_submission_file() {
   bam_dir=$1 #bam_dir is the directory containing the bam files to be used during m-bias correction (run_mbias.sh)
-  echo DEBUG: bam_dir: $bam_dir
   cat <<EOF >condor_submission_files/${sample_name}/methylation_calling_job_${sample_name}.sub
 Initialdir = $(pwd)
 executable = $REPO_FOR_REIZEL_LAB/run_on_atlas/bismark_wgbs/methylation_calling.sh
@@ -271,7 +270,7 @@ EOF
 }
 
 write_bam2nuc_job_submission_file() {
-  if [ $1 == "-override_genome" ]; then
+  if [[ $1 == "-override_genome" ]]; then
     genome=$2 #used for mbias correction (run_fix_mbias.sh)
   fi
   cat <<EOF >condor_submission_files/${sample_name}/bam2nuc_job_${sample_name}.sub
