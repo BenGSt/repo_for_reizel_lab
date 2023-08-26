@@ -32,11 +32,8 @@ main() {
   #find the sample directories (the first node in the path) for which bam files exist
   for sample_name in $(find $biased_dir -name "*deduplicated*bam" | awk -F / '{print $(NF-1)}'); do
     {
-      echo DEBUG: sample_name=$sample_name
-      echo
       unset split sep chunk
       sample_names+=($sample_name)
-      echo DEBUG: mkdir -p $sample_name
       mkdir -p $sample_name
       mkdir -p condor_submission_files/$sample_name
       mkdir -p logs/$sample_name
@@ -54,6 +51,19 @@ main() {
 
   #list jobs and the commands to run them
   #ask if user wants to run them now, if so, run them.
+  echo Submit all jobs by running: condor_submit_dag $output_dir/condor_submission_files/submit_all_bismark_wgbs.dag
+  echo
+  echo To run samples individually:
+  for dag in $(find $output_dir/condor_submission_files -name "*.dag" | grep -v submit_all); do
+    echo condor_submit_dag $dag
+  done
+  echo
+  printf 'Submit all jobs now? (y/n) '
+  read answer
+  if [ "$answer" != "${answer#[Yy]}" ]; then # this grammar (the #[] operator) means that the variable $answer where any Y or y in 1st position will be dropped if they exist.
+    condor_submit_dag $output_dir/condor_submission_files/submit_all_bismark_wgbs.dag
+  fi
+  echo Good Luck!
   cat <<EOF
 
 Unless you need them, it is recommended to delete the bam files when you are done.
@@ -77,7 +87,7 @@ at least one of the following:
    --ignore_r2 <int>
    --ignore_3prime_r2 <int>
 non-obligatory options:
-   [--output-dir <output_dir>]
+   [--output-dir <output_dir>] defaults to \${biased_dir}_mbias_fixed
 
 options to ignore edges of reads (from Bismark manual):
 =====================================
@@ -136,7 +146,7 @@ arg_parse() {
       shift
       ;;
     --output-dir)
-      output_dir=$2
+      output_dir=$(realpath $2)
       shift
       shift
       ;;
