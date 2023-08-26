@@ -16,7 +16,6 @@ save_cmd() {
 }
 
 main() {
-  save_cmd "$@"
   bias_fix=1 #for write_sample_dag_file()
   arg_parse "$@"
   extra_meth_opts="-extra-options '$ignore_r1 $ignore_r2 $ignore_3prime $ignore_3prime_r2'"
@@ -26,6 +25,7 @@ main() {
   fi
   mkdir -p $output_dir
   cd $output_dir
+  save_cmd "$@"
   mkdir -p logs
 
   #write bismark_methylation_extractor sub files
