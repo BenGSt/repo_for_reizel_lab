@@ -178,7 +178,7 @@ write_trim_jobs_submission_file() {
 Initialdir = $(pwd)
 executable = $REPO_FOR_REIZEL_LAB/run_on_atlas/bismark_wgbs/trim_illumina_adaptors.sh
 Arguments = \$(args)
-request_cpus = 8
+request_cpus = 3
 RequestMemory = 500MB
 universe = vanilla
 log = $(pwd)/logs/$sample_name/\$(name)_trim.log
@@ -258,7 +258,7 @@ write_methylation_calling_job_submission_file() {
 Initialdir = $(pwd)
 executable = $REPO_FOR_REIZEL_LAB/run_on_atlas/bismark_wgbs/methylation_calling.sh
 Arguments = \$(args)
-request_cpus = 10
+request_cpus = 3
 RequestMemory = 4GB
 universe = vanilla
 log = $(pwd)/logs/$sample_name/\$(name)_methylation_calling.log

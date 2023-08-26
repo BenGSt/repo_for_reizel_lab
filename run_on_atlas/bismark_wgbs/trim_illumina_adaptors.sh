@@ -1,6 +1,6 @@
 #!/bin/bash
 
-N_CORES=8
+N_CORES=3
 MEM=300MB
 
 help()
