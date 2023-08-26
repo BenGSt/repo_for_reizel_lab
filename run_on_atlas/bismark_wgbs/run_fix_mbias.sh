@@ -34,6 +34,7 @@ main() {
       write_methylation_calling_job_submission_file "-bam-dir $biased_dir/$sample_name"
       write_bam2nuc_job_submission_file -override_genome $(find $biased_dir/ -name "*make_tiles.out" | head -1 | xargs grep -o -- "-genome.*"| awk '{print $2}')
       write_make_tiles_job_submission_file #genome already set by previous -override_genome
+      write_multiqc_job_submission_file
       write_sample_dag_file
     }
   done

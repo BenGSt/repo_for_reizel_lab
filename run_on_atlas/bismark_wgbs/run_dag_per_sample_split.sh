@@ -480,7 +480,7 @@ write_top_level_dag() {
   done
   echo JOB multiqc $(realpath ./condor_submission_files/multiqc_job.sub) >>$fileout
   echo >>$fileout
-  # Old version - all samples submitted at once
+  #all samples submitted at once
   echo PARENT $(for ((k = 0; k <= $i; k++)); do printf "%s " ${sample_names[$k]}; done) CHILD multiqc >>$fileout
 }
 
