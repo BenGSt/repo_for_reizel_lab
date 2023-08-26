@@ -288,6 +288,9 @@ EOF
 }
 
 write_make_tiles_job_submission_file() {
+  if [ $1 == "-override_genome" ]; then
+    genome=$2
+  fi
   cat <<EOF >condor_submission_files/${sample_name}/make_tiles_${sample_name}.sub
 Initialdir = $(pwd)
 executable = $REPO_FOR_REIZEL_LAB/run_on_atlas/bismark_wgbs/make_tiles.sh
