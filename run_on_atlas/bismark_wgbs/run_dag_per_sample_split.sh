@@ -291,6 +291,7 @@ write_make_tiles_job_submission_file() {
   echo DEBUG: write_make_tiles_job_submission_file: \$1: $1
   if [ $1 == "-override_genome" ]; then
     genome=$2
+    echo DEBUG: write_make_tiles_job_submission_file: setting genome: $genome
   fi
   cat <<EOF >condor_submission_files/${sample_name}/make_tiles_${sample_name}.sub
 Initialdir = $(pwd)
