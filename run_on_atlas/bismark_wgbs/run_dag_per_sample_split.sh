@@ -402,9 +402,9 @@ EOF
   echo PARENT meth_call CHILD make_tiles bam2nuc >>$outfile
 }
 
-count_reads_and_split() {
+count_reads() {
   echo "Counting reads in $sample_name to see if the fastq file(s) should be split into chunks"
-  n_reads=$(($(pigz -cd $(find $raw_dir/$sample_name/ -name "*.fastq.gz" | head -1) | wc -l) / 4))
+  n_reads=$(($(pigz -p 1 -cd $(find $raw_dir/$sample_name/ -name "*.fastq.gz" | head -1) | wc -l) / 4))
   n_chunks=$((n_reads / n_reads_per_chunk))
 
   if [[ $((n_reads % n_reads_per_chunk)) -gt 0 ]]; then
@@ -440,16 +440,16 @@ write_trim_and_align_sub_files() {
 write_sub_files_for_each_sample() {
   for sample_name in $(find -L $raw_dir -type d | awk -F / 'NR>1{print $NF}' | sort); do
     #TODO: try to replace this loop with xargs
-    #  find -L $raw_dir -type d | awk -F / 'NR>1{print $NF}' | sort | xargs -n1 -P4 sh -c "
+    #  find -L $raw_dir -type d | awk -F / 'NR>1{print $NF}' | sort | xargs -n1 -P4
     {
       unset split sep chunk
       sample_names+=($sample_name)
       mkdir -p condor_submission_files/$sample_name
       mkdir -p logs/$sample_name
 
-      # if fastq file is longer than n_reads_per_chunk reads, split it into chunks of length n_reads_per_chunk,
-      # given as an argument to this script, defaults to 100M.
-      count_reads_and_split
+      # count reads to see if fastq file is longer than n_reads_per_chunk reads, if so it will be split into chunks of
+      # length n_reads_per_chunk, given as an argument to this script, defaults to 100M.
+      count_reads
 
       #write sub files for trimming and aligning each chunk (or one sub file if no splitting)
       write_trim_and_align_sub_files
@@ -462,6 +462,30 @@ write_sub_files_for_each_sample() {
       write_sample_dag_file
     }
   done
+}
+
+write_sub_files_for_each_sample_parallel(){
+  find -L $raw_dir -type d | awk -F / 'NR>1{print $NF}' | sort | xargs -n1 -P4 sh -c '
+  sample_name="$1"
+  unset split sep chunk
+  sample_names+=($sample_name)
+  mkdir -p condor_submission_files/$sample_name
+  mkdir -p logs/$sample_name
+
+  # count reads to see if fastq file is longer than n_reads_per_chunk reads, if so it will be split into chunks of
+  # length n_reads_per_chunk, given as an argument to this script, defaults to 100M.
+  count_reads
+
+  #write sub files for trimming and aligning each chunk (or one sub file if no splitting)
+  write_trim_and_align_sub_files
+
+  # the following sub files are not dependent on splitting
+  write_deduplicate_job_submission_file
+  write_methylation_calling_job_submission_file
+  write_bam2nuc_job_submission_file
+  write_make_tiles_job_submission_file
+  write_sample_dag_file
+' sh
 }
 
 write_top_level_dag() {
@@ -487,7 +511,8 @@ main_write_condor_submission_files() { # <raw_dir>
   raw_dir=$1
   sample_names=()
 
-  write_sub_files_for_each_sample
+#  write_sub_files_for_each_sample
+  write_sub_files_for_each_sample_parallel #TODO: trying this
   write_multiqc_job_submission_file
 
   #Write the top level submission file to submit all dags
@@ -567,8 +592,8 @@ arg_parse() {
   done
 }
 
-#allow the functions in this script to be sourced by other scripts
-#(in particular used by run_fix_mniasm.sh)
+# allow the functions in this script to be sourced by other scripts
+# (in particular used by run_fix_mniasm.sh)
 if [[ $1 != "--source-only" ]]; then
   main "$@"
 fi
