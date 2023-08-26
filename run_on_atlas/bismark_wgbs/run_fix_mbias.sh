@@ -4,7 +4,19 @@
 REPO_FOR_REIZEL_LAB=/storage/bfe_reizel/bengst/repo_for_reizel_lab
 source $REPO_FOR_REIZEL_LAB/run_on_atlas/bismark_wgbs/run_dag_per_sample_split.sh --source-only
 
+save_cmd() {
+  if [[ $# -gt 2 ]]; then #don't (re)write cmd.txt if no args
+    echo This command was run to fix m-bias. the original command was: >cmd.txt
+    cat $biased_dir/cmd.txt >>cmd.txt
+    echo >>cmd.txt
+    echo >>cmd.txt
+    echo the m-bias fix command was: >>cmd.txt
+    echo "$0" "$@" >>cmd.txt #TODO: preserve quotes that may be in args
+  fi
+}
+
 main() {
+  save_cmd "$@"
   bias_fix=1 #for write_sample_dag_file()
   arg_parse "$@"
   extra_meth_opts="-extra-options '$ignore_r1 $ignore_r2 $ignore_3prime $ignore_3prime_r2'"
@@ -16,10 +28,9 @@ main() {
   cd $output_dir
   mkdir -p logs
 
-
   #write bismark_methylation_extractor sub files
-    #find the sample directories (the first node in the path) for which bam files exist
-    for sample_name in $(find $biased_dir -name "*deduplicated*bam" | awk -F / '{print $(NF-1)}'); do
+  #find the sample directories (the first node in the path) for which bam files exist
+  for sample_name in $(find $biased_dir -name "*deduplicated*bam" | awk -F / '{print $(NF-1)}'); do
     {
       echo DEBUG: sample_name=$sample_name
       echo
@@ -32,7 +43,7 @@ main() {
 
       # the following sub files are not dependent on splitting
       write_methylation_calling_job_submission_file "-bam-dir $biased_dir/$sample_name"
-      write_bam2nuc_job_submission_file -override_genome $(find $biased_dir/ -name "*make_tiles.out" | head -1 | xargs grep -o -- "-genome.*"| awk '{print $2}')
+      write_bam2nuc_job_submission_file -override_genome $(find $biased_dir/ -name "*make_tiles.out" | head -1 | xargs grep -o -- "-genome.*" | awk '{print $2}')
       write_make_tiles_job_submission_file #genome already set by previous -override_genome
       write_multiqc_job_submission_file
       write_sample_dag_file
@@ -43,7 +54,7 @@ main() {
 
   #list jobs and the commands to run them
   #ask if user wants to run them now, if so, run them.
-  cat << EOF
+  cat <<EOF
 
 Unless you need them, it is recommended to delete the bam files when you are done.
 
@@ -55,7 +66,7 @@ EOF
 }
 
 help() {
-  cat << EOF
+  cat <<EOF
   run_fix_mbias.sh --biased_dir <path> {at least one of: --ignore_r1 <int> --ignore_r2  --ignore_3prime <int> --ignore_3prime_r2 <int>} [--output-dir <output_dir>]
 obligatory options:
    --biased_dir <path>
@@ -99,41 +110,41 @@ arg_parse() {
   fi
   while [[ $# -gt 0 ]]; do
     case $1 in
-      --biased_dir)
-        biased_dir="$(realpath $2)"
-        shift
-        shift
-        ;;
-      --ignore)
-        ignore_r1="--ignore $2"
-        shift
-        shift
-        ;;
-      --ignore_r2)
-        ignore_r2="--ignore_r2 $2"
-        shift
-        shift
-        ;;
-      --ignore_3prime)
-        ignore_3prime="--ignore_3prime $2"
-        shift
-        shift
-        ;;
-      --ignore_3prime_r2)
-        ignore_3prime_r2="--ignore_3prime_r2 $2"
-        shift
-        shift
-        ;;
-      --output-dir)
-        output_dir=$2
-        shift
-        shift
-        ;;
-      *)
-        echo "Unknown option: $1"
-        help
-        exit 1
-        ;;
+    --biased_dir)
+      biased_dir="$(realpath $2)"
+      shift
+      shift
+      ;;
+    --ignore)
+      ignore_r1="--ignore $2"
+      shift
+      shift
+      ;;
+    --ignore_r2)
+      ignore_r2="--ignore_r2 $2"
+      shift
+      shift
+      ;;
+    --ignore_3prime)
+      ignore_3prime="--ignore_3prime $2"
+      shift
+      shift
+      ;;
+    --ignore_3prime_r2)
+      ignore_3prime_r2="--ignore_3prime_r2 $2"
+      shift
+      shift
+      ;;
+    --output-dir)
+      output_dir=$2
+      shift
+      shift
+      ;;
+    *)
+      echo "Unknown option: $1"
+      help
+      exit 1
+      ;;
     esac
   done
 
