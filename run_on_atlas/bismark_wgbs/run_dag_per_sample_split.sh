@@ -511,8 +511,8 @@ main_write_condor_submission_files() { # <raw_dir>
   raw_dir=$1
   sample_names=()
 
-#  write_sub_files_for_each_sample
-  write_sub_files_for_each_sample_parallel #TODO: trying this
+  write_sub_files_for_each_sample
+#  write_sub_files_for_each_sample_parallel #TODO: try this
   write_multiqc_job_submission_file
 
   #Write the top level submission file to submit all dags
