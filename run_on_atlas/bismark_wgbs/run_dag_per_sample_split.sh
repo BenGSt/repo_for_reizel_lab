@@ -439,6 +439,7 @@ write_trim_and_align_sub_files() {
 }
 
 write_sub_files_for_each_sample() {
+  echo DEBUG: function call: write_sub_files_for_each_sample()
   for sample_name in $(find -L $raw_dir -type d | awk -F / 'NR>1{print $NF}' | sort); do
     #TODO: try to replace this loop with xargs
     #  find -L $raw_dir -type d | awk -F / 'NR>1{print $NF}' | sort | xargs -n1 -P4
