@@ -168,6 +168,7 @@ EOF
 }
 
 write_trim_jobs_submission_file() {
+  #TODO: if file is not split than no files at $(pwd)/$sample_name/$split/$chunk/\*.fq. make trim jpb use raw_dir or unzip files to $(pwd)/$sample_name/$split/$chunk/\*.fq
   chunk=$1
   if [[ $chunk ]]; then
     filename=condor_submission_files/${sample_name}/trim_job_${sample_name}_${chunk}.sub
