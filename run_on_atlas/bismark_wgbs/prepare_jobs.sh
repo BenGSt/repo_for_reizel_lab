@@ -2,6 +2,7 @@
 
 REPO_FOR_REIZEL_LAB=/storage/bfe_reizel/bengst/repo_for_reizel_lab
 source $REPO_FOR_REIZEL_LAB/run_on_atlas/bismark_wgbs/shared.sh --source-only
+source /Local/bfe_reizel/anaconda3/bin/activate wgbs_bismark_pipeline_2023
 
 prepapre_sample() {
   raw_dir=$1
