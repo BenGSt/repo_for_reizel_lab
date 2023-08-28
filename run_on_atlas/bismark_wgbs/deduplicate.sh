@@ -5,15 +5,14 @@ main() #<sample_dir> <split> {--paired-end|--single-end}
 {
   sample_dir=$1
   split=$2 #USAGE: set if input are multiple split fastq files (if run_data_split.sh was run)
-#TODO: meth extractor is broken, commenting this out for now to see if it works without it
-#  if [[ $3 == "-paired-end" ]]; then
-#    pe_or_se="-p"
-#  elif [[ $3 == "-single-end" ]]; then
-#    pe_or_se="-s"
-#  else
-#    echo "ERROR: must specify -paired-end or -single-end"
-#    exit 1
-#  fi
+  if [[ $3 == "-paired-end" ]]; then
+    pe_or_se="-p"
+  elif [[ $3 == "-single-end" ]]; then
+    pe_or_se="-s"
+  else
+    echo "ERROR: must specify -paired-end or -single-end"
+    exit 1
+  fi
 
   source /Local/bfe_reizel/anaconda3/bin/activate wgbs_bismark_pipeline_2023
 	script_name=$(echo $0 | awk -F / '{print $NF}')
