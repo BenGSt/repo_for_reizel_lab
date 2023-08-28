@@ -24,51 +24,46 @@ help()
 EOF
 }
 
+print_info(){ #<phase= running / finished>
+  	cat << EOF
 
+	 ################################
+	 ################################
+	 $1: $script_name "$@"
+	 date: $(date)
+	 hostname: $(hostname)
+	 pwd: $(pwd)
+	 #################################
+	 #################################
+
+
+EOF
+
+
+}
 main()
 {
+  print_info "running"
   arg_parse "$@"
 	source /Local/bfe_reizel/anaconda3/bin/activate wgbs_bismark_pipeline_2023
 	cd "$output_dir" || exit 1
 	script_name=$(echo $0 | awk -F / '{print $NF}')
 
-	echo
-	echo
-	echo \################################
-	echo \################################
-	echo running: $script_name "$@"
-	echo date: $(date)
-	echo hostname: $(hostname)
-	echo pwd: $(pwd)
-	echo \#################################
-	echo \#################################
-	echo
-	echo
+  call_methylation
 
-#	time methylation_calling
-  methylation_calling
+  #rename the cov output:
+  current_dir=$(pwd | awk -F'/' '{print $NF}')
+  mv -v .*cov.gz ${current_dir}_cov.gz
 
-#TODO: getting empty cov files, want to see what is in here. commenting out for now (28.8.23 10:50)
 	#cleanup
   rm -v $(find ./ | grep -P 'OT|OB')
   rm -v $(find . -name "*.bedGraph.gz")
 
-	echo
-	echo
-	echo \################################
-	echo \################################
-	echo finished: $script_name
-	echo date: $(date)
-	echo hostname: $(hostname)
-	echo pwd: $(pwd)
-	echo \#################################
-	echo \#################################
-	echo
-	echo
+  print_info "finished"
 }
 
 
-methylation_calling()
+call_methylation()
 {
   #if bam_dir is an empty string (i.e. not set), find the bam files in the current directory
   if [[ -z $bam_dir ]]; then
@@ -78,10 +73,10 @@ methylation_calling()
   fi
   echo $alignment_output | grep 'pe' && paired="-p" || paired=""
 
-#  command=$(echo bismark_methylation_extractor --bedgraph $paired $ignore_r2 --multicore $N_PARALLEL_INSTANCES --gzip --buffer_size $BUFFER_SIZE $extra $alignment_output)
-
-  #trying to fix empy coverage files by using old samtools #TODO: this works as of 28.8.23 - should be properly fixed in the environment
-  command=$(echo bismark_methylation_extractor --samtools_path /Local/bfe_reizel/samtools-0.1.19/ --bedgraph $paired $ignore_r2 --multicore $N_PARALLEL_INSTANCES --gzip --buffer_size $BUFFER_SIZE $extra $alignment_output)
+  command=$(echo bismark_methylation_extractor --bedgraph $paired $ignore_r2 --multicore $N_PARALLEL_INSTANCES --gzip --buffer_size $BUFFER_SIZE $extra $alignment_output)
+  #NOTE: samtools broken pipe and perl gzip: broken pipe errors occur. this is a knows issue and should not affect the output.
+  #      an ld version of samtools (--samtools_path /Local/bfe_reizel/samtools-0.1.19/) fixes the samtools error but not the perl error, perhaps an old version of perl will work.
+  #      Leaving this as is for now, the errors are not fatal and the output is fine.
 
   #--ample_memory speeds things up for samples over 10 million reads or so. since it may take over an hour to get going ATLAS policy holds the jobs.
 #  command=$(echo bismark_methylation_extractor --ample_memory --bedgraph $paired $ignore_r2 --multicore $N_PARALLEL_INSTANCES --gzip  $extra $alignment_output)
