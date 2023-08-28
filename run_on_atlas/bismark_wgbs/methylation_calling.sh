@@ -46,7 +46,6 @@ main()
 	echo
 
 #	time methylation_calling
-	#TODO try without time , see if it speeds up or less memory used
   methylation_calling
 
 #TODO: getting empty cov files, want to see what is in here. commenting out for now (28.8.23 10:50)
