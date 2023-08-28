@@ -80,7 +80,7 @@ methylation_calling()
 
 #  command=$(echo bismark_methylation_extractor --bedgraph $paired $ignore_r2 --multicore $N_PARALLEL_INSTANCES --gzip --buffer_size $BUFFER_SIZE $extra $alignment_output)
 
-  #trying to fix empy coverage files by using old samtools
+  #trying to fix empy coverage files by using old samtools #TODO: this works as of 28.8.23 - should be properly fixed in the environment
   command=$(echo bismark_methylation_extractor --samtools_path /Local/bfe_reizel/samtools-0.1.19/ --bedgraph $paired $ignore_r2 --multicore $N_PARALLEL_INSTANCES --gzip --buffer_size $BUFFER_SIZE $extra $alignment_output)
 
   #--ample_memory speeds things up for samples over 10 million reads or so. since it may take over an hour to get going ATLAS policy holds the jobs.
