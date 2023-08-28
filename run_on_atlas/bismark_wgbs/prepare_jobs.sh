@@ -29,7 +29,6 @@ prepapre_sample() {
 # Another script is used to write the submission file for multiqc,and top level dag files.
 # Yet another script provides the user cli for preparing jobs for all the samples.
 main() {
-  mkdir -p logs
   n_reads_per_chunk=100000000 #default value (may be overwritten by arg_parse)
   prepapre_sample "$@"
 }
