@@ -53,7 +53,7 @@ main()
 
   #rename the cov output:
   current_dir=$(pwd | awk -F'/' '{print $NF}')
-  mv -v .*cov.gz ${current_dir}_cov.gz
+  mv -v ./*.cov.gz ${current_dir}_cov.gz
 
 	#cleanup
   rm -v $(find ./ | grep -P 'OT|OB')
@@ -73,7 +73,8 @@ call_methylation()
   fi
   echo $alignment_output | grep 'pe' && paired="-p" || paired=""
 
-  command=$(echo bismark_methylation_extractor --bedgraph $paired $ignore_r2 --multicore $N_PARALLEL_INSTANCES --gzip --buffer_size $BUFFER_SIZE $extra $alignment_output)
+#  command=$(echo bismark_methylation_extractor --bedgraph $paired $ignore_r2 --multicore $N_PARALLEL_INSTANCES --gzip --buffer_size $BUFFER_SIZE $extra $alignment_output)
+  command="bismark_methylation_extractor --bedgraph $paired $ignore_r2 --multicore $N_PARALLEL_INSTANCES --gzip --buffer_size $BUFFER_SIZE $extra $alignment_output"
   #NOTE: samtools broken pipe and perl gzip: broken pipe errors occur. this is a knows issue and should not affect the output.
   #      an ld version of samtools (--samtools_path /Local/bfe_reizel/samtools-0.1.19/) fixes the samtools error but not the perl error, perhaps an old version of perl will work.
   #      Leaving this as is for now, the errors are not fatal and the output is fine.
