@@ -49,9 +49,10 @@ main()
 	#TODO try without time , see if it speeds up or less memory used
   methylation_calling
 
-	#cleanup
-  rm -v $(find ./ | grep -P 'OT|OB')
-  rm -v $(find . -name "*.bedGraph.gz")
+#TODO: getting empty cov files, want to see what is in here. commenting out for now (28.8.23 10:50)
+#	#cleanup
+#  rm -v $(find ./ | grep -P 'OT|OB')
+#  rm -v $(find . -name "*.bedGraph.gz")
 
 	echo
 	echo
