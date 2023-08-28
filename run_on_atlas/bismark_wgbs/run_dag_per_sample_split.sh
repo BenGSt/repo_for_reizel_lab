@@ -470,7 +470,8 @@ write_sub_files_for_each_sample_parallel(){
   # fastq.gz files. From observing htop, it seems each job use ~1.3 cores, 1 for pigz (faster than gzip even with a
   # single core) and 0.3 for wc. I'm going to try to run 10 jobs in parallel, and see if the ht_condor config in Atlas
   # let's me get away with that.
-  find -L $raw_dir -type d | awk -F / 'NR>1{print $NF}' | sort | xargs -n 1 -P $p_count sh -c '
+  find -L $raw_dir -type d | awk -F / 'NR>1{print $NF}' | sort | xargs -n 1 -P $p_count bash -c '
+  source <(env| grep -v "LS_COLORS")
   sample_name="$1"
   unset split sep chunk
   sample_names+=($sample_name)
@@ -490,7 +491,7 @@ write_sub_files_for_each_sample_parallel(){
   write_bam2nuc_job_submission_file
   write_make_tiles_job_submission_file
   write_sample_dag_file
-' sh
+'
 }
 
 write_top_level_dag() {
