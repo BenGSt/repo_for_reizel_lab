@@ -466,7 +466,11 @@ write_sub_files_for_each_sample() {
 }
 
 write_sub_files_for_each_sample_parallel(){
-  find -L $raw_dir -type d | awk -F / 'NR>1{print $NF}' | sort | xargs -n1 -P4 sh -c '
+  p_count=10 # number of parallel jobs (local shell jobs, not ht_condor jobs) to run that unzip and count lines in
+  # fastq.gz files. From observing htop, it seems each job use ~1.3 cores, 1 for pigz (faster than gzip even with a
+  # single core) and 0.3 for wc. I'm going to try to run 10 jobs in parallel, and see if the ht_condor config in Atlas
+  # let's me get away with that.
+  find -L $raw_dir -type d | awk -F / 'NR>1{print $NF}' | sort | xargs -n 1 -P $p_count sh -c '
   sample_name="$1"
   unset split sep chunk
   sample_names+=($sample_name)
@@ -512,8 +516,8 @@ main_write_condor_submission_files() { # <raw_dir>
   raw_dir=$1
   sample_names=()
 
-  write_sub_files_for_each_sample
-#  write_sub_files_for_each_sample_parallel #TODO: try this
+#  write_sub_files_for_each_sample
+  write_sub_files_for_each_sample_parallel #TODO: try this
   write_multiqc_job_submission_file
 
   #Write the top level submission file to submit all dags
