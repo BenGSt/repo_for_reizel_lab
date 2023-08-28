@@ -126,8 +126,6 @@ main() {
   n_reads_per_chunk=100000000 #default value (may be overwritten by arg_parse)
   arg_parse "$@"
   mkdir -p logs
-  echo DEBUG: main: jist before calling main_write_condor_submission_files #TODO: debug
-  exit 1
   main_write_condor_submission_files $raw_data_dir
 
   echo Submit all jobs by running: condor_submit_dag ./condor_submission_files/submit_all_bismark_wgbs.dag
@@ -520,7 +518,7 @@ main_write_condor_submission_files() { # <raw_dir>
   raw_dir=$1
   sample_names=()
 
-#  write_sub_files_for_each_sample
+  write_sub_files_for_each_sample
 #  write_sub_files_for_each_sample_parallel #TODO: try this
   write_multiqc_job_submission_file
 
