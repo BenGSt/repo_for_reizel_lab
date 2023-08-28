@@ -53,7 +53,7 @@ main()
 
   #rename the cov output:
   current_dir=$(pwd | awk -F'/' '{print $NF}')
-  mv -v ./*.cov.gz ${current_dir}_cov.gz
+  mv -v ./*.cov.gz ${current_dir}.cov.gz
 
 	#cleanup
   rm -v $(find ./ | grep -P 'OT|OB')
