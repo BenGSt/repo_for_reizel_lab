@@ -4,7 +4,9 @@ REPO_FOR_REIZEL_LAB=/storage/bfe_reizel/bengst/repo_for_reizel_lab
 source $REPO_FOR_REIZEL_LAB/run_on_atlas/bismark_wgbs/shared.sh --source-only
 
 prepapre_sample() {
-  sample_name=$1
+  raw_dir=$1
+  sample_name=$2
+
   mkdir -p condor_submission_files/$sample_name
   mkdir -p logs/$sample_name
 
@@ -28,7 +30,7 @@ prepapre_sample() {
 # Yet another script provides the user cli for preparing jobs for all the samples.
 main() {
   n_reads_per_chunk=100000000 #default value (may be overwritten by arg_parse)
-  prepapre_sample $1
+  prepapre_sample "$@"
 }
 
 
