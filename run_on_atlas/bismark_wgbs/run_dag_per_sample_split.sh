@@ -272,7 +272,7 @@ EOF
 
 write_bam2nuc_job_submission_file() {
   if [[ $1 == "-override_genome" ]]; then
-    genome=$2 #used for mbias correction (run_fix_mbias.sh)
+    genome=$2 #used for mbias correction (fix_mbias.sh)
   fi
   cat <<EOF >condor_submission_files/${sample_name}/bam2nuc_job_${sample_name}.sub
 Initialdir = $(pwd)

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# USAGE: run_fix_mbias.sh --biased_dir <path> --ignore_r1 <int> --ignore_r2  --ignore_3prime <int> --ignore_3prime_r2 <int> [--output-dir <output_dir>]
+# USAGE: fix_mbias.sh --biased_dir <path> --ignore_r1 <int> --ignore_r2  --ignore_3prime <int> --ignore_3prime_r2 <int> [--output-dir <output_dir>]
 
 REPO_FOR_REIZEL_LAB=/storage/bfe_reizel/bengst/repo_for_reizel_lab
 source $REPO_FOR_REIZEL_LAB/run_on_atlas/bismark_wgbs/shared.sh
