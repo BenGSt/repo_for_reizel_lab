@@ -44,7 +44,7 @@ main() {
       write_make_tiles_job_submission_file #genome already set by previous -override_genome
       write_multiqc_job_submission_file
       echo DEBUG: "sample_names:" "${sample_names[@]}" #TODO remove
-      write_sample_dag_file
+      write_sample_dag_file -mbias-fix
     }
   done
 
