@@ -35,6 +35,10 @@ prepare_sample() {
 
 write_prep_submission_files() {
   for sample_name in $(find -L $raw_data_dir -type d | awk -F / 'NR>1{print $NF}' | sort); do
+    if [[ -z $sample_name ]]; then
+      echo "ERROR: no samples found in $raw_data_dir"
+      exit 1
+    fi
     cat <<EOF >condor_submission_files/prep/${sample_name}.sub
 Initialdir = $(pwd)
 executable = $REPO_FOR_REIZEL_LAB/run_on_atlas/bismark_wgbs/prepare_jobs.sh
