@@ -299,12 +299,10 @@ write_trim_and_align_sub_files() {
   fi
 }
 
-#write_sub_files_for_each_sample() {
-#  #TODO: get rid of this function and move the loop
-#  for sample_name in $(find -L $raw_dir -type d | awk -F / 'NR>1{print $NF}' | sort); do
-#    sample_names+=($sample_name)
-#  done
-#}
+write_sub_files_for_each_sample() {
+  #TODO: get rid of this function and move the loop
+
+}
 
 write_sub_files_for_each_sample_parallel() {
   p_count=10 # number of parallel jobs (local shell jobs, not ht_condor jobs) to run that unzip and count lines in
@@ -341,14 +339,16 @@ write_top_level_dag() {
   fileout=condor_submission_files/submit_all_bismark_wgbs.dag
   touch $fileout
 
+  for sample_name in $(find -L $raw_data_dir -type d | awk -F / 'NR>1{print $NF}' | sort); do
+    sample_names+=($sample_name)
+  done
+
   i=0
   for dag in $sample_dags; do
-    for sample_name in $(find -L $raw_data_dir -type d | awk -F / 'NR>1{print $NF}' | sort); do
-    echo SUBDAG EXTERNAL $sample_name $dag >>$fileout
-    echo PRIORITY $sample_name $i >>$fileout
+    echo SUBDAG EXTERNAL ${sample_names[$i]} $dag >>$fileout
+    echo PRIORITY ${sample_names[$i]} $i >>$fileout
     echo >>$fileout
     ((i++))
-    done
   done
   echo JOB multiqc $(realpath ./condor_submission_files/multiqc_job.sub) >>$fileout
   echo >>$fileout
@@ -371,7 +371,7 @@ main_write_condor_submission_files() { # <raw_dir>
 save_cmd() {
   #must be redirected to a file: save_cmd "@" >cmd.txt
   if [[ $# -gt 2 ]]; then #don't (re)write cmd.txt if no args
-    echo "$0" "$@" #TODO: preserve quotes that may be in args
+    echo "$0" "$@"        #TODO: preserve quotes that may be in args
   fi
 
 }
