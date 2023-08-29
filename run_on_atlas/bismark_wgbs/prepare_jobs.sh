@@ -57,7 +57,7 @@ for sub in $(find ./condor_submission_files/prep -name "*.sub"); do
     echo condor_submit $sub
   done
   echo
-  printf 'Submit all jobs now? (y/n) '
+  printf 'Submit prep jobs now? (y/n) '
   read answer
   if [ "$answer" != "${answer#[Yy]}" ]; then # this grammar (the #[] operator) means that the variable $answer where any Y or y in 1st position will be dropped if they exist.
     for cmd in "${cmds[@]}"; do
