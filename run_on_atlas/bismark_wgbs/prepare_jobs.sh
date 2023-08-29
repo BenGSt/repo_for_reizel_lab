@@ -56,6 +56,7 @@ $(
       echo $sample_name
     done
   )
+)
 EOF
 }
 
