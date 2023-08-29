@@ -268,7 +268,7 @@ EOF
       echo PARENT split_fastq CHILD \
         $(
           n=$(cat temp_n_value)
-          for i in $(seq -w 00 $n); do printf "trim_and_qc_%d " $i; done
+          for i in $(seq -w 00 $n); do printf "trim_and_qc_%s " $i; done
         ) >>$outfile
     fi
     cat <<EOF >>$outfile
@@ -289,7 +289,7 @@ $(
       # bismark_align -> deduplicate
       printf "PARENT "
       for i in $(seq -w 00 $n); do
-        printf "bismark_align_%d " $i
+        printf "bismark_align_%s " $i
       done
       printf "CHILD deduplicate\n"
     )
