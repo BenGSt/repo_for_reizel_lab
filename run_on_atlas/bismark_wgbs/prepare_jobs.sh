@@ -35,6 +35,7 @@ prepare_sample() {
 
 write_prep_submission_files() {
   for sample_name in $(find -L $raw_data_dir -type d | awk -F / 'NR>1{print $NF}' | sort); do
+    echo DEBUG: sample_name: $sample_name
     if [[ -z $sample_name ]]; then
       echo "ERROR: no samples found in $raw_data_dir"
       exit 1
