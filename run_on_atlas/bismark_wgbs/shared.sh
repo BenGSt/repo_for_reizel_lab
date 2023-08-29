@@ -301,7 +301,6 @@ EOF
 
 write_top_level_dag() {
   mbias_fix=$1
-  echo DEBUG: mbias_fix: $mbias_fix
   rm -f ./condor_submission_files/submit_all_bismark_wgbs.dag #incase rerunning the script without delete
   sample_dags=$(realpath $(find ./condor_submission_files/ -name "*.dag" | sort))
   fileout=condor_submission_files/submit_all_bismark_wgbs.dag
