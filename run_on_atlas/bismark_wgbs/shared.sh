@@ -265,7 +265,7 @@ JOB bam2nuc $(realpath ./condor_submission_files/$sample_name/bam2nuc_job_${samp
 EOF
   if [[ ! $bias_fix ]]; then
     if [[ $split ]]; then
-      echo PARENT split_job CHILD \
+      echo PARENT split_fastq CHILD \
         $(
           n=$(cat temp_n_value)
           for i in $(seq -w 00 $n); do printf "trim_and_qc_%d " $i; done
