@@ -29,7 +29,7 @@ print_info(){ #<phase= running / finished>
 
 	 ################################
 	 ################################
-	 $1: $script_name "$@"
+	 $1: $script_name $script_args
 	 date: $(date)
 	 hostname: $(hostname)
 	 pwd: $(pwd)
@@ -43,11 +43,12 @@ EOF
 }
 main()
 {
+	script_name=$(echo $0 | awk -F / '{print $NF}')
+	script_args="$@"
   print_info "running"
   arg_parse "$@"
 	source /Local/bfe_reizel/anaconda3/bin/activate wgbs_bismark_pipeline_2023
 	cd "$output_dir" || exit 1
-	script_name=$(echo $0 | awk -F / '{print $NF}')
 
   call_methylation
 
