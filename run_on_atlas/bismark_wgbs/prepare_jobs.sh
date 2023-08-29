@@ -43,13 +43,13 @@ write_prep_submission_files() {
   cat <<EOF >condor_submission_files/prep/prep.sub
 Initialdir = $(pwd)
 executable = $REPO_FOR_REIZEL_LAB/run_on_atlas/bismark_wgbs/prepare_jobs.sh
-Arguments = $@ -job -sample-name $sample_name
+Arguments = $@ -job -sample-name \$(sample_name)
 request_cpus = 1
 RequestMemory = 500MB
 universe = vanilla
-log = $(pwd)/logs/prep/${sample_name}.log
-output = $(pwd)/logs/prep/${sample_name}.out
-error = $(pwd)/logs/prep/${sample_name}.out
+log = $(pwd)/logs/prep/\$(sample_name).log
+output = $(pwd)/logs/prep/\$(sample_name).out
+error = $(pwd)/logs/prep/\$(sample_name).out
 queue sample_name from(
 $(
     for sample_name in $samples; do
