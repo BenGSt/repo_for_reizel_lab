@@ -299,10 +299,7 @@ write_trim_and_align_sub_files() {
   fi
 }
 
-write_sub_files_for_each_sample() {
-  #TODO: get rid of this function and move the loop
 
-}
 
 write_sub_files_for_each_sample_parallel() {
   p_count=10 # number of parallel jobs (local shell jobs, not ht_condor jobs) to run that unzip and count lines in
