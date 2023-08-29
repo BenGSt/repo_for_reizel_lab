@@ -40,8 +40,7 @@ write_prep_submission_files() {
     exit 1
   fi
 
-  for sample_name in $samples; do
-    cat <<EOF >condor_submission_files/prep/${sample_name}.sub
+  cat <<EOF >condor_submission_files/prep/prep.sub
 Initialdir = $(pwd)
 executable = $REPO_FOR_REIZEL_LAB/run_on_atlas/bismark_wgbs/prepare_jobs.sh
 Arguments = $@ -job -sample-name $sample_name
@@ -51,17 +50,19 @@ universe = vanilla
 log = $(pwd)/logs/prep/${sample_name}.log
 output = $(pwd)/logs/prep/${sample_name}.out
 error = $(pwd)/logs/prep/${sample_name}.out
-queue
-
+queue sample_name from(
+$(
+    for sample_name in $samples; do
+      echo $sample_name
+    done
+  )
 EOF
-  done
 }
 
 submit_prep_jobs() {
-  echo To submit the prep jobs, run the following commands:
-  for sub in $(find ./condor_submission_files/prep -name "*.sub"); do
-    cmds+=("condor_submit $sub")
-    echo condor_submit $sub
+  echo The following samples will be prepared:
+  for sample_name in $samples; do
+    echo $sample_name
   done
   echo
   echo !NOTE: After the initial prep jobs are finished, run \"bash prep2.cmd\" to prepare and submit the top level dag jobs!
@@ -69,15 +70,13 @@ submit_prep_jobs() {
   printf 'Submit prep jobs now? (y/n) '
   read answer
   if [ "$answer" != "${answer#[Yy]}" ]; then # this grammar (the #[] operator) means that the variable $answer where any Y or y in 1st position will be dropped if they exist.
-    for cmd in "${cmds[@]}"; do
-      eval $cmd
-    done
+    condor_submit condor_submission_files/prep/prep.sub
   fi
 }
 
-submit_top_level_dag(){
+submit_top_level_dag() {
   echo To submit the samples sepratly, you may run the following commands:
-  for dag in $(find ./condor_submission_files/ -name "*.dag"| grep -v submit_all); do
+  for dag in $(find ./condor_submission_files/ -name "*.dag" | grep -v submit_all); do
     echo condor_submit_dag $dag
   done
   echo
