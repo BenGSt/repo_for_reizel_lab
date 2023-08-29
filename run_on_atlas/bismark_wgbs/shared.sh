@@ -243,7 +243,7 @@ $(
 $(
       n=0
       for align_job in $(find ./condor_submission_files/$sample_name/ -name "bismark_align_job_${sample_name}*sub"| sort); do
-        echo JOB bismark_align_$((n++)) $(realpath $align_job)
+        printf "JOB bismark_align_%02d $(realpath $align_job)\n" $((n++))
         echo
       done
       echo $((--n)) >temp_n_value
