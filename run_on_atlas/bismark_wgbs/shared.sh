@@ -337,16 +337,18 @@ write_sub_files_for_each_sample_parallel() {
 
 write_top_level_dag() {
   rm -f ./condor_submission_files/submit_all_bismark_wgbs.dag #incase rerunning the script without delete
-  sample_dags=$(realpath $(find ./condor_submission_files/ -name "*.dag"))
+  sample_dags=$(realpath $(find ./condor_submission_files/ -name "*.dag"| sort))
   fileout=condor_submission_files/submit_all_bismark_wgbs.dag
   touch $fileout
 
   i=0
   for dag in $sample_dags; do
-    echo SUBDAG EXTERNAL ${sample_names[$i]} $dag >>$fileout
-    echo PRIORITY ${sample_names[$i]} $i >>$fileout
+    for sample_name in $(find -L $raw_dir -type d | awk -F / 'NR>1{print $NF}' | sort); do
+    echo SUBDAG EXTERNAL $sample_name $dag >>$fileout
+    echo PRIORITY $sample_name $i >>$fileout
     echo >>$fileout
     ((i++))
+    done
   done
   echo JOB multiqc $(realpath ./condor_submission_files/multiqc_job.sub) >>$fileout
   echo >>$fileout
