@@ -44,11 +44,11 @@ main() {
       write_make_tiles_job_submission_file #genome already set by previous -override_genome
       write_multiqc_job_submission_file
       echo DEBUG: "sample_names:" "${sample_names[@]}" #TODO remove
-      write_sample_dag_file -mbias-fix
+      write_sample_dag_file
     }
   done
 
-  write_top_level_dag
+  write_top_level_dag  -mbias-fix
 
   #list jobs and the commands to run them
   #ask if user wants to run them now, if so, run them.
