@@ -23,7 +23,7 @@ prepare_sample() {
   count_reads
 
   #write sub files for trimming and aligning each chunk (or one sub file if no splitting)
-#  write_trim_and_align_sub_files
+  write_trim_and_align_sub_files
 #
 #  # the following sub files are not dependent on splitting
 #  write_deduplicate_job_submission_file
