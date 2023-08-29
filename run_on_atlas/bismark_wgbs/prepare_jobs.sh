@@ -85,7 +85,7 @@ submit_top_level_dag(){
   echo condor_submit_dag condor_submission_files/submit_all_bismark_wgbs.dag
   echo
   echo !NOTE: after the top level dag jobs are finished, run fix_mbias.sh to fix m-bias!
-  echo e.g. fix_mbias.sh --biased_dir <path> --ignore 8 --ignore_r2 9 --ignore_3prime_r2 1
+  echo e.g. fix_mbias.sh --biased_dir \<path\> --ignore 8 --ignore_r2 9 --ignore_3prime_r2 1
   echo for more info see $REPO_FOR_REIZEL_LAB/run_on_atlas/bismark_wgbs/fix_mbias.sh --help
   echo !Note: Atlas policy is to hold jobs after 3 days of running, so you may need to release them using condor_release!
   echo
