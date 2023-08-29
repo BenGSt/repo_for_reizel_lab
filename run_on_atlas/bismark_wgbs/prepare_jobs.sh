@@ -84,7 +84,7 @@ submit_top_level_dag(){
   echo To submit the top level dag \(all samples\), run the following commands:
   echo condor_submit_dag condor_submission_files/submit_all_bismark_wgbs.dag
   echo
-  echo note that Atlas policy is to hold jobs after 3 days of running, so you may need to release them using condor_release
+  echo !Note: Atlas policy is to hold jobs after 3 days of running, so you may need to release them using condor_release!
   echo
   printf 'Submit top level dag now? (y/n) '
   read answer
