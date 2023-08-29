@@ -23,7 +23,7 @@ prepare_sample() {
   count_reads
 
   #write sub files for trimming and aligning each chunk (or one sub file if no splitting)
-  write_trim_and_align_sub_files
+  write_split_trim_and_align_sub_files
 
   # the following sub files are not dependent on splitting
   write_deduplicate_job_submission_file
@@ -89,7 +89,7 @@ main() {
     write_multiqc_job_submission_file
     write_top_level_dag
   else
-    echo "$0" "$@" >prep.cmd
+    echo "$0" "$@" >cmd.txt
     echo "$0" "$@" -top-level >prep2.cmd
     write_prep_submission_files "$@"
     submit_prep_jobs

@@ -2,12 +2,12 @@
 # USAGE: run_fix_mbias.sh --biased_dir <path> --ignore_r1 <int> --ignore_r2  --ignore_3prime <int> --ignore_3prime_r2 <int> [--output-dir <output_dir>]
 
 REPO_FOR_REIZEL_LAB=/storage/bfe_reizel/bengst/repo_for_reizel_lab
-source $REPO_FOR_REIZEL_LAB/run_on_atlas/bismark_wgbs/run_dag_per_sample_split.sh --source-only
+source $REPO_FOR_REIZEL_LAB/run_on_atlas/bismark_wgbs/shared.sh
 
 save_cmd() {
   if [[ $# -gt 2 ]]; then #don't (re)write cmd.txt if no args
     echo This command was run to fix m-bias. the original command was: >cmd.txt
-    cat $biased_dir/cmd.txt >>cmd.txt
+    printf "# "; cat $biased_dir/cmd.txt >>cmd.txt
     echo >>cmd.txt
     echo >>cmd.txt
     echo the m-bias fix command was: >>cmd.txt
@@ -43,7 +43,7 @@ main() {
       write_bam2nuc_job_submission_file -override_genome $(find $biased_dir/ -name "*make_tiles.out" | head -1 | xargs grep -o -- "-genome.*" | awk '{print $2}')
       write_make_tiles_job_submission_file #genome already set by previous -override_genome
       write_multiqc_job_submission_file
-      echo DEBUG: "sample_names:" ${sample_names[@]} #TODO remove
+      echo DEBUG: "sample_names:" "${sample_names[@]}" #TODO remove
       write_sample_dag_file
     }
   done

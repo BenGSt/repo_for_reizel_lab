@@ -280,7 +280,7 @@ count_reads() {
   echo "n_reads: $n_reads, n_reads_per_chunk: $n_reads_per_chunk"
 }
 
-write_trim_and_align_sub_files() {
+write_split_trim_and_align_sub_files() {
   if [[ $n_reads -gt $n_reads_per_chunk ]]; then
     echo "fastq files will be split into $n_full_chunks chunks of $n_reads_per_chunk reads each" "$remainder_msg"
     echo
@@ -300,35 +300,6 @@ write_trim_and_align_sub_files() {
 }
 
 
-
-write_sub_files_for_each_sample_parallel() {
-  p_count=10 # number of parallel jobs (local shell jobs, not ht_condor jobs) to run that unzip and count lines in
-  # fastq.gz files. From observing htop, it seems each job use ~1.3 cores, 1 for pigz (faster than gzip even with a
-  # single core) and 0.3 for wc. I'm going to try to run 10 jobs in parallel, and see if the ht_condor config in Atlas
-  # let's me get away with that.
-  find -L $raw_dir -type d | awk -F / 'NR>1{print $NF}' | sort | xargs -n 1 -P $p_count bash -c '
-  source <(env| grep -v "LS_COLORS")
-  sample_name="$1"
-  unset split sep chunk
-  sample_names+=($sample_name)
-  mkdir -p condor_submission_files/$sample_name
-  mkdir -p logs/$sample_name
-
-  # count reads to see if fastq file is longer than n_reads_per_chunk reads, if so it will be split into chunks of
-  # length n_reads_per_chunk, given as an argument to this script, defaults to 100M.
-  count_reads
-
-  #write sub files for trimming and aligning each chunk (or one sub file if no splitting)
-  write_trim_and_align_sub_files
-
-  # the following sub files are not dependent on splitting
-  write_deduplicate_job_submission_file
-  write_methylation_calling_job_submission_file
-  write_bam2nuc_job_submission_file
-  write_make_tiles_job_submission_file
-  write_sample_dag_file
-'
-}
 
 write_top_level_dag() {
   rm -f ./condor_submission_files/submit_all_bismark_wgbs.dag #incase rerunning the script without delete
@@ -365,13 +336,6 @@ main_write_condor_submission_files() { # <raw_dir>
   write_top_level_dag
 }
 
-save_cmd() {
-  #must be redirected to a file: save_cmd "@" >cmd.txt
-  if [[ $# -gt 2 ]]; then #don't (re)write cmd.txt if no args
-    echo "$0" "$@"        #TODO: preserve quotes that may be in args
-  fi
-
-}
 
 help() {
   echo Run The WGBS bismark pipeline \(separate dag for each sample\):
@@ -487,75 +451,3 @@ EOF
 
 }
 
-arg_parse() {
-  if [[ $# -eq 0 ]]; then
-    help
-    exit 1
-  fi
-  while [[ $# -gt 0 ]]; do
-    case $1 in
-    -h | --help)
-      help
-      exit 1
-      ;;
-    -single-end)
-      single_end=1
-      shift
-      ;;
-    -paired-end)
-      single_end=0
-      shift
-      ;;
-    -non-directional)
-      non_directional="--non_directional"
-      shift
-      ;;
-    -raw-data-dir)
-      raw_data_dir=$2
-      shift
-      shift
-      ;;
-    -keep-bam)
-      keep_bam="-keep-bam"
-      shift
-      ;;
-    -keep-trimmed-fq)
-      keep_trimmed_fq="-keep-trimmed-fq"
-      shift
-      ;;
-    -dovetail) #seems this is on by default.
-      dovetail="-dovetail"
-      shift
-      ;;
-    -genome)
-      genome=$2
-      shift
-      shift
-      ;;
-    -n-reads-per-chunk) #for splitting fastq files, default is 100M
-      n_reads_per_chunk=$2
-      shift
-      shift
-      ;;
-    -extra-trim-galore-options)
-      extra_trim_opts=$(echo -extra-trim-galore-options \'"$2"\')
-      shift
-      shift
-      ;;
-    -extra-meth_extract-options)
-      extra_meth_opts=$(echo -extra-options \'"$2"\')
-      shift
-      shift
-      ;;
-    -ignore_r2)
-      ignore_r2=$(echo -ignore_r2 "$2")
-      shift
-      shift
-      ;;
-    *)
-      help
-      exit 1
-      ;;
-    esac
-  done
-}
