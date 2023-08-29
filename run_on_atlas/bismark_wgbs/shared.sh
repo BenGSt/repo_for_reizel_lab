@@ -235,7 +235,7 @@ write_sample_dag_file() {
 $(
       n=0
       for trim_job in $(find ./condor_submission_files/$sample_name/ -name "trim_job_${sample_name}*sub" | sort); do
-        echo JOB trim_and_qc_$((n++)) $(realpath $trim_job)
+        printf "JOB trim_and_qc_%02d $(realpath $trim_job)\n" $((n++))
         echo
       done
     )
