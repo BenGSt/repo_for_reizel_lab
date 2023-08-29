@@ -59,8 +59,7 @@ main() {
   if [[ $job -eq 1 ]]; then
     prepare_sample
   else
-    echo DEBUG: save cmd
-    save_cmd prep.cmd
+    save_cmd >prep.cmd
     write_prep_submission_files "$@"
   fi
 }

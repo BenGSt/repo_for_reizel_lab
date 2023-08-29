@@ -366,14 +366,10 @@ main_write_condor_submission_files() { # <raw_dir>
   write_top_level_dag
 }
 
-save_cmd() { #<output file>
-  if [[ -z $1 ]]; then
-    cmd_out=cmd.txt
-  fi
+save_cmd() {
+  #must be redirected to a file: save_cmd "@" >cmd.txt
   if [[ $# -gt 2 ]]; then #don't (re)write cmd.txt if no args
-    echo \# the command used to prepare the jobs. Note that parentheses are lost >cmd.txt
-    echo \# and need to be added to rerun: -extra-trim-galore-options \"multiple quoted options\" >>cmd.txt
-    echo "$0" "$@" >>$cmd_out #TODO: preserve quotes that may be in args
+    echo "$0" "$@" #TODO: preserve quotes that may be in args
   fi
 
 }
