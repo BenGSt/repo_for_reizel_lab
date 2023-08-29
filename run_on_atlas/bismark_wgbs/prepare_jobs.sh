@@ -60,7 +60,6 @@ main() {
     prepare_sample
   else
     echo "$0" "$@" >prep.cmd #TODO: preserve quotes that may be in args
-    echo DEBUG: "$0" "$@"
     write_prep_submission_files "$@"
   fi
 }
