@@ -299,12 +299,12 @@ write_trim_and_align_sub_files() {
   fi
 }
 
-write_sub_files_for_each_sample() {
-  #TODO: get rid of this function and move the loop
-  for sample_name in $(find -L $raw_dir -type d | awk -F / 'NR>1{print $NF}' | sort); do
-    sample_names+=($sample_name)
-  done
-}
+#write_sub_files_for_each_sample() {
+#  #TODO: get rid of this function and move the loop
+#  for sample_name in $(find -L $raw_dir -type d | awk -F / 'NR>1{print $NF}' | sort); do
+#    sample_names+=($sample_name)
+#  done
+#}
 
 write_sub_files_for_each_sample_parallel() {
   p_count=10 # number of parallel jobs (local shell jobs, not ht_condor jobs) to run that unzip and count lines in
@@ -343,7 +343,7 @@ write_top_level_dag() {
 
   i=0
   for dag in $sample_dags; do
-    for sample_name in $(find -L $raw_dir -type d | awk -F / 'NR>1{print $NF}' | sort); do
+    for sample_name in $(find -L $raw_data_dir -type d | awk -F / 'NR>1{print $NF}' | sort); do
     echo SUBDAG EXTERNAL $sample_name $dag >>$fileout
     echo PRIORITY $sample_name $i >>$fileout
     echo >>$fileout
