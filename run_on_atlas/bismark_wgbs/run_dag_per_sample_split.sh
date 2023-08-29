@@ -496,8 +496,8 @@ write_sub_files_for_each_sample_parallel(){
 
 write_top_level_dag() {
   rm -f ./condor_submission_files/submit_all_bismark_wgbs.dag #incase rerunning the script without delete
-  sample_dags=$(realpath $(find ./condor_submission_files/ -name "*.dag"))
   fileout=condor_submission_files/submit_all_bismark_wgbs.dag
+  sample_dags=$(realpath $(find ./condor_submission_files/ -name "*.dag" | sort))
   touch $fileout
 
   i=0
