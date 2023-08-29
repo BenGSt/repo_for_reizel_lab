@@ -227,13 +227,8 @@ optional:
   trimming and rerunning the pipeline, and possibly other downstream analysis. If not running methylation calling jobs again,
   bam files should be deleted because they large and not needed for most downstream analysis (use the .cov files).
 
--ignore_r2 <int>
-  From Bismark User Guide:
-  ignore the first <int> bp from the 5' end of Read 2 of paired-end sequencing results only.
-  Since the first couple of bases in Read 2 of BS-Seq experiments show a severe bias towards non-methylation
-  as a result of end-repairing sonicated fragments with unmethylated cytosines (see M-bias plot),
-  it is recommended that the first couple of bp of Read 2 are removed before starting downstream analysis.
-  Please see the section on M-bias plots in the Bismark User Guide for more details.
+-n-reads-per-chunk
+  Number of reads per chunk for splitting fastq files. Default is 100M.
 
 
 -extra-meth_extract-options "multiple quoted options"
