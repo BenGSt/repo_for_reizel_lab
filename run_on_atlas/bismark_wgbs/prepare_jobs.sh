@@ -64,7 +64,7 @@ submit_prep_jobs() {
     echo condor_submit $sub
   done
   echo
-  echo !NOTE: After the initial prep jobs are finished, run ./prep2.cmd to prepare and submit the top level dag jobs!
+  echo !NOTE: After the initial prep jobs are finished, run "bash prep2.cmd" to prepare and submit the top level dag jobs!
   echo
   printf 'Submit prep jobs now? (y/n) '
   read answer
@@ -91,7 +91,6 @@ main() {
   else
     echo "$0" "$@" >prep.cmd
     echo "$0" "$@" -top-level >prep2.cmd
-    chmod +x prep2.cmd
     write_prep_submission_files "$@"
     submit_prep_jobs
   fi
