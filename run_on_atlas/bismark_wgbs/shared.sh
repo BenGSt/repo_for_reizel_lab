@@ -274,15 +274,15 @@ EOF
     cat <<EOF >>$outfile
 $(
       n=$(cat temp_n_value)
-#      rm temp_n_value #TODO: uncomment this
+      rm temp_n_value
       # trim_and_qc -> bismark_align
       printf "PARENT "
       for i in $(seq -w 00 $n); do
-        printf "trim_and_qc_%d " $i
+        printf "trim_and_qc_%s " $i
       done
       printf "CHILD "
       for i in $(seq -w 00 $n); do
-        printf "bismark_align_%d " $i
+        printf "bismark_align_%s " $i
       done
       printf "\n"
 
