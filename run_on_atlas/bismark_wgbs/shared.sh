@@ -301,16 +301,17 @@ EOF
 
 write_top_level_dag() {
   mbias_fix=$1
+  echo DEBUG: mbias_fix: $mbias_fix
   rm -f ./condor_submission_files/submit_all_bismark_wgbs.dag #incase rerunning the script without delete
   sample_dags=$(realpath $(find ./condor_submission_files/ -name "*.dag" | sort))
   fileout=condor_submission_files/submit_all_bismark_wgbs.dag
   touch $fileout
 
-#  if [[ -z $mbias_fix ]]; then
-#    for sample_name in $(find -L $raw_data_dir -type d | awk -F / 'NR>1{print $NF}' | sort); do
-#      sample_names+=($sample_name)
-#    done
-#  fi
+  if [[ -z $mbias_fix ]]; then
+    for sample_name in $(find -L $raw_data_dir -type d | awk -F / 'NR>1{print $NF}' | sort); do
+      sample_names+=($sample_name)
+    done
+  fi
 
   i=0
   for dag in $sample_dags; do
