@@ -24,13 +24,13 @@ prepare_sample() {
 
   #write sub files for trimming and aligning each chunk (or one sub file if no splitting)
   write_trim_and_align_sub_files
-#
-#  # the following sub files are not dependent on splitting
-#  write_deduplicate_job_submission_file
-#  write_methylation_calling_job_submission_file
-#  write_bam2nuc_job_submission_file
-#  write_make_tiles_job_submission_file
-#  write_sample_dag_file
+
+  # the following sub files are not dependent on splitting
+  write_deduplicate_job_submission_file
+  write_methylation_calling_job_submission_file
+  write_bam2nuc_job_submission_file
+  write_make_tiles_job_submission_file
+  write_sample_dag_file
 }
 
 write_prep_submission_files() {
