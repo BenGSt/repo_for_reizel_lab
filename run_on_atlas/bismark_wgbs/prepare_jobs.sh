@@ -80,10 +80,13 @@ submit_top_level_dag(){
   for dag in $(find ./condor_submission_files/ -name "*.dag"| grep -v submit_all); do
     echo condor_submit_dag $dag
   done
-  echo To submit the top level dag jobs, run the following commands:
-  echo condor_submit_dag condor_submission_files/top_level.dag
   echo
-  printf 'Submit top level dag jobs now? (y/n) '
+  echo To submit the top level dag \(all samples\), run the following commands:
+  echo condor_submit_dag condor_submission_files/submit_all_bismark_wgbs.dag
+  echo
+  echo note that Atlas policy is to hold jobs after 3 days of running, so you may need to release them using condor_release
+  echo
+  printf 'Submit top level dag now? (y/n) '
   read answer
   if [ "$answer" != "${answer#[Yy]}" ]; then # this grammar (the #[] operator) means that the variable $answer where any Y or y in 1st position will be dropped if they exist.
     condor_submit_dag condor_submission_files/top_level.dag
