@@ -57,11 +57,14 @@ EOF
   done
 }
 
-submit_prep_jobs(){
-for sub in $(find ./condor_submission_files/prep -name "*.sub"); do
+submit_prep_jobs() {
+  echo To submit the prep jobs, run the following commands:
+  for sub in $(find ./condor_submission_files/prep -name "*.sub"); do
     cmds+=("condor_submit $sub")
     echo condor_submit $sub
   done
+  echo
+  echo !NOTE: After the initial prep jobs are finished, run ./prep2.cmd to prepare and submit the top level dag jobs!
   echo
   printf 'Submit prep jobs now? (y/n) '
   read answer
@@ -72,15 +75,23 @@ for sub in $(find ./condor_submission_files/prep -name "*.sub"); do
   fi
 }
 
+
+
 main() {
   mkdir -p logs/prep
   mkdir -p condor_submission_files/prep/
   n_reads_per_chunk=100000000 #default value (may be overwritten by arg_parse)
   arg_parse "$@"
-  if [[ $job -eq 1 ]]; then
+
+  if [[ $job ]]; then
     prepare_sample
+  elif [[ $top_level ]]; then
+    write_multiqc_job_submission_file
+    write_top_level_dag
   else
-    echo "$0" "$@" >prep.cmd #TODO: preserve quotes that may be in args
+    echo "$0" "$@" >prep.cmd
+    echo "$0" "$@" -top-level >prep2.cmd
+    chmod +x prep2.cmd
     write_prep_submission_files "$@"
     submit_prep_jobs
   fi
@@ -148,6 +159,10 @@ arg_parse() {
       ;;
     -job)
       job=1
+      shift
+      ;;
+    -top-level)
+      top_level=1
       shift
       ;;
     -sample-name)
