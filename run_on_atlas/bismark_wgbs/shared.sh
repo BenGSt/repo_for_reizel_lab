@@ -274,7 +274,7 @@ EOF
     cat <<EOF >>$outfile
 $(
       n=$(cat temp_n_value)
-      rm temp_n_value
+#      rm temp_n_value #TODO: uncomment this
       # trim_and_qc -> bismark_align
       printf "PARENT "
       for i in $(seq -w 00 $n); do
