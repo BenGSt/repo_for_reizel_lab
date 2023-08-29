@@ -75,7 +75,20 @@ submit_prep_jobs() {
   fi
 }
 
-
+submit_top_level_dag(){
+  echo To submit the samples sepratly, you may run the following commands:
+  for dag in $(find ./condor_submission_files/ -name "*.dag"| grep -v submit_all); do
+    echo condor_submit_dag $dag
+  done
+  echo To submit the top level dag jobs, run the following commands:
+  echo condor_submit_dag condor_submission_files/top_level.dag
+  echo
+  printf 'Submit top level dag jobs now? (y/n) '
+  read answer
+  if [ "$answer" != "${answer#[Yy]}" ]; then # this grammar (the #[] operator) means that the variable $answer where any Y or y in 1st position will be dropped if they exist.
+    condor_submit_dag condor_submission_files/top_level.dag
+  fi
+}
 
 main() {
   mkdir -p logs/prep
@@ -88,6 +101,7 @@ main() {
   elif [[ $top_level ]]; then
     write_multiqc_job_submission_file
     write_top_level_dag
+    submit_top_level_dag
   else
     echo "$0" "$@" >cmd.txt
     echo "$0" "$@" -top-level >prep2.cmd
