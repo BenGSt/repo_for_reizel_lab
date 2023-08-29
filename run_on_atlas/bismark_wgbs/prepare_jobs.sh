@@ -66,6 +66,7 @@ submit_prep_jobs() {
     echo $sample_name
   done
   echo
+  echo To submit the jobs, run: condor_submit condor_submission_files/prep/prep.sub
   echo !NOTE: After the initial prep jobs are finished, run \"bash prep2.cmd\" to prepare and submit the top level dag jobs!
   echo
   printf 'Submit prep jobs now? (y/n) '
