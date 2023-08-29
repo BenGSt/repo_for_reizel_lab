@@ -42,9 +42,9 @@ Arguments = $@ -job -sample-name $sample_name
 request_cpus = 1
 RequestMemory = 500MB
 universe = vanilla
-log = $(pwd)/logs/multiqc_job.log
-output = $(pwd)/logs/multiqc_job.out
-error = $(pwd)/logs/multiqc_job.out
+log = $(pwd)/logs/prep/${sample_name}.log
+output = $(pwd)/logs/prep/${sample_name}.out
+error = $(pwd)/logs/prep/${sample_name}.out
 queue
 
 EOF
@@ -52,7 +52,7 @@ EOF
 }
 
 main() {
-  mkdir -p logs
+  mkdir -p logs/prep
   mkdir -p condor_submission_files/prep/
   n_reads_per_chunk=100000000 #default value (may be overwritten by arg_parse)
   arg_parse "$@"
