@@ -59,13 +59,14 @@ main() {
   if [[ $job -eq 1 ]]; then
     prepare_sample
   else
-    save_cmd "@" >prep.cmd
+    echo "$0" "$@" >prep.cmd #TODO: preserve quotes that may be in args
+    echo DEBUG: "$0" "$@"
     write_prep_submission_files "$@"
   fi
 }
 
 arg_parse() {
-  if [[ $# -eq 0 ]]; then
+  if [[ $# -lt 2 ]]; then
     help
     exit 1
   fi
