@@ -224,7 +224,7 @@ write_sample_dag_file() {
   #TODO: refactor this to tidy readable code
   outfile=condor_submission_files/${sample_name}/bismark_wgbs_${sample_name}.dag
   if [[ $split ]]; then
-    echo JOB split_job $(realpath ./condor_submission_files/${sample_name}/split_fastq_${sample_name}.sub) >$outfile
+    echo JOB split_fastq $(realpath ./condor_submission_files/${sample_name}/split_fastq_${sample_name}.sub) >$outfile
   else
     truncate --size=0 $outfile #delete previous file's content if it exists
   fi
@@ -234,7 +234,7 @@ write_sample_dag_file() {
 
 $(
       n=0
-      for trim_job in $(find ./condor_submission_files/$sample_name/ -name "trim_job_${sample_name}*sub"); do
+      for trim_job in $(find ./condor_submission_files/$sample_name/ -name "trim_job_${sample_name}*sub" | sort); do
         echo JOB trim_and_qc_$((n++)) $(realpath $trim_job)
         echo
       done
@@ -242,7 +242,7 @@ $(
 
 $(
       n=0
-      for align_job in $(find ./condor_submission_files/$sample_name/ -name "bismark_align_job_${sample_name}*sub"); do
+      for align_job in $(find ./condor_submission_files/$sample_name/ -name "bismark_align_job_${sample_name}*sub"| sort); do
         echo JOB bismark_align_$((n++)) $(realpath $align_job)
         echo
       done
