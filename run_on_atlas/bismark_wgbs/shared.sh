@@ -266,7 +266,7 @@ EOF
 
 count_reads() {
   echo "Counting reads in $sample_name to see if the fastq file(s) should be split into chunks"
-  n_reads=$(($(pigz -p 1 -cd $(find $raw_dir/$sample_name/ -name "*.fastq.gz" | head -1) | wc -l) / 4))
+  n_reads=$(($(pigz -p 1 -cd $(find $raw_data_dir/$sample_name/ -name "*.fastq.gz" | head -1) | wc -l) / 4))
   n_chunks=$((n_reads / n_reads_per_chunk))
 
   if [[ $((n_reads % n_reads_per_chunk)) -gt 0 ]]; then
