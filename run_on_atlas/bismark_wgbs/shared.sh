@@ -287,15 +287,15 @@ write_trim_and_align_sub_files() {
     write_split_job_submission_file
 
     #write condor sub files for jobs to trim and align each chunk
-    split="split"
-    sep="_"
-    for chunk in $(seq -w 00 $((n_chunks - 1))); do
-      write_trim_jobs_submission_file $chunk
-      write_align_sub_file $chunk
-    done
-  else # no splitting of fastq files
-    write_trim_jobs_submission_file
-    write_align_sub_file
+#    split="split"
+#    sep="_"
+#    for chunk in $(seq -w 00 $((n_chunks - 1))); do
+#      write_trim_jobs_submission_file $chunk
+#      write_align_sub_file $chunk
+#    done
+#  else # no splitting of fastq files
+#    write_trim_jobs_submission_file
+#    write_align_sub_file
   fi
 }
 
