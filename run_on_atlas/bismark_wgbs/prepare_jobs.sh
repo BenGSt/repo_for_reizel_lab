@@ -51,6 +51,21 @@ EOF
   done
 }
 
+submit_prep_jobs(){
+for sub in $(find ./condor_submission_files/prep -name "*.sub"); do
+    cmds+=("condor_submit $sub")
+    echo condor_submit $sub
+  done
+  echo
+  printf 'Submit all jobs now? (y/n) '
+  read answer
+  if [ "$answer" != "${answer#[Yy]}" ]; then # this grammar (the #[] operator) means that the variable $answer where any Y or y in 1st position will be dropped if they exist.
+    for cmd in "${cmds[@]}"; do
+      eval $cmd
+    done
+  fi
+}
+
 main() {
   mkdir -p logs/prep
   mkdir -p condor_submission_files/prep/
@@ -61,6 +76,7 @@ main() {
   else
     echo "$0" "$@" >prep.cmd #TODO: preserve quotes that may be in args
     write_prep_submission_files "$@"
+    submit_prep_jobs
   fi
 }
 
