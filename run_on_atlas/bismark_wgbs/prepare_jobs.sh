@@ -76,7 +76,7 @@ submit_prep_jobs() {
   fi
 }
 
-submit_top_level_dag() {
+submit_top_level_dag() { #TODO: tee output to readme or other text file becayse instruction are long and complicated and need to be carried out over long time periods (>= days
   echo To submit the samples sepratly, you may run the following commands:
   for dag in $(find ./condor_submission_files/ -name "*.dag" | grep -v submit_all); do
     echo condor_submit_dag $dag
