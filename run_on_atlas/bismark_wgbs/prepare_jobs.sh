@@ -91,6 +91,15 @@ submit_top_level_dag() {
   echo
   echo !Note: Atlas policy is to hold jobs after 3 days of running, so you may need to release them using condor_release!
   echo
+  #TODO: add instructions for restarting held jobs (draft below), print this whole block with cat <<EOF
+  cat <<EOF
+  One way to restart a job that is part of a DAG is to use the condor_dagman tool. You can use the -f option
+  with condor_dagman to force it to re-run a specific node in the DAG. For example, if your DAG is defined in a
+  file called mydag.dag and the job you want to restart is represented by the node NODE_A, you can use the following
+  command to force condor_dagman to re-run that node:
+condor_dagman -f NODE_A mydag.dag
+EOF
+  echo
   printf 'Submit top level dag now? (y/n) '
   read answer
   if [ "$answer" != "${answer#[Yy]}" ]; then # this grammar (the #[] operator) means that the variable $answer where any Y or y in 1st position will be dropped if they exist.
