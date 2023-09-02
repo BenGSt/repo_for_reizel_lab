@@ -76,7 +76,8 @@ submit_prep_jobs() {
   fi
 }
 
-submit_top_level_dag() { #TODO: tee output to readme or other text file becayse instruction are long and complicated and need to be carried out over long time periods (>= days
+submit_top_level_dag() {
+  #TODO: tee output to readme or other text file because instruction are complicated and need to be carried out over long time periods (>= days
   echo To submit the samples sepratly, you may run the following commands:
   for dag in $(find ./condor_submission_files/ -name "*.dag" | grep -v submit_all); do
     echo condor_submit_dag $dag
@@ -93,10 +94,10 @@ submit_top_level_dag() { #TODO: tee output to readme or other text file becayse 
   echo
   #TODO: add instructions for restarting held jobs (draft below), print this whole block with cat <<EOF
   cat <<EOF
-  One way to restart a job that is part of a DAG is to use the condor_dagman tool. You can use the -f option
-  with condor_dagman to force it to re-run a specific node in the DAG. For example, if your DAG is defined in a
-  file called mydag.dag and the job you want to restart is represented by the node NODE_A, you can use the following
-  command to force condor_dagman to re-run that node:
+One way to restart a job that is part of a DAG is to use the condor_dagman tool. You can use the -f option
+with condor_dagman to force it to re-run a specific node in the DAG. For example, if your DAG is defined in a
+file called mydag.dag and the job you want to restart is represented by the node NODE_A, you can use the following
+command to force condor_dagman to re-run that node:
 condor_dagman -f NODE_A mydag.dag
 EOF
   echo

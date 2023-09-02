@@ -29,12 +29,14 @@ EOF
 }
 
 write_trim_jobs_submission_file() {
-  #TODO: if file is not split than no files at $(pwd)/$sample_name/$split/$chunk/\*.fq. make trim jpb use raw_dir or unzip files to $(pwd)/$sample_name/$split/$chunk/\*.fq
+  #TODO: if file is not split than no files at $(pwd)/$sample_name/$split/$chunk/\*.fq. make trim job use raw_dir or unzip files to $(pwd)/$sample_name/$split/$chunk/\*.fq
   chunk=$1
   if [[ $chunk ]]; then
     filename=condor_submission_files/${sample_name}/trim_job_${sample_name}_${chunk}.sub
+    input_fastq=$(pwd)/$sample_name/$split/$chunk/\*.fq
   else
     filename=condor_submission_files/${sample_name}/trim_job_${sample_name}.sub
+    input_fastq=$(realpath $raw_data_dir/$sample_name/*.fastq.gz)
   fi
   cat <<EOF >$filename
 Initialdir = $(pwd)
@@ -49,9 +51,9 @@ error = $(pwd)/logs/$sample_name/\$(name)_trim.out
 queue name, args from (
 $(
     if [[ $single_end -eq 1 ]]; then
-      echo $sample_name$sep$chunk, \" -output-dir $(pwd)/$sample_name/$split/$chunk -input-fastq-file $(pwd)/$sample_name/$split/$chunk/\*.fq $extra_trim_opts\"
+      echo $sample_name$sep$chunk, \" -output-dir $(pwd)/$sample_name/$split/$chunk -input-fastq-file $input_fastq $extra_trim_opts\"
     else
-      echo $sample_name$sep$chunk, \" -output-dir $(pwd)/$sample_name/$split/$chunk -paired-input-fastq-files $(pwd)/$sample_name/$split/$chunk/\*.fq $extra_trim_opts\"
+      echo $sample_name$sep$chunk, \" -output-dir $(pwd)/$sample_name/$split/$chunk -paired-input-fastq-files $input_fastq $extra_trim_opts\"
     fi
   )
 )
