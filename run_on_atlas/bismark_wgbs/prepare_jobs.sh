@@ -11,9 +11,7 @@
 # starting from the methylation calling stage, and ignoring a specified number of base pairs from read ends.
 
 source /storage/bfe_reizel/bengst/repo_for_reizel_lab/run_on_atlas/bismark_wgbs/shared.sh
-
-
-n_reads_per_chunk=100000000 #default value (may be overwritten by arg_parse)
+n_reads_per_chunk=25000000 #default value (may be overwritten by arg_parse)
 
 
 prepare_sample() {
@@ -21,7 +19,7 @@ prepare_sample() {
   mkdir -p logs/$sample_name
 
   # count reads to see if fastq file is longer than n_reads_per_chunk reads, if so it will be split into chunks of
-  # length n_reads_per_chunk, given as an argument to this script, defaults to 100M.
+  # length n_reads_per_chunk, given as an argument to this script, defaults to 25M.
   count_reads
 
   #write sub files for trimming and aligning each chunk (or one sub file if no splitting)
@@ -219,10 +217,9 @@ help() {
     -genome \<mm10 or hg38\> \[optional\]
   echo
   echo raw_data_dir should contain a dir for each sample containing it\'s fastq files.
-  echo -non-directional
   echo Run from the directory you wish the output to be written to.
   echo
-  echo products: fastqc report, bismark covaregae file, 100 bp tiles with methylation levels, [bam file containing alignments]
+  echo products: fastqc report, bismark covaregae files, 100 bp tiles with methylation levels, bam file containing alignments
   cat <<EOF
 
 A note about methylation bias correction: I recommend running the pipeline once without additional options, you could
@@ -234,6 +231,9 @@ done correctly, consider trimming R1 and R2 symmetrically and/or using the "--do
 aligner (--dovetail is actually the default).
 
 optional:
+-n-reads-per-chunk
+  Number of reads per chunk for splitting fastq files. Default is $n_reads_per_chunk
+
 -non-directional
   Use for non directional libraries. Instructs Bismark to align to OT, CTOT, OB, CTOB.
 
@@ -241,10 +241,6 @@ optional:
   Delete the deduplicated bam files. Default is to keep them for running methylation calling jobs again to fix m-bias without
   trimming and rerunning the pipeline, and possibly other downstream analysis. If not running methylation calling jobs again,
   bam files should be deleted because they large and not needed for most downstream analysis (use the .cov files).
-
--n-reads-per-chunk
-  Number of reads per chunk for splitting fastq files. Default is 100M.
-
 
 -extra-meth_extract-options "multiple quoted options"
 handy options (from Bismark manual):
