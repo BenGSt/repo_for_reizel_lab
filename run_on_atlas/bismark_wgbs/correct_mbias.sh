@@ -1,27 +1,27 @@
 #!/usr/bin/env bash
-# USAGE: fix_mbias.sh --biased_dir <path> --ignore_r1 <int> --ignore_r2  --ignore_3prime <int> --ignore_3prime_r2 <int> [--output-dir <output_dir>]
+# USAGE: correct_mbias.sh --biased_dir <path> --ignore_r1 <int> --ignore_r2  --ignore_3prime <int> --ignore_3prime_r2 <int> [--output-dir <output_dir>]
 
 source /storage/bfe_reizel/bengst/repo_for_reizel_lab/run_on_atlas/bismark_wgbs/shared.sh
 
 save_cmd() {
   if [[ $# -gt 2 ]]; then #don't (re)write cmd.txt if no args
-    echo This command was run to fix m-bias. the original command was: >cmd.txt
+    echo This command was run to correct m-bias. the original command was: >cmd.txt
     printf "# "
     cat $biased_dir/cmd.txt >>cmd.txt
     echo >>cmd.txt
     echo >>cmd.txt
-    echo the m-bias fix command was: >>cmd.txt
+    echo the m-bias correction command was: >>cmd.txt
     echo "$0" "$@" >>cmd.txt #TODO: preserve quotes that may be in args
   fi
 }
 
 main() {
-  bias_fix=1 #for write_sample_dag_file()
+  correct_mbias=1 #for write_sample_dag_file()
   arg_parse "$@"
   extra_meth_opts="-extra-options '$ignore_r1 $ignore_r2 $ignore_3prime $ignore_3prime_r2'"
   if [[ ! $output_dir ]]; then
-    echo output_dir=${biased_dir}_mbias_fixed
-    output_dir=${biased_dir}_mbias_fixed
+    echo output_dir=${biased_dir}_mbias_corrected
+    output_dir=${biased_dir}_mbias_corrected
   fi
   mkdir -p $output_dir
   cd $output_dir
@@ -33,7 +33,7 @@ main() {
   for sample_name in $(find $biased_dir -name "*deduplicated*bam" | awk -F / '{print $(NF-1)}'); do
     {
       unset split sep chunk
-      sample_names+=($sample_name)
+#      sample_names+=($sample_name) #moved this to write_sample_dag_file(). 3.9.2023
       mkdir -p $sample_name
       mkdir -p condor_submission_files/$sample_name
       mkdir -p logs/$sample_name
@@ -47,7 +47,7 @@ main() {
     }
   done
 
-  write_top_level_dag -mbias-fix
+  write_top_level_dag -correct-mbias
 
   #list jobs and the commands to run them
   #ask if user wants to run them now, if so, run them.
@@ -87,7 +87,7 @@ at least one of the following:
    --ignore_r2 <int>
    --ignore_3prime_r2 <int>
 non-obligatory options:
-   [--output-dir <output_dir>] defaults to \${biased_dir}_mbias_fixed
+   [--output-dir <output_dir>] defaults to \${biased_dir}_mbias_corrected
 
 options to ignore edges of reads (from Bismark manual):
 =====================================

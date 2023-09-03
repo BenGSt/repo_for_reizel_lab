@@ -31,7 +31,7 @@ main() {
   cd "$output_dir" || exit 1
 
   #remove output files from previous runs
-  rm -fv $(find . -name "*.cov.gz" -o -name "*.bedGraph.gz" -name "*OB*.txt" -o -name "*OT*.txt")
+  rm -fv $(find . -name "*.cov.gz" -o -name "*.bedGraph.gz" -name "*OB*.txt*" -o -name "*OT*.txt*")
 
   call_methylation
 

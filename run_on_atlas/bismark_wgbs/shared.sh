@@ -155,7 +155,7 @@ EOF
 
 write_bam2nuc_job_submission_file() {
   if [[ $1 == "-override_genome" ]]; then
-    genome=$2 #used for mbias correction (fix_mbias.sh)
+    genome=$2 #used for mbias correction (correct_mbias.sh)
   fi
   cat <<EOF >condor_submission_files/${sample_name}/bam2nuc_job_${sample_name}.sub
 Initialdir = $(pwd)
@@ -253,7 +253,7 @@ write_sample_dag_file() {
     truncate --size=0 $outfile #delete previous file's content if it exists
   fi
 
-  if [[ ! $bias_fix ]]; then
+  if [[ ! $correct_mbias ]]; then
     cat <<EOF >>$outfile
 
 $(
@@ -287,7 +287,7 @@ JOB bam2nuc $(realpath ./condor_submission_files/$sample_name/bam2nuc_job_${samp
 
 
 EOF
-  if [[ ! $bias_fix ]]; then
+  if [[ ! $correct_mbias ]]; then
     if [[ $split ]]; then
       echo PARENT split_fastq CHILD \
         $(
@@ -324,13 +324,17 @@ EOF
 }
 
 write_top_level_dag() {
-  mbias_fix=$1
+  correct_mbias=$1
   rm -f ./condor_submission_files/submit_all_bismark_wgbs.dag #incase rerunning the script without delete
   sample_dags=$(realpath $(find ./condor_submission_files/ -name "*.dag" | sort))
   fileout=condor_submission_files/submit_all_bismark_wgbs.dag
   touch $fileout
 
-  if [[ -z $mbias_fix ]]; then
+  if [[ $correct_mbias ]]; then
+    for sample_name in $(find $biased_dir -name "*deduplicated*bam" | awk -F / '{print $(NF-1)}'); do
+      sample_names+=($sample_name)
+    done
+  else
     for sample_name in $(find -L $raw_data_dir -type d | awk -F / 'NR>1{print $NF}' | sort); do
       sample_names+=($sample_name)
     done
