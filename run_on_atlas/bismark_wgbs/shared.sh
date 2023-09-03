@@ -320,7 +320,11 @@ $(
 PARENT deduplicate CHILD meth_call
 EOF
   fi
-  echo PARENT meth_call CHILD make_tiles bam2nuc >>$outfile
+  if [[ $correct_mbias ]]; then
+    echo PARENT meth_call CHILD make_tiles >>$outfile
+  else
+    echo PARENT meth_call CHILD make_tiles bam2nuc >>$outfile
+  fi
 }
 
 write_top_level_dag() {
