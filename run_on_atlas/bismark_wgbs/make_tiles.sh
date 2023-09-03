@@ -1,6 +1,5 @@
 #!/bin/bash
-
-GENOMIC_REFERENCE_LOCATION=/storage/bfe_reizel/bengst/genomic_reference_data
+source /storage/bfe_reizel/bengst/repo_for_reizel_lab/run_on_atlas/bismark_wgbs/shared.sh
 
 help() {
   cat <<EOF
@@ -13,26 +12,16 @@ EOF
 }
 
 main() {
+  # NOTE: not cleaning up tiles from previous runs, because they wii be overwritten anyway,
+  # and people may want to run this script again with different parameters (e.g. tile size).
   arg_parse "$@"
   source /Local/bfe_reizel/anaconda3/bin/activate wgbs_bismark_pipeline_2023
   cd $output_dir || exit 1
   script_name=$(echo $0 | awk -F / '{print $NF}')
 
-  echo
-  echo
-  echo \#################################
-  echo \#################################
-  echo running: $script_name "$@"
-  echo date: $(date)
-  echo hostname: $(hostname)
-  echo pwd: $(pwd)
-  echo \#################################
-  echo \#################################
-  echo
-  echo
-
+  print_info "running" "$script_name" "$@"
   time combine_methylation_coverage_to_tiles 100 10 $genome #<tile_size> <min_coverage> <genome>
-
+  print_info "finished" "$script_name" "$@"
 }
 
 combine_methylation_coverage_to_tiles() {

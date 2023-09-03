@@ -1,8 +1,10 @@
 #!/usr/bin/env bash
+source /storage/bfe_reizel/bengst/repo_for_reizel_lab/run_on_atlas/bismark_wgbs/shared.sh
 
 main() { #<sample_dir> <split> {--paired-end|--single-end}
   sample_dir=$1
   split=$2 #USAGE: set if input are multiple split fastq files (if run_data_split.sh was run)
+  script_name=$(echo $0 | awk -F / '{print $NF}')
 
   if [[ $3 == "-paired-end" ]]; then
     flags="-p"
@@ -17,30 +19,20 @@ main() { #<sample_dir> <split> {--paired-end|--single-end}
     flags=$(echo $flags "--multiple")
   fi
 
+  print_info "running" $script_name "$@"
   source /Local/bfe_reizel/anaconda3/bin/activate wgbs_bismark_pipeline_2023
   script_name=$(echo $0 | awk -F / '{print $NF}')
 
-  echo
-  echo
-  echo \#################################
-  echo \#################################
-  echo running: $script_name "$@"
-  echo date: $(date)
-  echo hostname: $(hostname)
-  echo pwd: $(pwd)
-  echo \#################################
-  echo \#################################
-  echo
-  echo
 
   cd "$sample_dir" || exit 1
+  #remove output files from previous runs
+  rm -fv $(find . -name "*deduplicated*bam")
 
   # NOTE: with the wgbs_bismark_pipeline_2023 conda environment, we get broken pipe errors from samtools and perl.
   # This is a known issue and should not affect the output. The samtools error can be fixed by using an older version
   # of samtools (tested with  -samtools_path /Local/bfe_reizel/samtools-0.1.19/). The perl error might also be fixed by
   # using an older version of perl, but this has not been tested.
-  # (Ben G. Steinberg, 28.8.2023)
-  deduplicate_bismark $flags $(find . -name "*bismark*bam" | sort)
+  deduplicate_bismark $flags $(find . -name "*bismark*bam" | sort) || exit 1
 
   # rename deduplicated bam file to remove chunk and val from name of paired end
   # and chunk and trimmed from se (for multiqc)
@@ -52,16 +44,7 @@ main() { #<sample_dir> <split> {--paired-end|--single-end}
 
   rm -v $(find . -name '*.bam' | grep -v deduplicated) #delete bam file(s) with duplicates
 
-  echo
-  echo
-  echo \#################################
-  echo \#################################
-  echo finished: $script_name "$@"
-  echo date: $(date)
-  echo \#################################
-  echo \#################################
-  echo
-  echo
+print_info "finished" $script_name "$@"
 }
 
 main "$@"

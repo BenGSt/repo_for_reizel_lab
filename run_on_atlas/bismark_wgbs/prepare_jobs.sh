@@ -10,9 +10,11 @@
 # After the WGBS pipeline jobs have finished running, another script is used to fix m-bias by repeating the pipeline,
 # starting from the methylation calling stage, and ignoring a specified number of base pairs from read ends.
 
-REPO_FOR_REIZEL_LAB=/storage/bfe_reizel/bengst/repo_for_reizel_lab
-source $REPO_FOR_REIZEL_LAB/run_on_atlas/bismark_wgbs/shared.sh
-source /Local/bfe_reizel/anaconda3/bin/activate wgbs_bismark_pipeline_2023
+source /storage/bfe_reizel/bengst/repo_for_reizel_lab/run_on_atlas/bismark_wgbs/shared.sh
+
+
+n_reads_per_chunk=100000000 #default value (may be overwritten by arg_parse)
+
 
 prepare_sample() {
   mkdir -p condor_submission_files/$sample_name
@@ -109,9 +111,11 @@ EOF
 }
 
 main() {
+  script_name=$(echo $0 | awk -F / '{print $NF}')
+  print_info "running" "$script_name" "$@"
+
   mkdir -p logs/prep
   mkdir -p condor_submission_files/prep/
-  n_reads_per_chunk=100000000 #default value (may be overwritten by arg_parse)
   arg_parse "$@"
 
   if [[ $job ]]; then
@@ -126,6 +130,8 @@ main() {
     write_prep_submission_files "$@"
     submit_prep_jobs
   fi
+
+  print_info "finished" "$script_name" "$@"
 }
 
 arg_parse() {

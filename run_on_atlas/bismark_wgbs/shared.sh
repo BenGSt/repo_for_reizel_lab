@@ -1,8 +1,29 @@
 #!/usr/bin/env bash
 
-#!/bin/bash
-
+source /Local/bfe_reizel/anaconda3/bin/activate wgbs_bismark_pipeline_2023
 REPO_FOR_REIZEL_LAB=/storage/bfe_reizel/bengst/repo_for_reizel_lab
+GENOMIC_REFERENCE_LOCATION=/storage/bfe_reizel/bengst/genomic_reference_data
+
+print_info(){ #<phase= running / finished>
+  phase=$1
+  script_name=$2
+  script_args=$3
+  	cat << EOF
+
+ ################################
+ ################################
+ $phase: $script_name $script_args
+ date: $(date)
+ hostname: $(hostname)
+ pwd: $(pwd)
+ #################################
+ #################################
+
+
+EOF
+
+
+}
 
 write_split_job_submission_file() {
   cat <<EOF >condor_submission_files/${sample_name}/split_fastq_${sample_name}.sub

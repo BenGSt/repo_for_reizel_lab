@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 # USAGE: fix_mbias.sh --biased_dir <path> --ignore_r1 <int> --ignore_r2  --ignore_3prime <int> --ignore_3prime_r2 <int> [--output-dir <output_dir>]
 
-REPO_FOR_REIZEL_LAB=/storage/bfe_reizel/bengst/repo_for_reizel_lab
-source $REPO_FOR_REIZEL_LAB/run_on_atlas/bismark_wgbs/shared.sh
+source /storage/bfe_reizel/bengst/repo_for_reizel_lab/run_on_atlas/bismark_wgbs/shared.sh
 
 save_cmd() {
   if [[ $# -gt 2 ]]; then #don't (re)write cmd.txt if no args
     echo This command was run to fix m-bias. the original command was: >cmd.txt
-    printf "# "; cat $biased_dir/cmd.txt >>cmd.txt
+    printf "# "
+    cat $biased_dir/cmd.txt >>cmd.txt
     echo >>cmd.txt
     echo >>cmd.txt
     echo the m-bias fix command was: >>cmd.txt
@@ -16,6 +16,9 @@ save_cmd() {
 }
 
 main() {
+  script_name=$(echo $0 | awk -F / '{print $NF}')
+  print_info "running" "$script_name" "$@"
+
   bias_fix=1 #for write_sample_dag_file()
   arg_parse "$@"
   extra_meth_opts="-extra-options '$ignore_r1 $ignore_r2 $ignore_3prime $ignore_3prime_r2'"
@@ -47,7 +50,7 @@ main() {
     }
   done
 
-  write_top_level_dag  -mbias-fix
+  write_top_level_dag -mbias-fix
 
   #list jobs and the commands to run them
   #ask if user wants to run them now, if so, run them.
@@ -73,6 +76,8 @@ To do so, run: rm -v $(find $biased_dir -name "*deduplicated*bam")
 Please download your data and delete it from atlas as soon as you are done.
 !Good luck and happy clustering!
 EOF
+
+  print_info "finished" "$script_name" "$@"
 }
 
 help() {

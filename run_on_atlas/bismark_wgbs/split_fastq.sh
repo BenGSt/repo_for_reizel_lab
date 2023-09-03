@@ -1,11 +1,20 @@
 #!/usr/bin/env bash
+source /storage/bfe_reizel/bengst/repo_for_reizel_lab/run_on_atlas/bismark_wgbs/shared.sh
 
 main() {
+  print_info "running"
   arg_parse "$@"
   mkdir -p $output_dir
   cd $output_dir
   echo pwd: $PWD
+
+  #if split directory exists, delete it
+  if [[ -d split ]]; then
+    rm -rfv split
+    echo deleted preexisting split directory to make sure restarted jobs are clean
+  fi
   mkdir split
+
 
   # Split fastq files, N_READS_PER_FILE reads per file
   if [[ $read_type == "single_end" ]]; then
@@ -31,6 +40,7 @@ main() {
     mkdir $chunk
     mv *$chunk.fq $chunk
   done
+  print_info "finished"
 }
 
 help() {
