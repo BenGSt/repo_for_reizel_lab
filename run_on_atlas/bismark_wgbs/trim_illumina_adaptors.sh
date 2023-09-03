@@ -46,7 +46,7 @@ main() {
   print_info "running: " "$script_name " "$@"
   arg_parse "$@"
   #clean any trimmed fastq files from previous runs
-  rm -fv $(find $output_dir -name "*trimmed*" -o -name "*val_[0-1]*")
+  rm -fv $(find $output_dir -name "*trimmed*" -o -name "*val_[0-1]*" -o -name "*fastqc*")
 
   mkdir -p $output_dir
   cd $output_dir || exit 1
