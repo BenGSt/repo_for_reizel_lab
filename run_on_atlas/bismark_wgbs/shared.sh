@@ -131,7 +131,7 @@ log = $(pwd)/logs/$sample_name/\$(name)_deduplicate.log
 output = $(pwd)/logs/$sample_name/\$(name)_deduplicate.out
 error = $(pwd)/logs/$sample_name/\$(name)_deduplicate.out
 queue name, args from (
- $sample_name, $(pwd)/$sample_name $split $pe_or_se
+ $sample_name, $(pwd)/$sample_name $pe_or_se $split
 )
 EOF
 }

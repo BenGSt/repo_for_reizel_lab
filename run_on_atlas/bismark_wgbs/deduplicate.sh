@@ -3,12 +3,12 @@ source /storage/bfe_reizel/bengst/repo_for_reizel_lab/run_on_atlas/bismark_wgbs/
 
 main() { #<sample_dir> <split> {--paired-end|--single-end}
   sample_dir=$1
-  split=$2 #USAGE: set if input are multiple split fastq files (if run_data_split.sh was run)
+  split=$3 #USAGE: set if input are multiple split fastq files (if run_data_split.sh was run)
   script_name=$(echo $0 | awk -F / '{print $NF}')
 
-  if [[ $3 == "-paired-end" ]]; then
+  if [[ $2 == "-paired-end" ]]; then
     flags="-p"
-  elif [[ $3 == "-single-end" ]]; then
+  elif [[ $2 == "-single-end" ]]; then
     flags="-s"
   else
     echo "ERROR: must specify -paired-end or -single-end"
