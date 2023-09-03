@@ -131,7 +131,7 @@ main() {
     submit_prep_jobs
   fi
 
-  print_info "finished" "$script_name" "$@"
+  print_info "finished: " "$script_name " "$@"
 }
 
 arg_parse() {
