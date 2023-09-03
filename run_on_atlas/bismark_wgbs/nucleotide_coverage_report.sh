@@ -47,7 +47,9 @@ main()
   fi
 
   bam2nuc --genome_folder $bismark_genome_location ./*.bam
-  bismark2report --splitting_report *splitting_report.txt --mbias_report  *M-bias.txt
+  bismark2report --splitting_report *splitting_report.txt --mbias_report  *M-bias.txt \
+                --nucleotide_report *nucleotide_stats.txt --alignment_report *alignment_report.txt \
+                --dedup_report *deduplication_report.txt
 
   echo
 	echo
