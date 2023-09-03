@@ -12,7 +12,7 @@ print_info(){ #<phase= running / finished>
 
  ################################
  ################################
- $phase: $script_name $script_args
+ $phase: "$script_name" "$script_args" "$@"
  date: $(date)
  hostname: $(hostname)
  pwd: $(pwd)
