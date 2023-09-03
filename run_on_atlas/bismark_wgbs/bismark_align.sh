@@ -28,6 +28,7 @@ main() {
 
   echo "cleaning up any previous runs so that restarted jobs aren't corrupted"
   rm -v $(find . -name "*.bam" -o -name "*unmapped_reads*" -o -name "*ambiguous_reads*" -o -name "*C_to_T*" -o -name "*G_to_A*")
+  echo
 
   #set bismark_genome_location
   if [[ $genome == "mm10" ]]; then
