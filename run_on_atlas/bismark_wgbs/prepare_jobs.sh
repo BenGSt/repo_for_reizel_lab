@@ -112,7 +112,7 @@ EOF
 
 main() {
   script_name=$(echo $0 | awk -F / '{print $NF}')
-  print_info "running" "$script_name" "$@"
+  print_info "running: " "$script_name " "$@"
 
   mkdir -p logs/prep
   mkdir -p condor_submission_files/prep/
