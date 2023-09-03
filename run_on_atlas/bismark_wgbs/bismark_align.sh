@@ -24,7 +24,7 @@ main() {
   script_name=$(echo $0 | awk -F / '{print $NF}')
   arg_parse "$@"
   cd "$output_dir" || exit 1
-  print_info "running" $script_name "$@"
+  print_info "running: " "$script_name " "$@"
 
   echo "cleaning up any previous runs so that restarted jobs aren't corrupted"
   rm -v $(find . -name "*.bam")
@@ -50,7 +50,7 @@ main() {
   fi
   rm -v *.fq.gz #rm unmapped, ambiguous
 
-  print_info "finished" $script_name "$@"
+    print_info "finished: " "$script_name " "$@"
 }
 
 align_to_genome() {

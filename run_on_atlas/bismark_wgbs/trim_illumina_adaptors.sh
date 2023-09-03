@@ -43,7 +43,7 @@ EOF
 
 main() {
   script_name=$(echo $0 | awk -F / '{print $NF}')
-  print_info "running" "$script_name" "$@"
+  print_info "running: " "$script_name " "$@"
   arg_parse "$@"
   #clean any trimmed fastq files from previous runs
   rm -fv $(find $output_dir -name "*trimmed*" -o -name "*val_[0-1]*")
@@ -57,7 +57,7 @@ main() {
     time trim_illumina_adapter_paired_end $input_fastq_1 $input_fastq_2
   fi
 
-  print_info "finished" "$script_name" "$@"
+  print_info "finished: " "$script_name " "$@"
 }
 
 trim_illumina_adapter_paired_end() { #<R1> <R2>

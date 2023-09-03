@@ -26,7 +26,7 @@ EOF
 
 main() {
   script_name=$(echo $0 | awk -F / '{print $NF}')
-  print_info "running" $script_name "$@"
+  print_info "running: " "$script_name " "$@"
   arg_parse "$@"
   cd "$output_dir" || exit 1
 
@@ -43,7 +43,7 @@ main() {
   rm -v $(find ./ | grep -P 'OT|OB')
   rm -v $(find . -name "*.bedGraph.gz")
 
-  print_info "finished" $script_name "$@"
+    print_info "finished: " "$script_name " "$@"
 }
 
 call_methylation() {

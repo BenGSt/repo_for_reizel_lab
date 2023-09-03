@@ -19,9 +19,9 @@ main() {
   cd $output_dir || exit 1
   script_name=$(echo $0 | awk -F / '{print $NF}')
 
-  print_info "running" "$script_name" "$@"
+  print_info "running: " "$script_name " "$@"
   time combine_methylation_coverage_to_tiles 100 10 $genome #<tile_size> <min_coverage> <genome>
-  print_info "finished" "$script_name" "$@"
+  print_info "finished: " "$script_name " "$@"
 }
 
 combine_methylation_coverage_to_tiles() {

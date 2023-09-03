@@ -2,7 +2,8 @@
 source /storage/bfe_reizel/bengst/repo_for_reizel_lab/run_on_atlas/bismark_wgbs/shared.sh
 
 main() {
-  print_info "running"
+  script_name=$(echo $0 | awk -F / '{print $NF}')
+  print_info "running: " "$script_name " "$@"
   arg_parse "$@"
   mkdir -p $output_dir
   cd $output_dir
@@ -15,7 +16,6 @@ main() {
   fi
   mkdir split
 
-
   # Split fastq files, N_READS_PER_FILE reads per file
   if [[ $read_type == "single_end" ]]; then
     to_split=($input_fastq)
@@ -26,7 +26,7 @@ main() {
   n=0
   for fastq in "${to_split[@]}"; do
     mkfifo fifo$n
-    gzip -dc $fastq > fifo$n &
+    gzip -dc $fastq >fifo$n &
     echo split -dl $n_lines_per_file fifo$n split/$(echo $(basename $fastq) | sed 's/.fastq.gz\|fq.gz//')_chunk_ --additional-suffix=.fq
     split -dl $n_lines_per_file fifo$n split/$(echo $(basename $fastq) | sed 's/.fastq.gz\|fq.gz//')_chunk_ --additional-suffix=.fq &
     ((n++))
@@ -40,7 +40,8 @@ main() {
     mkdir $chunk
     mv *$chunk.fq $chunk
   done
-  print_info "finished"
+
+  print_info "finished: " "$script_name " "$@"
 }
 
 help() {

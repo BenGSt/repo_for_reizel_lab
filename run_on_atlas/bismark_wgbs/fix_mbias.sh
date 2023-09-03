@@ -17,7 +17,7 @@ save_cmd() {
 
 main() {
   script_name=$(echo $0 | awk -F / '{print $NF}')
-  print_info "running" "$script_name" "$@"
+  print_info "running: " "$script_name " "$@"
 
   bias_fix=1 #for write_sample_dag_file()
   arg_parse "$@"
@@ -77,7 +77,7 @@ Please download your data and delete it from atlas as soon as you are done.
 !Good luck and happy clustering!
 EOF
 
-  print_info "finished" "$script_name" "$@"
+    print_info "finished: " "$script_name " "$@"
 }
 
 help() {

@@ -4,10 +4,10 @@ source /Local/bfe_reizel/anaconda3/bin/activate wgbs_bismark_pipeline_2023
 REPO_FOR_REIZEL_LAB=/storage/bfe_reizel/bengst/repo_for_reizel_lab
 GENOMIC_REFERENCE_LOCATION=/storage/bfe_reizel/bengst/genomic_reference_data
 
-print_info(){ #<phase= running / finished>
-#  phase="$1"
-#  script_name="$2"
-#  script_args= "${@:3}"
+print_info(){
+# Usage:
+#  script_name=$(echo $0 | awk -F / '{print $NF}')
+#  print_info "running: " "$script_name " "$@"
   	cat << EOF
 
  ################################
