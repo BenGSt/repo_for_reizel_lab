@@ -320,10 +320,10 @@ $(
 PARENT deduplicate CHILD meth_call
 EOF
   fi
-  if [[ $correct_mbias ]]; then
-    echo PARENT meth_call CHILD make_tiles >>$outfile
-  else
+  if [[ ! $correct_mbias ]]; then
     echo PARENT meth_call CHILD make_tiles bam2nuc >>$outfile
+  else
+    echo PARENT meth_call CHILD make_tiles >>$outfile
   fi
 }
 
