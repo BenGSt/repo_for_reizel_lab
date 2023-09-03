@@ -16,9 +16,6 @@ save_cmd() {
 }
 
 main() {
-  script_name=$(echo $0 | awk -F / '{print $NF}')
-  print_info "running: " "$script_name " "$@"
-
   bias_fix=1 #for write_sample_dag_file()
   arg_parse "$@"
   extra_meth_opts="-extra-options '$ignore_r1 $ignore_r2 $ignore_3prime $ignore_3prime_r2'"
@@ -76,8 +73,6 @@ To do so, run: rm -v $(find $biased_dir -name "*deduplicated*bam")
 Please download your data and delete it from atlas as soon as you are done.
 !Good luck and happy clustering!
 EOF
-
-    print_info "finished: " "$script_name " "$@"
 }
 
 help() {
