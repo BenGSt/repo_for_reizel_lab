@@ -4,11 +4,11 @@ source /Local/bfe_reizel/anaconda3/bin/activate wgbs_bismark_pipeline_2023
 REPO_FOR_REIZEL_LAB=/storage/bfe_reizel/bengst/repo_for_reizel_lab
 GENOMIC_REFERENCE_LOCATION=/storage/bfe_reizel/bengst/genomic_reference_data
 
-print_info(){
-# Usage:
-#  script_name=$(echo $0 | awk -F / '{print $NF}')
-#  print_info "running: " "$script_name " "$@"
-  	cat << EOF
+print_info() {
+  # Usage:
+  #  script_name=$(echo $0 | awk -F / '{print $NF}')
+  #  print_info "running: " "$script_name " "$@"
+  cat <<EOF
 
 ################################
 ################################
@@ -21,7 +21,6 @@ pwd: $(pwd)
 
 
 EOF
-
 
 }
 
@@ -238,6 +237,8 @@ write_split_trim_and_align_sub_files() {
       write_align_sub_file $chunk
     done
   else # no splitting of fastq files
+    echo "fastq files will not be split"
+    echo
     write_trim_jobs_submission_file
     write_align_sub_file
   fi
@@ -265,7 +266,7 @@ $(
 
 $(
       n=0
-      for align_job in $(find ./condor_submission_files/$sample_name/ -name "bismark_align_job_${sample_name}*sub"| sort); do
+      for align_job in $(find ./condor_submission_files/$sample_name/ -name "bismark_align_job_${sample_name}*sub" | sort); do
         printf "JOB bismark_align_%02d $(realpath $align_job)\n" $((n++))
         echo
       done
