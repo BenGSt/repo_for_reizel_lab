@@ -1,5 +1,7 @@
 #!/bin/bash
 
+source /Local/bfe_reizel/bengst/repo_for_reizel_lab/run_on_atlas/bismark_wgbs/shared.sh
+
 help() {
   cat <<EOF
 ----------------------------------------
