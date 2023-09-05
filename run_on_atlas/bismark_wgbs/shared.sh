@@ -281,6 +281,7 @@ write_split_trim_and_align_sub_files() {
 
 write_sample_dag_file() {
   #TODO: refactor this to tidy readable code
+  correct_mbias=$1
   outfile=condor_submission_files/${sample_name}/bismark_wgbs_${sample_name}.dag
   if [[ $split ]]; then
     echo JOB split_fastq $(realpath ./condor_submission_files/${sample_name}/split_fastq_${sample_name}.sub) >$outfile

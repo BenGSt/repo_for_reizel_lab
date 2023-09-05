@@ -43,7 +43,7 @@ main() {
       # don't need bam2nuc when correcting mbias with -ignore
       write_make_tiles_job_submission_file -override_genome $(find $biased_dir/ -name "*make_tiles.out" | head -1 | xargs grep -o -- "-genome.*" | awk '{print $2}')
       write_multiqc_job_submission_file
-      write_sample_dag_file
+      write_sample_dag_file -correct-mbias
     }
   done
 
