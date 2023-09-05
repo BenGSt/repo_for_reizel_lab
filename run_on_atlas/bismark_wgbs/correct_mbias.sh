@@ -64,7 +64,6 @@ main() {
   if [ "$answer" != "${answer#[Yy]}" ]; then # this grammar (the #[] operator) means that the variable $answer where any Y or y in 1st position will be dropped if they exist.
     condor_submit_dag $output_dir/condor_submission_files/submit_all_bismark_wgbs.dag
   fi
-  echo Good Luck!
   cat <<EOF
 
 Unless you need them, it is recommended to delete the bam files when you are done.
