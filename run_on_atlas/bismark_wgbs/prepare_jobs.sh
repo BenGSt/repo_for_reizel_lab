@@ -193,21 +193,34 @@ submit_prep_jobs() {
 }
 
 submit_top_level_dag() {
-  #TODO: tee output to readme or other text file because instruction are complicated and need to be carried out over long time periods (>= days
-  echo To submit the samples sepratly, you may run the following commands:
-  for dag in $(find ./condor_submission_files/ -name "*.dag" | grep -v submit_all); do
+  #TODO: tee output to reminder.txt because instruction are complicated and need to be carried out over long time periods (>= days
+  cat <<EOF | tee reminder.txt
+To submit the samples sepratly, you may run the following commands:
+$(
+for dag in $(find ./condor_submission_files/ -name "*.dag" | grep -v submit_all); do
     echo condor_submit_dag $dag
-  done
-  echo
-  echo To submit the top level dag \(all samples\), run the following commands:
-  echo condor_submit_dag condor_submission_files/submit_all_bismark_wgbs.dag
-  echo
-  echo !Note: after the top level dag jobs are finished, correct m-bias by running correct_mbias.sh!
-  echo !e.g. correct_mbias.sh --biased_dir \$PWD --ignore 8 --ignore_r2 9 --ignore_3prime_r2 1!
-  echo !for more info see $REPO_FOR_REIZEL_LAB/run_on_atlas/bismark_wgbs/fix_mbias.sh --help!
-  echo
-  echo !Note: Atlas policy is to hold jobs after 3 days of running, so you may need to release them using condor_release!
-  echo
+done
+  )
+
+To submit the top level dag (all samples), run the following commands:
+condor_submit_dag condor_submission_files/submit_all_bismark_wgbs.dag
+
+!Note: after the top level dag jobs are finished, correct m-bias by running correct_mbias.sh!
+!e.g. correct_mbias.sh --biased_dir \$PWD --ignore 8 --ignore_r2 9 --ignore_3prime_r2 1!
+!for more info see $REPO_FOR_REIZEL_LAB/run_on_atlas/bismark_wgbs/fix_mbias.sh --help!
+
+!Note: Atlas policy is to hold jobs after 3 days of running, so you may need to release them using condor_release!
+
+Check the status of the jobs by running: condor_q -nobatch -dag
+!Good luck and happy clustering!
+
+EOF
+  printf 'Submit top level dag now? (y/n) '
+  read answer
+  if [ "$answer" != "${answer#[Yy]}" ]; then # this grammar (the #[] operator) means that the variable $answer where any Y or y in 1st position will be dropped if they exist.
+    condor_submit_dag condor_submission_files/submit_all_bismark_wgbs.dag
+  fi
+
   #TODO: add instructions for restarting held jobs (draft below), print this whole block with cat <<EOF
   #TODO: update 3.9.2023: may not need this, released jobs restart and delete previous output.
   #TODO: Also, still remains to be seen if the cmd below work.
@@ -218,12 +231,6 @@ submit_top_level_dag() {
 #command to force condor_dagman to re-run that node:
 #condor_dagman -f NODE_A mydag.dag
 #EOF
-  echo
-  printf 'Submit top level dag now? (y/n) '
-  read answer
-  if [ "$answer" != "${answer#[Yy]}" ]; then # this grammar (the #[] operator) means that the variable $answer where any Y or y in 1st position will be dropped if they exist.
-    condor_submit_dag condor_submission_files/submit_all_bismark_wgbs.dag
-  fi
 }
 
 arg_parse() {
