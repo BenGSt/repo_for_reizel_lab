@@ -40,9 +40,8 @@ main() {
 
       # the following sub files are not dependent on splitting
       write_methylation_calling_job_submission_file "-bam-dir $biased_dir/$sample_name"
-      #don't need bam2nuc when correcting mbias with -ignore
-#      write_bam2nuc_job_submission_file -override_genome $(find $biased_dir/ -name "*make_tiles.out" | head -1 | xargs grep -o -- "-genome.*" | awk '{print $2}')
-      write_make_tiles_job_submission_file #genome already set by previous -override_genome
+      # don't need bam2nuc when correcting mbias with -ignore
+      write_make_tiles_job_submission_file -override_genome $(find $biased_dir/ -name "*make_tiles.out" | head -1 | xargs grep -o -- "-genome.*" | awk '{print $2}')
       write_multiqc_job_submission_file
       write_sample_dag_file
     }

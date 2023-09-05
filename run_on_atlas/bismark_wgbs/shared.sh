@@ -189,9 +189,6 @@ EOF
 }
 
 write_bam2nuc_job_submission_file() {
-  if [[ $1 == "-override_genome" ]]; then
-    genome=$2 #used for mbias correction (correct_mbias.sh)
-  fi
   cat <<EOF >condor_submission_files/${sample_name}/bam2nuc_job_${sample_name}.sub
 Initialdir = $(pwd)
 executable = $REPO_FOR_REIZEL_LAB/run_on_atlas/bismark_wgbs/nucleotide_coverage_report.sh
@@ -209,6 +206,9 @@ EOF
 }
 
 write_make_tiles_job_submission_file() {
+    if [[ $1 == "-override_genome" ]]; then
+    genome=$2 #used for mbias correction (correct_mbias.sh)
+  fi
   cat <<EOF >condor_submission_files/${sample_name}/make_tiles_${sample_name}.sub
 Initialdir = $(pwd)
 executable = $REPO_FOR_REIZEL_LAB/run_on_atlas/bismark_wgbs/make_tiles.sh
