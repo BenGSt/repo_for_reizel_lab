@@ -63,6 +63,9 @@ combine_methylation_coverage_to_tiles() {
   #get current directory name:
   current_dir=$(pwd | awk -F'/' '{print $NF}')
   output_file=${current_dir}_100bp_tiles.bed
+  echo tiles file: $tiles_file
+  echo methylation calling output: $meth_calling_output
+
   bedtools intersect -a $tiles_file -b $meth_calling_output -wa -wb | awk -v cov=$min_coverage -v tileSize=$tile_size 'BEGIN {OFS="\t"; Prev=-1} {if ($2 == Prev) {T=T+$8+$9; M=M+$8} else {if (Prev!=-1 && T>=cov) {print PrevChr,Prev,Prev+tileSize-1,M/T};T=$8+$9; M=$8;}; Prev=$2; PrevChr=$1}' >${output_file}
 
   #to unite all tiles from different samples:
