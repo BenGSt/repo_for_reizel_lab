@@ -1,7 +1,19 @@
 #!/usr/bin/env bash
+#  ----------------------------------------
+#  Project: Reizel Lab Bioinformatics Pipelines
+#  Pipeline: Bismark WGBS
+#  Script: deduplicate.sh
+#  Author: Ben G. Steinberg
+#  Last Update: 4 Sep 2023
+#  ----------------------------------------
+
 source /storage/bfe_reizel/bengst/repo_for_reizel_lab/run_on_atlas/bismark_wgbs/shared.sh
 
-main() { #<sample_dir> <split> {--paired-end|--single-end}
+# USAGE: deduplicate.sh <sample_dir> {--paired-end or --single-end} <split>
+#   sample_dir: directory containing the alignment output bam file(s)
+#   --paired-end or --single-end: specify if the input data is paired end or single end
+#   split: set if input are multiple split fastq files (if split_fastq.sh was run)
+main() { #<sample_dir> {--paired-end or --single-end} <split>
   sample_dir=$1
   split=$3 #USAGE: set if input are multiple split fastq files (if run_data_split.sh was run)
   script_name=$(echo $0 | awk -F / '{print $NF}')
@@ -18,10 +30,6 @@ main() { #<sample_dir> <split> {--paired-end|--single-end}
   if [[ $split ]]; then
     flags=$(echo $flags "--multiple")
   fi
-
-  source /Local/bfe_reizel/anaconda3/bin/activate wgbs_bismark_pipeline_2023
-  script_name=$(echo $0 | awk -F / '{print $NF}')
-
 
   cd "$sample_dir" || exit 1
   print_info "running: " "$script_name " "$@"

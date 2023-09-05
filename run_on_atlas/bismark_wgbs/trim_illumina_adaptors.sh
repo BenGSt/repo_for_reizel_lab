@@ -1,42 +1,53 @@
 #!/bin/bash
 
 source /storage/bfe_reizel/bengst/repo_for_reizel_lab/run_on_atlas/bismark_wgbs/shared.sh
-N_CORES=3
-MEM=300MB
 
 help() {
   cat <<EOF
-	run first
-	resources: $N_CORES cores, $MEM RAM
+----------------------------------------
+Project: Reizel Lab Bioinformatics Pipelines
+Pipeline: Bismark WGBS
+Script: trim_illumina_adaptors.sh
+Author: Ben G. Steinberg
+Last Update: 4 Sep 2023
+----------------------------------------
 
-	-input-fastq-file <sample.fq.gz> or -paired-input-fastq-files <sample_R1.fq.gz> <sample_R2.fq.gz>
-	-output-dir
+Run after prepare_jobs.sh [and split_fastq.sh if fastq files are split]
 
-	optional:
-	-extra-trim-galore-options "multiple quoted options"
+USAGE: trim_illumina_adaptors.sh {-input-fastq-file <sample.fq.gz>  or  -paired-input-fastq-files <sample_R1.fq.gz> <sample_R2.fq.gz>}
+                                 -output-dir <path> [-extra-trim-galore-options "multiple quoted options"]
 
-  handy extra options from trim_galore manual
-  ===========================================
-  --clip_R1 <int>         Instructs Trim Galore to remove <int> bp from the 5' end of read 1 (or single-end
-                        reads). This may be useful if the qualities were very poor, or if there is some
-                        sort of unwanted bias at the 5' end. Default: OFF.
+Resources: $TRIM_JOB_CPUS cores, $TRIM_JOB_MEM RAM (defined in shared.sh)
 
-  --clip_R2 <int>         Instructs Trim Galore to remove <int> bp from the 5' end of read 2 (paired-end reads
-                          only). This may be useful if the qualities were very poor, or if there is some sort
-                          of unwanted bias at the 5' end. For paired-end BS-Seq, it is recommended to remove
-                          the first few bp because the end-repair reaction may introduce a bias towards low
-                          methylation. Please refer to the M-bias plot section in the Bismark User Guide for
-                          some examples. Default: OFF.
+Arguments:
+-input-fastq-file <sample.fq.gz> or -paired-input-fastq-files <sample_R1.fq.gz> <sample_R2.fq.gz>
+-output-dir <path> output will be written to this directory
 
-  --three_prime_clip_R1 <int>     Instructs Trim Galore to remove <int> bp from the 3' end of read 1 (or single-end
-                          reads) AFTER adapter/quality trimming has been performed. This may remove some unwanted
-                          bias from the 3' end that is not directly related to adapter sequence or basecall quality.
-                          Default: OFF.
+optional:
+-extra-trim-galore-options "multiple quoted options"
 
-  --three_prime_clip_R2 <int>     Instructs Trim Galore to remove <int> bp from the 3' end of read 2 AFTER
-                          adapter/quality trimming has been performed. This may remove some unwanted bias from
-                          the 3' end that is not directly related to adapter sequence or basecall quality.
-                          Default: OFF.
+handy extra options from trim_galore manual
+===========================================
+--clip_R1 <int>         Instructs Trim Galore to remove <int> bp from the 5' end of read 1 (or single-end
+                      reads). This may be useful if the qualities were very poor, or if there is some
+                      sort of unwanted bias at the 5' end. Default: OFF.
+
+--clip_R2 <int>         Instructs Trim Galore to remove <int> bp from the 5' end of read 2 (paired-end reads
+                        only). This may be useful if the qualities were very poor, or if there is some sort
+                        of unwanted bias at the 5' end. For paired-end BS-Seq, it is recommended to remove
+                        the first few bp because the end-repair reaction may introduce a bias towards low
+                        methylation. Please refer to the M-bias plot section in the Bismark User Guide for
+                        some examples. Default: OFF.
+
+--three_prime_clip_R1 <int>     Instructs Trim Galore to remove <int> bp from the 3' end of read 1 (or single-end
+                        reads) AFTER adapter/quality trimming has been performed. This may remove some unwanted
+                        bias from the 3' end that is not directly related to adapter sequence or basecall quality.
+                        Default: OFF.
+
+--three_prime_clip_R2 <int>     Instructs Trim Galore to remove <int> bp from the 3' end of read 2 AFTER
+                        adapter/quality trimming has been performed. This may remove some unwanted bias from
+                        the 3' end that is not directly related to adapter sequence or basecall quality.
+                        Default: OFF.
 
 EOF
 }
@@ -67,13 +78,13 @@ trim_illumina_adapter_paired_end() { #<R1> <R2>
   #note from trim_galore manual
   #It seems that --cores 4 could be a sweet spot, anything above has diminishing returns.
   #--cores 4 would then be: 4 (read) + 4 (write) + 4 (Cutadapt) + 2 (extra Cutadapt) + 1 (Trim Galore) = 15, and so forth.
-  cmd="trim_galore --dont_gzip --paired $1 $2 --cores $N_CORES --fastqc $extra"
+  cmd="trim_galore --dont_gzip --paired $1 $2 --cores $TRIM_JOB_CPUS --fastqc $extra"
   echo runnig: $cmd
   $cmd
 }
 
 trim_illumina_adapter_single_end() { #<R1>
-  cmd="trim_galore  $1 --dont_gzip --cores $N_CORES --fastqc $extra"
+  cmd="trim_galore  $1 --dont_gzip --cores $TRIM_JOB_CPUS --fastqc $extra"
   echo runnig: $cmd
   $cmd
 }

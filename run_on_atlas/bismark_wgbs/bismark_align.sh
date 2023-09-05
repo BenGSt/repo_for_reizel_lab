@@ -2,21 +2,46 @@
 
 source /storage/bfe_reizel/bengst/repo_for_reizel_lab/run_on_atlas/bismark_wgbs/shared.sh
 
-N_CORES=3
-MEM=40GB
 N_PARALLEL_INSTANCES=1 #manual states ~5 cores per instance, But i'm seeing less on htcondor logs (~2.5)
 #maybe due to using unzipped fastq files
 # exceeding MEM too often. changing to 1 parallel instance. 14.03.2023
 
 help() {
   cat <<EOF
-	run after trim_illumina_adaptors.sh
-		resources: $N_CORES cores, $MEM RAM
+----------------------------------------
+Project: Reizel Lab Bioinformatics Pipelines
+Pipeline: Bismark WGBS
+Script: bismark_align.sh
+Author: Ben G. Steinberg
+Last Update: 4 Sep 2023
+----------------------------------------
 
-	<-single-end> or <-paired-end>
-	<-output-dir>
-	-genome <mm10 or hg38>
-	[-non-directional]   instructs Bismark to use all four alignment outputs (OT, CTOT, OB, CTOB)
+Run after trim_illumina_adaptors.sh
+
+USAGE: bismark_align.sh -single-end or -paired-end -output-dir <path> -genome <mm10 or hg38>
+                        [-non-directional] [-keep-trimmed-fq] [-no-dovetail]
+
+Resources: $ALIGN_JOB_CPUS cores, $ALIGN_JOB_MEM RAM
+
+Arguments:
+-single-end or -paired-end
+-output-dir <path>  Trimmed fq files are expected to be in this directory, output bam will be written here.
+-genome <mm10 or hg38>
+[-non-directional]   Instructs Bismark to use all four alignment outputs (OT, CTOT, OB, CTOB)
+[-keep-trimmed-fq]   Keep the trimmed fq files (default: delete them)
+[-no-dovetail]       Don't consider dovetailing alignments as concordant (default: consider them concordant)
+                     Explanation from Bismark manual:
+                     It is possible, though unusual, for the mates to "dovetail", with the mates seemingly extending
+                     "past" each other as in this example:
+                         Mate 1:                 GTCAGCTACGATATTGTTTGGGGTGACACATTACGC
+                         Mate 2:            TATGAGTCAGCTACGATATTGTTTGGGGTGACACAT
+                         Reference: GCAGATTATATGAGTCAGCTACGATATTGTTTGGGGTGACACATTACGCGTCTTTGAC
+                     Dovetailing is considered inconsistent with concordant alignment, but by default Bismark calls
+                     Bowtie 2 with --dovetail, causing it to consider dovetailing alignments as concordant. This
+                     becomes relevant whenever reads are clipped from their 5' end prior to mapping, e.g. because of
+                     quality or bias issues such as in PBAT or EM-seq libraries.
+                     Specify -no-dovetail to turn off this behaviour for paired-end libraries.
+
 EOF
 }
 
@@ -32,11 +57,10 @@ main() {
 
   #set bismark_genome_location
   if [[ $genome == "mm10" ]]; then
-    bismark_genome_location=/storage/bfe_reizel/bengst/genomic_reference_data/from_huji/mm10/Sequence/WholeGenomeFasta
+    bismark_genome_location=$MM10_REF # (defined in shared.sh)
   elif [[ $genome == "hg38" ]]; then
-    bismark_genome_location=/srv01/technion/bengst/storage/genomic_reference_data/hg38/minChromSet/hg38.minChromSet.chroms
-    # NOTE: deleted all random and unknown chromosomes from hg38 analysis set to reduce memory usage, s.t.
-    #       bismark can run on atlas, which is restricted to 40GB per job.
+    bismark_genome_location=$HG38_REF
+
   else
     echo genome not recognized
     exit 1
@@ -45,13 +69,13 @@ main() {
   align_to_genome
 
   #cleanup
-  rm_fq="rm -v *.fq"                    #the non gz trimmed fq
-  if [[ $keep_trimmed_fq -eq 0 ]]; then #TODO: add this to args
+  rm_fq="rm -v *.fq" #the non gz trimmed fq
+  if [[ $keep_trimmed_fq -eq 0 ]]; then
     $rm_fq
   fi
   rm -v *.fq.gz #rm unmapped, ambiguous
 
-    print_info "finished: " "$script_name " "$@"
+  print_info "finished: " "$script_name " "$@"
 }
 
 align_to_genome() {
@@ -66,11 +90,11 @@ align_to_genome() {
 
   if [[ $read_type == "single_end" ]]; then
     trim_galore_output=$(find . -name '*trimmed.fq*')
-    command=$(echo bismark --multicore $N_PARALLEL_INSTANCES --bowtie2 $dovetail --genome $bismark_genome_location $trim_galore_output $non_directional $unmapped_ambig)
+    command=$(echo bismark --multicore $BISMARK_INSTANCES --bowtie2 $no_dovetail --genome $bismark_genome_location $trim_galore_output $non_directional $unmapped_ambig)
   else
     trim_galore_output_1=$(find . -name '*val_1.fq*')
     trim_galore_output_2=$(find . -name '*val_2.fq*')
-    command=$(echo bismark --multicore $N_PARALLEL_INSTANCES --bowtie2 $dovetail --genome $bismark_genome_location -1 $trim_galore_output_1 -2 $trim_galore_output_2 $non_directional $unmapped_ambig)
+    command=$(echo bismark --multicore $BISMARK_INSTANCES --bowtie2 $no_dovetail --genome $bismark_genome_location -1 $trim_galore_output_1 -2 $trim_galore_output_2 $non_directional $unmapped_ambig)
   fi
 
   echo runnig: $command
@@ -88,6 +112,11 @@ arg_parse() {
       read_type="paired_end"
       shift
       ;;
+    -genome)
+      genome=$2
+      shift
+      shift
+      ;;
     -output-dir)
       output_dir="$2"
       shift
@@ -97,13 +126,12 @@ arg_parse() {
       non_directional="--non_directional"
       shift
       ;;
-    -dovetail)
-      dovetail="--dovetail"
+    -no-dovetail)
+      no_dovetail="--no_dovetail"
       shift
       ;;
-    -genome)
-      genome=$2
-      shift
+    -keep-trimmed-fq)
+      keep_trimmed_fq=1
       shift
       ;;
     -* | --*)

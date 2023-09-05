@@ -3,11 +3,23 @@ source /storage/bfe_reizel/bengst/repo_for_reizel_lab/run_on_atlas/bismark_wgbs/
 
 help() {
   cat <<EOF
-	run after trim_illumina_adaptors.sh, trim_diversity_adaptors.sh, align_to_genome.sh, methylation_calling.sh
-	resources: 1 core, 30GB RAM
+----------------------------------------
+Project: Reizel Lab Bioinformatics Pipelines
+Pipeline: Bismark WGBS
+Script: make_tiles.sh
+Author: Ben G. Steinberg
+Last Update: 4 Sep 2023
+----------------------------------------
 
-	-output_dir
-	-genome <mm10 or hg38>
+Run after methylation_calling.sh, calculates the methylation scores in 100bp tiles with coverace >= 10 CpG reads.
+
+USAGE: make_tiles.sh -output_dir <path> -genome <mm10 or hg38>
+
+Resources: $TILES_JOB_CPUS core, $TILES_JOB_MEM RAM
+
+Arguments:
+-output_dir <path> cov.gz file expected to be found here, tiles output will be written to this directory.
+-genome <mm10 or hg38>
 EOF
 }
 
@@ -37,7 +49,7 @@ combine_methylation_coverage_to_tiles() {
   meth_calling_output=$(find . -name "*.cov.gz")
 
   mm10_tiles=${GENOMIC_REFERENCE_LOCATION}/mm10_whole_genome_${tile_size}bpTiles.bed
-  hg38_tiles=${GENOMIC_REFERENCE_LOCATION}/hg38/hg38_100bp_tiles.bed #TODO: create tiles for minChromSet, speed things up.
+  hg38_tiles=${GENOMIC_REFERENCE_LOCATION}/hg38/hg38_100bp_tiles.bed #TODO: create tiles for minChromSet, speed things up a bit.
   if [[ $3 == "mm10" ]]; then
     tiles_file=$mm10_tiles
   elif [[ $3 == "hg38" ]]; then

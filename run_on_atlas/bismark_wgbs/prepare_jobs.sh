@@ -1,18 +1,134 @@
 #!/usr/bin/env bash
 
-# This script writes and submits submission files for preparing the sample prep jobs, one job per sample is run in order
-# to count the reads in the raw data (fastq.gz) file, and write the appropriate submission files needed in order to split
-# the input and run the pipeline.
-
-# Once the prep jobs have finished running, another script is used to write the submission file for multiqc, and the top
-# level dag files, and submit the WGBS bismark pipline jobs.
-
-# After the WGBS pipeline jobs have finished running, another script is used to fix m-bias by repeating the pipeline,
-# starting from the methylation calling stage, and ignoring a specified number of base pairs from read ends.
-
 source /storage/bfe_reizel/bengst/repo_for_reizel_lab/run_on_atlas/bismark_wgbs/shared.sh
 n_reads_per_chunk=25000000 #default value (may be overwritten by arg_parse)
 
+help() {
+  cat <<EOF
+----------------------------------------
+Project: Reizel Lab Bioinformatics Pipelines
+Pipeline: Bismark WGBS
+Script: prepare_jobs.sh
+Author: Ben G. Steinberg
+Last Update: 4 Sep 2023
+----------------------------------------
+
+This script is the starting point for running the bismark WGBS pipeline on the Atlas cluster. It is designed to be run 3
+times for each sample batch, in other words it has 3 modes of operation:
+(1) First run, called directly, will write the condor submission file prep.sub, and prompt the user to submit it. A file
+    named prep2.cmd be written, which should be used to run the script again after the jobs in prep.sub are done.
+    (run "bash prep2.cmd")
+(2) Second run, submitted for each sample by prep.sub with the -job flag, the job will count the number of reads in the
+    fastq files to determine whether to split them. It will then write the condor submission files
+    needed for the sample.
+(3) Third run, called with the -top-level option when the user runs "bash prep2.cmd". It will write the submission file
+    for MultiQC as well as the top level dag needed to run the batch and prompt the user to submit it.
+
+
+USAGE: prepare_jobs.sh {-single-end or -paired-end} -raw-data-dir <raw_data_dir> -genome <mm10 or hg38> [optional]
+
+  <raw_data_dir> should contain a dir for each sample containing it\'s fastq files.
+  Run from the directory you wish the output to be written to.
+
+
+optional arguments:
+-n-reads-per-chunk
+  Number of reads per chunk for splitting fastq files. Default is $n_reads_per_chunk
+
+-non-directional
+  Use for non directional libraries. Instructs Bismark to align to OT, CTOT, OB, CTOB.
+
+-delete-bam
+  Delete the deduplicated bam files. Default is to keep them for running methylation calling jobs again to fix m-bias without
+  trimming and rerunning the pipeline, and possibly other downstream analysis. If not running methylation calling jobs again,
+  bam files should be deleted because they large and not needed for most downstream analysis (use the .cov files).
+
+-extra-meth_extract-options "multiple quoted options"
+handy options (from Bismark manual):
+=====================================
+
+Ignore bases in aligned reads.
+------------------------------------------------------------------------------------------------------------------
+--ignore <int>
+    Ignore the first <int> bp from the 5' end of Read 1 (or single-end alignment files) when processing
+    the methylation call string. This can remove e.g. a restriction enzyme site at the start of each read or any other
+    source of bias (such as PBAT-Seq data).
+
+--ignore_r2 <int>
+    Ignore the first <int> bp from the 5' end of Read 2 of paired-end sequencing results only. Since the first couple of
+    bases in Read 2 of BS-Seq experiments show a severe bias towards non-methylation as a result of end-repairing
+    sonicated fragments with unmethylated cytosines (see M-bias plot), it is recommended that the first couple of
+    bp of Read 2 are removed before starting downstream analysis. Please see the section on M-bias plots in the Bismark
+    User Guide for more details.
+
+--ignore_3prime <int>
+    Ignore the last <int> bp from the 3' end of Read 1 (or single-end alignment files) when processing the methylation
+    call string. This can remove unwanted biases from the end of reads.
+
+--ignore_3prime_r2 <int>
+    Ignore the last <int> bp from the 3' end of Read 2 of paired-end sequencing results only. This can remove unwanted
+    biases from the end of reads.
+
+Other
+------------------------------------------------------------------------------------------------------------------------
+--no_overlap
+    For paired-end reads it is theoretically possible that Read 1 and Read 2 overlap. This option avoids scoring
+    overlapping methylation calls twice (only methylation calls of read 1 are used for in the process since read 1 has
+    historically higher quality basecalls than read 2). Whilst this option removes a bias towards more methylation calls
+    in the center of sequenced fragments it may de facto remove a sizeable proportion of the data. This option is on by
+    default for paired-end data but can be disabled using --include_overlap. Default: ON.
+
+--include_overlap
+    For paired-end data all methylation calls will be extracted irrespective of whether they overlap or not.
+    Default: OFF.
+
+--zero_based
+    Write out an additional coverage file (ending in .zero.cov) that uses 0-based genomic start and 1-based genomic end
+    coordinates (zero-based, half-open), like used in the bedGraph file, instead of using 1-based coordinates
+    throughout. Default: OFF.
+
+
+-extra-trim-galore-options "multiple quoted options"
+handy options (from trim_galore manual):
+=====================================
+
+Remove bases from reads before alignment.
+------------------------------------------------------------------------------------------------------------------
+--clip_R1 <int>         Instructs Trim Galore to remove <int> bp from the 5' end of read 1 (or single-end
+                      reads). This may be useful if the qualities were very poor, or if there is some
+                      sort of unwanted bias at the 5' end. Default: OFF.
+
+--clip_R2 <int>         Instructs Trim Galore to remove <int> bp from the 5' end of read 2 (paired-end reads
+                        only). This may be useful if the qualities were very poor, or if there is some sort
+                        of unwanted bias at the 5' end. For paired-end BS-Seq, it is recommended to remove
+                        the first few bp because the end-repair reaction may introduce a bias towards low
+                        methylation. Please refer to the M-bias plot section in the Bismark User Guide for
+                        some examples. Default: OFF.
+
+--three_prime_clip_R1 <int>     Instructs Trim Galore to remove <int> bp from the 3' end of read 1 (or single-end
+                        reads) AFTER adapter/quality trimming has been performed. This may remove some unwanted
+                        bias from the 3' end that is not directly related to adapter sequence or basecall quality.
+                        Default: OFF.
+
+--three_prime_clip_R2 <int>     Instructs Trim Galore to remove <int> bp from the 3' end of read 2 AFTER
+                        adapter/quality trimming has been performed. This may remove some unwanted bias from
+                        the 3' end that is not directly related to adapter sequence or basecall quality.
+                        Default: OFF.
+
+
+A note about methylation bias correction: After running the pipeline once view the m-bias plots in the MultiQC report.
+The expected unbiased result is a uniform distribution of the average methylation levels across read positions. If the
+results are biased, fix this by one of 2 methods: (a) use the provided correct_mbias.sh script to the pipeline again
+starting from the methylation calling and ignoring the biased bases of the aligned reads. Or (b) running the pipeline
+again, trimming the biased bases and re aligning. Each of these approaches has it's advantages and disadvantages.
+Ignoring aligned bases is faster, and should be stable when running on Atlas. Trimming the reads may improve alignment,
+hence give more accurate results. However, the memory usage may go above 40GB leading to jobs failing
+(tested before splitting fastq files), This has yet to be tested with split fastq files. You may want to consider
+trimming R1 and R2 symmetrically and/or using the "--dovetail" bismark option for the bowtie2 aligner
+(--dovetail is actually the default).
+
+EOF
+}
 
 prepare_sample() {
   mkdir -p condor_submission_files/$sample_name
@@ -110,26 +226,6 @@ submit_top_level_dag() {
   fi
 }
 
-main() {
-  mkdir -p logs/prep
-  mkdir -p condor_submission_files/prep/
-  arg_parse "$@"
-
-  if [[ $job ]]; then
-    prepare_sample
-  elif [[ $top_level ]]; then
-    write_multiqc_job_submission_file
-    write_top_level_dag
-    submit_top_level_dag
-  else
-    echo "$0" "$@" >cmd.txt
-    echo "$0" "$@" -top-level >prep2.cmd
-    write_prep_submission_files "$@"
-    submit_prep_jobs
-  fi
-
-}
-
 arg_parse() {
   if [[ $# -lt 2 ]]; then
     help
@@ -211,110 +307,23 @@ arg_parse() {
   done
 }
 
-help() {
-  echo Run The WGBS bismark pipeline \(separate dag for each sample\):
-  echo USAGE: "$(echo "$0" | awk -F / '{print$NF}')" \{-single-end or -paired-end\} -raw-data-dir \<raw_data_dir\> \
-    -genome \<mm10 or hg38\> \[optional\]
-  echo
-  echo raw_data_dir should contain a dir for each sample containing it\'s fastq files.
-  echo Run from the directory you wish the output to be written to.
-  echo
-  echo products: fastqc report, bismark covaregae files, 100 bp tiles with methylation levels, bam file containing alignments
-  cat <<EOF
+main() {
+  mkdir -p logs/prep
+  mkdir -p condor_submission_files/prep/
+  arg_parse "$@"
 
-A note about methylation bias correction: I recommend running the pipeline once without additional options, you could
-then view the m-bias plots in the MultiQC report. The expected unbiased result is a uniform distribution of the
-average methylation levels across read positions. If the results are biased, fix this by either running the methylation
-calling jobs again ignoring the biased bases, or running the pipeline again with trimmed reads. Each of these approaches
-has it's advantages and disadvantages. Ignoring aligned bases is faster. Trimming the reads may improve alignment if
-done correctly, consider trimming R1 and R2 symmetrically and/or using the "--dovetail" bismark option for the bowtie2
-aligner (--dovetail is actually the default).
-
-optional:
--n-reads-per-chunk
-  Number of reads per chunk for splitting fastq files. Default is $n_reads_per_chunk
-
--non-directional
-  Use for non directional libraries. Instructs Bismark to align to OT, CTOT, OB, CTOB.
-
--delete-bam
-  Delete the deduplicated bam files. Default is to keep them for running methylation calling jobs again to fix m-bias without
-  trimming and rerunning the pipeline, and possibly other downstream analysis. If not running methylation calling jobs again,
-  bam files should be deleted because they large and not needed for most downstream analysis (use the .cov files).
-
--extra-meth_extract-options "multiple quoted options"
-handy options (from Bismark manual):
-=====================================
-
-Ignore bases in aligned reads.
-------------------------------------------------------------------------------------------------------------------
---ignore <int>
-    Ignore the first <int> bp from the 5' end of Read 1 (or single-end alignment files) when processing
-    the methylation call string. This can remove e.g. a restriction enzyme site at the start of each read or any other
-    source of bias (such as PBAT-Seq data).
-
---ignore_r2 <int>
-    Ignore the first <int> bp from the 5' end of Read 2 of paired-end sequencing results only. Since the first couple of
-    bases in Read 2 of BS-Seq experiments show a severe bias towards non-methylation as a result of end-repairing
-    sonicated fragments with unmethylated cytosines (see M-bias plot), it is recommended that the first couple of
-    bp of Read 2 are removed before starting downstream analysis. Please see the section on M-bias plots in the Bismark
-    User Guide for more details.
-
---ignore_3prime <int>
-    Ignore the last <int> bp from the 3' end of Read 1 (or single-end alignment files) when processing the methylation
-    call string. This can remove unwanted biases from the end of reads.
-
---ignore_3prime_r2 <int>
-    Ignore the last <int> bp from the 3' end of Read 2 of paired-end sequencing results only. This can remove unwanted
-    biases from the end of reads.
-
-Other
-------------------------------------------------------------------------------------------------------------------------
---no_overlap
-    For paired-end reads it is theoretically possible that Read 1 and Read 2 overlap. This option avoids scoring
-    overlapping methylation calls twice (only methylation calls of read 1 are used for in the process since read 1 has
-    historically higher quality basecalls than read 2). Whilst this option removes a bias towards more methylation calls
-    in the center of sequenced fragments it may de facto remove a sizeable proportion of the data. This option is on by
-    default for paired-end data but can be disabled using --include_overlap. Default: ON.
-
---include_overlap
-    For paired-end data all methylation calls will be extracted irrespective of whether they overlap or not.
-    Default: OFF.
-
---zero_based
-    Write out an additional coverage file (ending in .zero.cov) that uses 0-based genomic start and 1-based genomic end
-    coordinates (zero-based, half-open), like used in the bedGraph file, instead of using 1-based coordinates
-    throughout. Default: OFF.
-
-
--extra-trim-galore-options "multiple quoted options"
-handy options (from trim_galore manual):
-=====================================
-
-Remove bases from reads before alignment.
-------------------------------------------------------------------------------------------------------------------
---clip_R1 <int>         Instructs Trim Galore to remove <int> bp from the 5' end of read 1 (or single-end
-                      reads). This may be useful if the qualities were very poor, or if there is some
-                      sort of unwanted bias at the 5' end. Default: OFF.
-
---clip_R2 <int>         Instructs Trim Galore to remove <int> bp from the 5' end of read 2 (paired-end reads
-                        only). This may be useful if the qualities were very poor, or if there is some sort
-                        of unwanted bias at the 5' end. For paired-end BS-Seq, it is recommended to remove
-                        the first few bp because the end-repair reaction may introduce a bias towards low
-                        methylation. Please refer to the M-bias plot section in the Bismark User Guide for
-                        some examples. Default: OFF.
-
---three_prime_clip_R1 <int>     Instructs Trim Galore to remove <int> bp from the 3' end of read 1 (or single-end
-                        reads) AFTER adapter/quality trimming has been performed. This may remove some unwanted
-                        bias from the 3' end that is not directly related to adapter sequence or basecall quality.
-                        Default: OFF.
-
---three_prime_clip_R2 <int>     Instructs Trim Galore to remove <int> bp from the 3' end of read 2 AFTER
-                        adapter/quality trimming has been performed. This may remove some unwanted bias from
-                        the 3' end that is not directly related to adapter sequence or basecall quality.
-                        Default: OFF.
-
-EOF
+  if [[ $job ]]; then
+    prepare_sample
+  elif [[ $top_level ]]; then
+    write_multiqc_job_submission_file
+    write_top_level_dag
+    submit_top_level_dag
+  else
+    echo "$0" "$@" >cmd.txt
+    echo "$0" "$@" -top-level >prep2.cmd
+    write_prep_submission_files "$@"
+    submit_prep_jobs
+  fi
 
 }
 

@@ -1,8 +1,44 @@
 #!/usr/bin/env bash
 
 source /Local/bfe_reizel/anaconda3/bin/activate wgbs_bismark_pipeline_2023
+
 REPO_FOR_REIZEL_LAB=/storage/bfe_reizel/bengst/repo_for_reizel_lab
 GENOMIC_REFERENCE_LOCATION=/storage/bfe_reizel/bengst/genomic_reference_data
+
+MM10_REF=$GENOMIC_REFERENCE_LOCATION/from_huji/mm10/Sequence/WholeGenomeFasta
+HG38_REF=$GENOMIC_REFERENCE_LOCATION/hg38/analysisSet/hg38.analysisSet.chroms #TODO: test this, if mem usage is too high, use minChromSet instead (5.9.2023)
+# HG38_REF=$GENOMIC_REFERENCE_LOCATION/hg38/minChromSet/hg38.minChromSet.chroms
+# NOTE: deleted all random and unknown chromosomes from hg38 analysis set to reduce memory usage, s.t.
+#       bismark can run on atlas, which is restricted to 40GB per job. This wasn't enough, so input fq files were split.
+#       This reduced the memory usage, and may be enough to enable using the original Analysis Set reference genome
+#       as published by UCSC.
+
+SPLIT_JPB_CPUS=3
+SPLIT_JOB_MEM=250MB
+
+TRIM_JOB_CPUS=3
+TRIM_JOB_MEM=500MB
+
+ALIGN_JOB_CPUS=3
+ALIGN_JOB_MEM=40GB
+BISMARK_INSTANCES=1
+
+DEDUP_JOB_CPUS=2
+DEDUP_JOB_MEM=40GB
+
+METH_CALL_JOB_CPUS=3
+METH_CALL_JOB_MEM=4GB
+METH_CALL_INSTANCES=1     #each instance uses ~3 cores
+METH_CALL_BUFFER_SIZE=4GB #buffer size for unix sort
+
+BAM2NUC_JOB_CPUS=2
+BAM2NUC_JOB_MEM=10GB
+
+TILES_JOB_CPUS=1
+TILES_JOB_MEM=30GB
+
+MULTIQC_JOB_CPUS=1
+MULTIQC_JOB_MEM=500MB
 
 print_info() {
   # Usage:
@@ -29,8 +65,8 @@ write_split_job_submission_file() {
 Initialdir = $(pwd)
 executable = $REPO_FOR_REIZEL_LAB/run_on_atlas/bismark_wgbs/split_fastq.sh
 Arguments = \$(args)
-request_cpus = 3
-RequestMemory = 250MB
+request_cpus = $SPLIT_JPB_CPUS
+RequestMemory = $SPLIT_JOB_MEM
 universe = vanilla
 log = $(pwd)/logs/$sample_name/${sample_name}_split_fastq.log
 output = $(pwd)/logs/$sample_name/${sample_name}_split_fastq.out
@@ -49,7 +85,6 @@ EOF
 }
 
 write_trim_jobs_submission_file() {
-  #TODO: if file is not split than no files at $(pwd)/$sample_name/$split/$chunk/\*.fq. make trim job use raw_dir or unzip files to $(pwd)/$sample_name/$split/$chunk/\*.fq
   chunk=$1
   if [[ $chunk ]]; then
     filename=condor_submission_files/${sample_name}/trim_job_${sample_name}_${chunk}.sub
@@ -62,8 +97,8 @@ write_trim_jobs_submission_file() {
 Initialdir = $(pwd)
 executable = $REPO_FOR_REIZEL_LAB/run_on_atlas/bismark_wgbs/trim_illumina_adaptors.sh
 Arguments = \$(args)
-request_cpus = 3
-RequestMemory = 500MB
+request_cpus = $TRIM_JOB_CPUS
+RequestMemory = $TRIM_JOB_MEM
 universe = vanilla
 log = $(pwd)/logs/$sample_name/\$(name)_trim.log
 output = $(pwd)/logs/$sample_name/\$(name)_trim.out
@@ -94,8 +129,8 @@ write_align_sub_file() {
 Initialdir = $(pwd)
 executable = $REPO_FOR_REIZEL_LAB/run_on_atlas/bismark_wgbs/bismark_align.sh
 Arguments = \$(args)
-request_cpus = 3
-RequestMemory = 40GB
+request_cpus = $ALIGN_JOB_CPUS
+RequestMemory = $ALIGN_JOB_MEM
 universe = vanilla
 log = $(pwd)/logs/$sample_name/\$(name)_bismark_align.log
 output = $(pwd)/logs/$sample_name/\$(name)_bismark_align.out
@@ -123,8 +158,8 @@ write_deduplicate_job_submission_file() {
 Initialdir = $(pwd)
 executable = $REPO_FOR_REIZEL_LAB/run_on_atlas/bismark_wgbs/deduplicate.sh
 Arguments = \$(args)
-request_cpus = 2
-RequestMemory = 40GB
+request_cpus = $DEDUP_JOB_CPUS
+RequestMemory = $DEDUP_JOB_MEM
 universe = vanilla
 log = $(pwd)/logs/$sample_name/\$(name)_deduplicate.log
 output = $(pwd)/logs/$sample_name/\$(name)_deduplicate.out
@@ -141,8 +176,8 @@ write_methylation_calling_job_submission_file() {
 Initialdir = $(pwd)
 executable = $REPO_FOR_REIZEL_LAB/run_on_atlas/bismark_wgbs/methylation_calling.sh
 Arguments = \$(args)
-request_cpus = 3
-RequestMemory = 4GB
+request_cpus = $METH_CALL_JOB_CPUS
+RequestMemory = $METH_CALL_JOB_MEM
 universe = vanilla
 log = $(pwd)/logs/$sample_name/\$(name)_methylation_calling.log
 output = $(pwd)/logs/$sample_name/\$(name)_methylation_calling.out
@@ -161,8 +196,8 @@ write_bam2nuc_job_submission_file() {
 Initialdir = $(pwd)
 executable = $REPO_FOR_REIZEL_LAB/run_on_atlas/bismark_wgbs/nucleotide_coverage_report.sh
 Arguments = \$(args)
-request_cpus = 2
-RequestMemory = 10GB
+request_cpus = $BAM2NUC_JOB_CPUS
+RequestMemory = $BAM2NUC_JOB_MEM
 universe = vanilla
 log = $(pwd)/logs/$sample_name/\$(name)_bam2nuc.log
 output = $(pwd)/logs/$sample_name/\$(name)_bam2nuc.out
@@ -178,8 +213,8 @@ write_make_tiles_job_submission_file() {
 Initialdir = $(pwd)
 executable = $REPO_FOR_REIZEL_LAB/run_on_atlas/bismark_wgbs/make_tiles.sh
 Arguments = \$(args)
-request_cpus = 1
-RequestMemory = 30GB
+request_cpus = $TILES_JOB_CPUS
+RequestMemory = $TILES_JOB_MEM
 universe = vanilla
 log = $(pwd)/logs/$sample_name/\$(name)_make_tiles.log
 output = $(pwd)/logs/$sample_name/\$(name)_make_tiles.out
@@ -195,8 +230,8 @@ write_multiqc_job_submission_file() {
 Initialdir = $(pwd)
 executable = $REPO_FOR_REIZEL_LAB/run_on_atlas/bismark_wgbs/run_multiqc.sh
 Arguments = \$(args)
-request_cpus = 1
-RequestMemory = 500MB
+request_cpus = $MULTIQC_JOB_CPUS
+RequestMemory = $MULTIQC_JOB_MEM
 universe = vanilla
 log = $(pwd)/logs/multiqc_job.log
 output = $(pwd)/logs/multiqc_job.out

@@ -2,25 +2,32 @@
 
 source /storage/bfe_reizel/bengst/repo_for_reizel_lab/run_on_atlas/bismark_wgbs/shared.sh
 
-N_CORES=3
-N_PARALLEL_INSTANCES=1 #each instance uses ~3 cores
-BUFFER_SIZE=4G         #buffer size for unix sort
-MEM=4GB
+#TODO: to include all Cytosines use option --CX
+#TODO: -keep-files #OT OB *.bedGraph.gz
 
 help() {
   cat <<EOF
-	run after trim_illumina_adaptors.sh, trim_diversity_adaptors.sh, align_to_genome.sh
-	resources: $N_CORES cores, $MEM RAM
+----------------------------------------
+Project: Reizel Lab Bioinformatics Pipelines
+Pipeline: Bismark WGBS
+Script: methylation_calling.sh
+Author: Ben G. Steinberg
+Last Update: 4 Sep 2023
+----------------------------------------
 
-  produces coverage report (only CpG for to include all Cytosines use option --CX)
+Run after deduplicate.sh, Produces coverage report, cov file (only CpGs)
 
-	-output-dir
-	#TODO: -keep-files #OT OB *.bedGraph.gz
+USAGE: methylation_calling.sh -output-dir <path> [-extra-options "multiple double quoted options"] [-bam-dir <path>]
 
+Resources: $METH_CALL_JOB_CPUS cores, $METH_CALL_JOB_MEM RAM (defined in shared.sh)
 
-	optional:
-  -extra-options "multiple double quoted options" (e.g. --ignore <int>. See Bismark manual)
-  -bam-dir <path> Use for m-bias fix (when the bam files are in a different directory than the output directory).
+Arguments:
+-output-dir <path> Alignment output bam file(s) are expected to be found here, output will be written to here as well.
+
+optional:
+[-extra-options "multiple double quoted options"] (e.g. --ignore <int>. See Bismark manual)
+[-bam-dir <path>] Use for m-bias fix (when the bam files are in a different directory than the output directory).
+
 EOF
 }
 
@@ -55,15 +62,16 @@ call_methylation() {
   fi
   echo $alignment_output | grep 'pe' && paired="-p" || paired=""
 
-  #  command=$(echo bismark_methylation_extractor --bedgraph $paired $ignore_r2 --multicore $N_PARALLEL_INSTANCES --gzip --buffer_size $BUFFER_SIZE $extra $alignment_output)
-  command="bismark_methylation_extractor --bedgraph $paired $ignore_r2 --multicore $N_PARALLEL_INSTANCES --gzip --buffer_size $BUFFER_SIZE $extra $alignment_output"
+  #  command=$(echo bismark_methylation_extractor --bedgraph $paired $ignore_r2 --multicore $METH_CALL_INSTANCES --gzip --buffer_size $METH_CALL_BUFFER_SIZE $extra $alignment_output)
+  command="bismark_methylation_extractor --bedgraph $paired --multicore $METH_CALL_INSTANCES --gzip --buffer_size $METH_CALL_BUFFER_SIZE $extra $alignment_output"
   #NOTE: samtools broken pipe and perl gzip: broken pipe errors occur. this is a knows issue and should not affect the output.
   #      an ld version of samtools (--samtools_path /Local/bfe_reizel/samtools-0.1.19/) fixes the samtools error but not the perl error, perhaps an old version of perl will work.
   #      Leaving this as is for now, the errors are not fatal and the output is fine.
 
   #--ample_memory speeds things up for samples over 10 million reads or so. since it may take over an hour to get going ATLAS policy holds the jobs.
-  #  command=$(echo bismark_methylation_extractor --ample_memory --bedgraph $paired $ignore_r2 --multicore $N_PARALLEL_INSTANCES --gzip  $extra $alignment_output)
-  echo $SCRIPT_NAME runnig: $command
+  #  command=$(echo bismark_methylation_extractor --ample_memory --bedgraph $paired $ignore_r2 --multicore $METH_CALL_INSTANCES --gzip  $extra $alignment_output)
+  echo $script_name runnig: $command
+  echo
   $command
 }
 
@@ -76,11 +84,6 @@ arg_parse() {
       ;;
     -output-dir)
       output_dir="$2"
-      shift
-      shift
-      ;;
-    -ignore_r2)
-      ignore_r2=$(echo --ignore_r2 "$2")
       shift
       shift
       ;;
