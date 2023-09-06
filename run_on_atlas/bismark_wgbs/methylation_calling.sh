@@ -62,7 +62,7 @@ call_methylation() {
   fi
 
   #check if paired end and set flag
-  echo $alignment_output | grep 'pe' && paired="-p" || paired="" > /dev/null
+  echo $alignment_output | grep 'pe' >/dev/null && paired="-p" || paired=""
 
   #  command=$(echo bismark_methylation_extractor --bedgraph $paired $ignore_r2 --multicore $METH_CALL_INSTANCES --gzip --buffer_size $METH_CALL_BUFFER_SIZE $extra $alignment_output)
   command="bismark_methylation_extractor --bedgraph $paired --multicore $METH_CALL_INSTANCES --gzip --buffer_size $METH_CALL_BUFFER_SIZE $extra $alignment_output"
