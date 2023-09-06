@@ -34,7 +34,7 @@ main() { #<sample_dir> {--paired-end or --single-end} <split>
 
   cd "$sample_dir" || exit 1
 
-  echo "If output files from previous runs exist, they will be removed as to not corrupt the current run."
+  echo -e "If output files from previous runs exist, they will be removed as to not corrupt the current run.\n"
   rm -fv $(find . -name "*deduplicated*bam" -o -name "*deduplication_report.txt")
 
   # NOTE: with the wgbs_bismark_pipeline_2023 conda environment, we get broken pipe errors from samtools and perl.
