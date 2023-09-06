@@ -26,12 +26,10 @@ EOF
 main() {
   # NOTE: not cleaning up tiles from previous runs, because they wii be overwritten anyway,
   # and people may want to run this script again with different parameters (e.g. tile size).
-  arg_parse "$@"
-  source /Local/bfe_reizel/anaconda3/bin/activate wgbs_bismark_pipeline_2023
-  cd $output_dir || exit 1
   script_name=$(echo $0 | awk -F / '{print $NF}')
-
   print_info "running: " "$script_name " "$@"
+  arg_parse "$@"
+  cd $output_dir || exit 1
   time combine_methylation_coverage_to_tiles 100 10 $genome #<tile_size> <min_coverage> <genome>
   print_info "finished: " "$script_name " "$@"
 }

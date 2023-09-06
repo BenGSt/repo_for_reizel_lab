@@ -56,7 +56,8 @@ main() {
   script_name=$(echo $0 | awk -F / '{print $NF}')
   print_info "running: " "$script_name " "$@"
   arg_parse "$@"
-  #clean any trimmed fastq files from previous runs
+
+  echo "If output files from previous runs exist, they will be removed as to not corrupt the current run."
   rm -fv $(find $output_dir -name "*trimmed*" -o -name "*val_[0-1]*" -o -name "*fastqc*")
 
   mkdir -p $output_dir

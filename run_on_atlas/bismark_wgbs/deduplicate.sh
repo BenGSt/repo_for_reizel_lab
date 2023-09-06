@@ -17,6 +17,7 @@ main() { #<sample_dir> {--paired-end or --single-end} <split>
   sample_dir=$1
   split=$3 #USAGE: set if input are multiple split fastq files (if run_data_split.sh was run)
   script_name=$(echo $0 | awk -F / '{print $NF}')
+  print_info "running: " "$script_name " "$@"
 
   if [[ $2 == "-paired-end" ]]; then
     flags="-p"
@@ -32,8 +33,8 @@ main() { #<sample_dir> {--paired-end or --single-end} <split>
   fi
 
   cd "$sample_dir" || exit 1
-  print_info "running: " "$script_name " "$@"
-  #remove output files from previous runs
+
+  echo "If output files from previous runs exist, they will be removed as to not corrupt the current run."
   rm -fv $(find . -name "*deduplicated*bam")
 
   # NOTE: with the wgbs_bismark_pipeline_2023 conda environment, we get broken pipe errors from samtools and perl.
