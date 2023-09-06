@@ -39,7 +39,7 @@ main() {
 
   #remove output files from previous runs
   echo "If output files from previous runs exist, they will be removed as to not corrupt the current run."
-  rm -fv $(find . -name "*.cov.gz" -o -name "*.bedGraph.gz" -name "*OB*.txt*" -o -name "*OT*.txt*")
+  rm -fv $(find . -name "*.cov.gz" -o -name "*.bedGraph.gz" -o -name "*OB*.txt*" -o -name "*OT*.txt*")
 
   call_methylation
 
