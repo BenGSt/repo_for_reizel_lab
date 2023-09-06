@@ -33,9 +33,9 @@ EOF
 
 main() {
   script_name=$(echo $0 | awk -F / '{print $NF}')
-  print_info "running: " "$script_name " "$@"
   arg_parse "$@"
   cd "$output_dir" || exit 1
+  print_info "running: " "$script_name " "$@"
 
   #remove output files from previous runs
   rm -fv $(find . -name "*.cov.gz" -o -name "*.bedGraph.gz" -name "*OB*.txt*" -o -name "*OT*.txt*")
@@ -50,7 +50,7 @@ main() {
   rm -v $(find ./ | grep -P 'OT|OB')
   rm -v $(find . -name "*.bedGraph.gz")
 
-    print_info "finished: " "$script_name " "$@"
+  print_info "finished: " "$script_name " "$@"
 }
 
 call_methylation() {
@@ -60,7 +60,9 @@ call_methylation() {
   else
     alignment_output=$(find $bam_dir -name '*bismark*deduplicated*bam')
   fi
-  echo $alignment_output | grep 'pe' && paired="-p" || paired=""
+
+  #check if paired end and set flag
+  echo $alignment_output | grep 'pe' && paired="-p" || paired="" > /dev/null
 
   #  command=$(echo bismark_methylation_extractor --bedgraph $paired $ignore_r2 --multicore $METH_CALL_INSTANCES --gzip --buffer_size $METH_CALL_BUFFER_SIZE $extra $alignment_output)
   command="bismark_methylation_extractor --bedgraph $paired --multicore $METH_CALL_INSTANCES --gzip --buffer_size $METH_CALL_BUFFER_SIZE $extra $alignment_output"
