@@ -63,6 +63,7 @@ combine_methylation_coverage_to_tiles() {
   #get current directory name:
   current_dir=$(pwd | awk -F'/' '{print $NF}')
   output_file=${current_dir}_100bp_tiles.bed
+  rm -fv $output_file #remove old file if exists
   echo tiles file: $tiles_file
   echo methylation calling output: $meth_calling_output
 

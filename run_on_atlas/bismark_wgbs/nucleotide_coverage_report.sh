@@ -48,6 +48,8 @@ main() {
     exit 1
   fi
 
+  #remove output files from previous runs
+  rm -fv $(find . -name "nucleotide_stats.txt" -o -name "report.html")
   bam2nuc --genome_folder $bismark_genome_location ./*.bam
   bismark2report --splitting_report *splitting_report.txt --mbias_report *M-bias.txt \
     --nucleotide_report *nucleotide_stats.txt --dedup_report *deduplication_report.txt
