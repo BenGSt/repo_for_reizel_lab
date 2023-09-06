@@ -2,9 +2,7 @@
 
 source /storage/bfe_reizel/bengst/repo_for_reizel_lab/run_on_atlas/bismark_wgbs/shared.sh
 
-N_PARALLEL_INSTANCES=1 #manual states ~5 cores per instance, But i'm seeing less on htcondor logs (~2.5)
-#maybe due to using unzipped fastq files
-# exceeding MEM too often. changing to 1 parallel instance. 14.03.2023
+
 
 help() {
   cat <<EOF

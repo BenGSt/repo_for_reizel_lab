@@ -22,13 +22,16 @@ TRIM_JOB_MEM=500MB
 ALIGN_JOB_CPUS=3
 ALIGN_JOB_MEM=40GB
 BISMARK_INSTANCES=1
+# manual states ~5 cores per instance, But i'm seeing less on htcondor logs (~2.5)
+# maybe due to using unzipped fastq files
+# exceeding MEM too often. changing to 1 parallel instance. 14.03.2023
 
 DEDUP_JOB_CPUS=2
 DEDUP_JOB_MEM=40GB
 
 METH_CALL_JOB_CPUS=3
 METH_CALL_JOB_MEM=4GB
-METH_CALL_INSTANCES=1     #each instance uses ~3 cores
+METH_CALL_INSTANCES=1    #each instance uses ~3 cores
 METH_CALL_BUFFER_SIZE=4G #buffer size for unix sort
 
 BAM2NUC_JOB_CPUS=2
@@ -206,7 +209,7 @@ EOF
 }
 
 write_make_tiles_job_submission_file() {
-    if [[ $1 == "-override_genome" ]]; then
+  if [[ $1 == "-override_genome" ]]; then
     genome=$2 #used for mbias correction (correct_mbias.sh)
   fi
   cat <<EOF >condor_submission_files/${sample_name}/make_tiles_${sample_name}.sub
