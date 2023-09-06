@@ -38,6 +38,7 @@ main() {
   print_info "running: " "$script_name " "$@"
 
   #remove output files from previous runs
+  echo "If output files from previous runs exist, they will be removed as to not corrupt the current run."
   rm -fv $(find . -name "*.cov.gz" -o -name "*.bedGraph.gz" -name "*OB*.txt*" -o -name "*OT*.txt*")
 
   call_methylation
@@ -72,6 +73,7 @@ call_methylation() {
 
   #--ample_memory speeds things up for samples over 10 million reads or so. since it may take over an hour to get going ATLAS policy holds the jobs.
   #  command=$(echo bismark_methylation_extractor --ample_memory --bedgraph $paired $ignore_r2 --multicore $METH_CALL_INSTANCES --gzip  $extra $alignment_output)
+  echo
   echo $script_name runnig: $command
   echo
   $command
