@@ -76,7 +76,8 @@ EOF
 
 help() {
   cat <<EOF
-  $script_name --biased_dir <path> {at least one of: --ignore_r1 <int> --ignore_r2  --ignore_3prime <int> --ignore_3prime_r2 <int>} [--output-dir <output_dir>]
+USAGE: $script_name --biased_dir <path> {at least one of: --ignore_r1 <int> --ignore_r2  --ignore_3prime <int> --ignore_3prime_r2 <int>} [--output-dir <output_dir>]
+
 obligatory options:
    --biased_dir <path>
 at least one of the following:
