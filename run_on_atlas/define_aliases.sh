@@ -1,6 +1,7 @@
 #!/bin/bash
 
-# USAGE: define_aliases.sh [-write]
+# USAGE: set aliases in current shell: source define_aliases.sh
+#        make .bashrc set the aliases: define_aliases.sh -write
 
 write_to_bashrc()
 {
@@ -16,7 +17,7 @@ echo -e "Custom aliases added to .bashrc\n"
 
 #main
 if [ "$1" == "-write" ]; then
-  write_to_bashr
+  write_to_bashrc
 else
   alias wgbs='/storage/bfe_reizel/bengst/repo_for_reizel_lab/run_on_atlas/bismark_wgbs/prepare_jobs.sh'
   alias rrbs='/storage/bfe_reizel/bengst/repo_for_reizel_lab/run_on_atlas/rrbs_condor_dag/run.sh'
