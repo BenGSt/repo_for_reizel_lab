@@ -76,6 +76,16 @@ EOF
 
 help() {
   cat <<EOF
+----------------------------------------
+Project: Reizel Lab Bioinformatics Pipelines
+Pipeline: Bismark WGBS
+Script: correct_mbias.sh
+Author: Ben G. Steinberg
+Last Update: 4 Sep 2023
+----------------------------------------
+
+Initiate the m-bias correction step of the Bismark WGBS pipeline.
+
 USAGE: $script_name --biased_dir <path> {at least one of: --ignore_r1 <int> --ignore_r2  --ignore_3prime <int> --ignore_3prime_r2 <int>} [--output-dir <output_dir>]
 
 obligatory options:
@@ -86,6 +96,7 @@ at least one of the following:
 
    --ignore_r2 <int>
    --ignore_3prime_r2 <int>
+
 non-obligatory options:
    [--output-dir <output_dir>] defaults to \${biased_dir}_mbias_corrected
 
