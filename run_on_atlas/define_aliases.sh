@@ -14,7 +14,7 @@ USER_HOME=$(eval echo ~${SUDO_USER:-$USER})
 cat << EOF >>$USER_HOME/.bashrc
 
 # Reizel Lab Pipeline Aliases
-. /storage/bfe_reizel/bengst/repo_for_reizel_lab/run_on_atlas/define_aliases.shu
+. /storage/bfe_reizel/bengst/repo_for_reizel_lab/run_on_atlas/define_aliases.sh
 EOF
 echo -e "Custom aliases added to .bashrc\n"
 # Reload the .bashrc file
