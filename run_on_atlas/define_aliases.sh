@@ -1,10 +1,6 @@
 #!/bin/bash
 
 set_aliases() {
-  alias wgbs='/storage/bfe_reizel/bengst/repo_for_reizel_lab/run_on_atlas/bismark_wgbs/prepare_jobs.sh'
-  alias rrbs='/storage/bfe_reizel/bengst/repo_for_reizel_lab/run_on_atlas/rrbs_condor_dag/run.sh'
-  alias dmrs='/storage/bfe_reizel/bengst/repo_for_reizel_lab/run_on_atlas/dmrs_condor_dag/run.sh'
-  alias rna_seq='/storage/bfe_reizel/bengst/repo_for_reizel_lab/run_on_atlas/rna_hisat2_htseq_DESeq2_condor_dag/run.sh'
 
   echo Custom aliases set in current shell
   echo To make aliases permanent, run this script with the -write option
@@ -28,7 +24,10 @@ source $USER_HOME/.bashrc
 if [ "$1" == "-write" ]; then
   source_aliases_in_bashrc
 else
-  set_aliases
+  alias wgbs='/storage/bfe_reizel/bengst/repo_for_reizel_lab/run_on_atlas/bismark_wgbs/prepare_jobs.sh'
+  alias rrbs='/storage/bfe_reizel/bengst/repo_for_reizel_lab/run_on_atlas/rrbs_condor_dag/run.sh'
+  alias dmrs='/storage/bfe_reizel/bengst/repo_for_reizel_lab/run_on_atlas/dmrs_condor_dag/run.sh'
+  alias rna_seq='/storage/bfe_reizel/bengst/repo_for_reizel_lab/run_on_atlas/rna_hisat2_htseq_DESeq2_condor_dag/run.sh'
 fi
 
 
