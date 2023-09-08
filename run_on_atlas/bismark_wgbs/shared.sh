@@ -373,7 +373,7 @@ write_top_level_dag() {
   touch $fileout
 
   if [[ $correct_mbias ]]; then
-    for sample_name in $(find $biased_dir -name "*deduplicated*bam" | awk -F / '{print $(NF-1)}'); do
+    for sample_name in $(find $biased_dir -name "*deduplicated*bam" | awk -F / '{print $(NF-1)}' | sort); do
       sample_names+=($sample_name)
     done
   else
