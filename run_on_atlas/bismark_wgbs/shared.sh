@@ -29,9 +29,9 @@ BISMARK_INSTANCES=1
 DEDUP_JOB_CPUS=2
 DEDUP_JOB_MEM=40GB
 
-METH_CALL_JOB_CPUS=3
+METH_CALL_JOB_CPUS=4 #each instance uses ~3 cores, but some exceed 3, setting to 4 to stay on the safe side.
 METH_CALL_JOB_MEM=4GB
-METH_CALL_INSTANCES=1    #each instance uses ~3 cores
+METH_CALL_INSTANCES=1
 METH_CALL_BUFFER_SIZE=4G #buffer size for unix sort
 
 BAM2NUC_JOB_CPUS=2
