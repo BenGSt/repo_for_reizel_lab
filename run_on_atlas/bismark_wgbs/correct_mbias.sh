@@ -86,7 +86,7 @@ Last Update: 4 Sep 2023
 
 Initiate the m-bias correction step of the Bismark WGBS pipeline.
 
-USAGE: $script_name --biased_dir <path> {at least one of: --ignore_r1 <int> --ignore_r2  --ignore_3prime <int> --ignore_3prime_r2 <int>} [--output-dir <output_dir>]
+USAGE: $script_name --biased_dir <path> {at least one of: --ignore <int>  --ignore_3prime <int> --ignore_r2 <int> --ignore_3prime_r2 <int>} [--output-dir <path>]
 
 obligatory options:
    --biased_dir <path>
