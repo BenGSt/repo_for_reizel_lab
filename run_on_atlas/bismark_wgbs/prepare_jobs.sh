@@ -27,7 +27,7 @@ times for each sample batch, in other words it has 3 modes of operation:
 
 USAGE: prepare_jobs.sh {-single-end or -paired-end} -raw-data-dir <raw_data_dir> -genome <mm10 or hg38> [optional]
 
-  <raw_data_dir> should contain a dir for each sample containing it\'s fastq files.
+  <raw_data_dir> should contain a dir for each sample containing it's fastq files.
   Run from the directory you wish the output to be written to.
 
 
