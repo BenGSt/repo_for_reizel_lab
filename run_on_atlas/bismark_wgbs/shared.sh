@@ -6,13 +6,15 @@ REPO_FOR_REIZEL_LAB=/storage/bfe_reizel/bengst/repo_for_reizel_lab
 GENOMIC_REFERENCE_LOCATION=/storage/bfe_reizel/bengst/genomic_reference_data
 
 MM10_REF=$GENOMIC_REFERENCE_LOCATION/from_huji/mm10/Sequence/WholeGenomeFasta
-#HG38_REF=$GENOMIC_REFERENCE_LOCATION/hg38/analysisSet/hg38.analysisSet.chroms #TODO: test this, if mem usage is too high, use minChromSet instead (5.9.2023)
-# 11.9.2023: deduplication of 500M read sample failed due to memory usage, switching to minChromSet
+#HG38_REF=$GENOMIC_REFERENCE_LOCATION/hg38/analysisSet/hg38.analysisSet.chroms
+
 HG38_REF=$GENOMIC_REFERENCE_LOCATION/hg38/minChromSet/hg38.minChromSet.chroms
 # NOTE: deleted all random and unknown chromosomes from hg38 analysis set to reduce memory usage, s.t.
 #       bismark can run on atlas, which is restricted to 40GB per job. This wasn't enough, so input fq files were split.
-#       This reduced the memory usage, and may be enough to enable using the original Analysis Set reference genome
-#       as published by UCSC.
+#       This reduced the memory usage, and may be enough in most cases to enable using the original Analysis Set
+#       reference genome as published by UCSC.
+#       11.9.2023: deduplication of 500M read sample failed due to memory usage, switching to minChromSet.
+#TODO: add option to use minChromSet or analysisSet.
 
 SPLIT_JPB_CPUS=3
 SPLIT_JOB_MEM=250MB
