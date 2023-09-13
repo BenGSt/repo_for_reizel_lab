@@ -41,7 +41,9 @@ main() { #<sample_dir> {--paired-end or --single-end} <split>
   # This is a known issue and should not affect the output. The samtools error can be fixed by using an older version
   # of samtools (tested with  --samtools_path /Local/bfe_reizel/samtools-0.1.19/). The perl error might also be fixed by
   # using an older version of perl, but this has not been tested.
-  deduplicate_bismark $flags --samtools_path /Local/bfe_reizel/samtools-0.1.19/ $(find . -name "*bismark*bam" | sort) || exit 1
+  cmd="deduplicate_bismark $flags --samtools_path /Local/bfe_reizel/samtools-0.1.19/ $(find . -name "*bismark*bam" | sort)"
+  echo running: $cmd
+  $cmd || exit 1
 
   # rename deduplicated bam file to remove chunk and val from name of paired end
   # and chunk and trimmed from se (for multiqc)
