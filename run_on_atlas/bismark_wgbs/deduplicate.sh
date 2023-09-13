@@ -39,9 +39,9 @@ main() { #<sample_dir> {--paired-end or --single-end} <split>
 
   # NOTE: with the wgbs_bismark_pipeline_2023 conda environment, we get broken pipe errors from samtools and perl.
   # This is a known issue and should not affect the output. The samtools error can be fixed by using an older version
-  # of samtools (tested with  -samtools_path /Local/bfe_reizel/samtools-0.1.19/). The perl error might also be fixed by
+  # of samtools (tested with  --samtools_path /Local/bfe_reizel/samtools-0.1.19/). The perl error might also be fixed by
   # using an older version of perl, but this has not been tested.
-  deduplicate_bismark $flags $(find . -name "*bismark*bam" | sort) || exit 1
+  deduplicate_bismark $flags --samtools_path /Local/bfe_reizel/samtools-0.1.19/ $(find . -name "*bismark*bam" | sort) || exit 1
 
   # rename deduplicated bam file to remove chunk and val from name of paired end
   # and chunk and trimmed from se (for multiqc)
