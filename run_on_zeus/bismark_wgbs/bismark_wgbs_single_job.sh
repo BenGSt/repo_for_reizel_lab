@@ -14,38 +14,27 @@ EOF
 
 main() {
   script_name=$(echo $0 | awk -F / '{print $NF}')
-  echo
-  echo
-  echo \#################################
-  echo \#################################
-  echo running: $script_name "$@"
-  echo date: $(date)
-  echo hostname: $(hostname)
-  echo pwd: $(pwd)
-  echo \#################################
-  echo \#################################
-  echo
-  echo
-
+  print_command_info $script_name "$@"
   arg_parse "$@"
   mkdir -p $output_dir
   cd $output_dir || exit 1
-
   eval "$(micromamba shell hook --shell=bash)"
   micromamba activate /home/s.benjamin/micromamba/envs/wgbs_bismark_pipeline_2023
 
-  # fastqc in trim_galore runs on 1 core. run separately with fastqc --threads 20 *val*.fq
-  #  trim_reads $input_fastq_1 $input_fastq_2
-  #  fastqc --threads 20 ./*val*.fq
-  # TESTED: dosn't change anything, fastqc is just slow...
-  trim_reads_and_fastqc $input_fastq_1 $input_fastq_2
-  align_to_genome
-  remove_duplicates
-  methylation_calling &
-  nucleotide_cov_report &
-  wait %1 # wait for methylation_calling to complete
-  calculate_tiles 100 10
-  write_html_report
+  if [[ $correct_mbias -eq 1 ]]; then
+    methylation_calling
+    calculate_tiles 100 10
+    write_html_report
+  else
+    trim_reads_and_fastqc $input_fastq_1 $input_fastq_2
+    align_to_genome
+    remove_duplicates
+    methylation_calling &
+    nucleotide_cov_report &
+    wait %1 # wait for methylation_calling to complete
+    calculate_tiles 100 10
+    write_html_report
+  fi
 
   echo
   echo
@@ -65,7 +54,7 @@ print_command_info() { # $cmd
 
 #################################
 #################################
-running: $1
+running: $@
 date: $(date)
 pwd: $(pwd)
 #################################
@@ -113,7 +102,7 @@ set_bismark_genome_location() {
   if [[ $genome == "mm10" ]]; then
     bismark_genome_location=$GENOMIC_REFERENCE_DATA/from_huji/mm10/Sequence/WholeGenomeFasta/
   elif [[ $genome == "hg38" ]]; then
-#    bismark_genome_location=$GENOMIC_REFERENCE_DATA/hg38/ #Full analysis set
+    #    bismark_genome_location=$GENOMIC_REFERENCE_DATA/hg38/ #Full analysis set
     bismark_genome_location=$GENOMIC_REFERENCE_DATA/hg38/minChromSet/hg38.minChromSet.chroms/
   else
     echo ERROR: genome $genome not supported
@@ -264,6 +253,10 @@ arg_parse() {
     -extra-meth-extractor-options)
       extra_meth_extract_opts=$2
       shift
+      shift
+      ;;
+    -correct_mbias)
+      correct_mbias=1
       shift
       ;;
     *)

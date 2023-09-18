@@ -113,9 +113,7 @@ main() {
   arg_parse "$@"
   script=$REPO_FOR_REIZEL_LAB/run_on_zeus/bismark_wgbs/bismark_wgbs_single_job.sh
 
-#  sample_names=()
   for sample_name in $(find -L $raw_data_dir -type d | awk -F / 'NR>1{print $NF}' | sort); do
-#    sample_names+=($sample_name)
 
     if [[ $single_end -eq 1 ]]; then
       args=$(echo -output-dir $(realpath $PWD)/$sample_name -input-fastq-file $(realpath $raw_data_dir/$sample_name/*.fastq.gz) -genome $genome $non_directional $extra_trim_opts $extra_meth_opts)
@@ -131,8 +129,6 @@ main() {
 #!/bin/bash
 #PBS  -N  bismark_wgbs_${sample_name}
 #PBS  -q  zeus_new_q
-#PBS  -m  abe
-#PBS  -M  s.benjamin@technion.ac.il
 #PBS  -l select=1:ncpus=${N_CORES}
 #PBS  -l select=mem=64gb
 PBS_O_WORKDIR=$(realpath $PWD)
