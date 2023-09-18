@@ -113,7 +113,8 @@ set_bismark_genome_location() {
   if [[ $genome == "mm10" ]]; then
     bismark_genome_location=$GENOMIC_REFERENCE_DATA/from_huji/mm10/Sequence/WholeGenomeFasta/
   elif [[ $genome == "hg38" ]]; then
-    bismark_genome_location=$GENOMIC_REFERENCE_DATA/hg38/
+#    bismark_genome_location=$GENOMIC_REFERENCE_DATA/hg38/ #Full analysis set
+    bismark_genome_location=$GENOMIC_REFERENCE_DATA/hg38/minChromSet/hg38.minChromSet.chroms/
   else
     echo ERROR: genome $genome not supported
     exit 1
