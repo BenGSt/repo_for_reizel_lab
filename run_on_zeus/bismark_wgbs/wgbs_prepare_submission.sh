@@ -120,9 +120,9 @@ main() {
   for sample_name in $(find -L $raw_data_dir -type d | awk -F / 'NR>1{print $NF}' | sort); do
 
     if [[ $single_end -eq 1 ]]; then
-      args="$correct_mbias $biased_dir -output-dir $(realpath $PWD)/$sample_name -input-fastq-file $(realpath $raw_data_dir/$sample_name/*.fastq.gz) -genome $genome $non_directional $extra_trim_opts $extra_meth_opts"
+      args="$correct_mbias $biased_dir -output-dir $(realpath $PWD)/$sample_name -input-fastq-file "$(realpath $raw_data_dir/$sample_name/*.fastq.gz)" -genome $genome $non_directional $extra_trim_opts $extra_meth_opts"
     else
-      args="$correct_mbias $biased_dir -output-dir $(realpath $PWD)/$sample_name -paired-input-fastq-files $(realpath $raw_data_dir/$sample_name/*.fastq.gz) -genome $genome $non_directional $extra_trim_opts $extra_meth_opts"
+      args="$correct_mbias $biased_dir -output-dir $(realpath $PWD)/$sample_name -paired-input-fastq-files "$(realpath $raw_data_dir/$sample_name/*.fastq.gz)" -genome $genome $non_directional $extra_trim_opts $extra_meth_opts"
     fi
 
     mkdir -p $sample_name
