@@ -147,7 +147,11 @@ remove_duplicates() {
 }
 
 methylation_calling() {
-  alignment_output=$(find . -name '*bismark*deduplicated*bam')
+  if [[ $correct_mbias -eq 1 ]]; then
+    alignment_output=$(find $biased_dir -name '*bismark*deduplicated*bam')
+  else
+    alignment_output=$(find . -name '*bismark*deduplicated*bam')
+  fi
   echo $alignment_output | grep 'pe' && paired="-p" || paired=""
   # option 1 : use unix sort
   # command=$(echo bismark_methylation_extractor --bedgraph $paired --multicore $N_PARALLEL_INSTANCES --gzip --buffer_size $BUFFER_SIZE $extra_meth_extract_opts $alignment_output)
@@ -255,11 +259,17 @@ arg_parse() {
       shift
       shift
       ;;
-    -correct_mbias)
+    -correct-mbias)
       correct_mbias=1
       shift
       ;;
+    -biased-dir)
+      biased_dir=$2
+      shift
+      shift
+      ;;
     *)
+      echo "Unknown option $1"
       help
       exit 1
       ;;

@@ -11,13 +11,13 @@ Usage:  $(echo "$0" | awk -F / '{print$NF}') {-single-end or -paired-end} -raw-d
 Run from the directory you wish the output to be written to.
 raw_data_dir should contain a dir for each sample containing it's fastq files.
 
-Note about methylation bias correction: I recommend running the pipeline once without additional options, you could
+Note about methylation bias correction: I recommend running the pipeline once without additional options, you should
 then view the m-bias plots in the MultiQC report. The expected unbiased result is a uniform distribution of the
 average methylation levels across read positions. If the results are biased, fix this by either running the methylation
-calling jobs again ignoring the biased bases, or running the pipeline again with trimmed reads. Each of these approaches
-has it's advantages and disadvantages. Ignoring aligned bases is faster. Trimming the reads may improve alignment if
-done correctly, consider trimming R1 and R2 symmetrically and/or using the "--dovetail" bismark option for the bowtie2
-aligner.
+calling jobs again ignoring the biased bases (run this script in a different directory with -correct-mbias & -biased-dir
+& -extra-meth-extract-options), or running the pipeline again with trimmed reads. Each of these approaches has it's
+advantages and disadvantages. Ignoring aligned bases is faster. Trimming the reads may improve alignment, but can use a
+lot of resources and time.
 
 optional:
 -non-directional
@@ -27,8 +27,12 @@ optional:
   Don't delete the deduplicated bam files. Useful for running methylation calling jobs again to fix m-bias without
   trimming and rerunning the pipeline, and possibly other downstream analysis.
 
+-correct-mbias & -biased-dir & -extra-meth-extract-options
+  Use these three options together to correct m-bias by rerunning the methylation calling step and ignoring biased
+  positions.
 
--extra-meth_extract-options "multiple quoted options"
+
+-extra-meth-extract-options "multiple quoted options"
 handy options (from Bismark manual):
 =====================================
 
@@ -116,15 +120,15 @@ main() {
   for sample_name in $(find -L $raw_data_dir -type d | awk -F / 'NR>1{print $NF}' | sort); do
 
     if [[ $single_end -eq 1 ]]; then
-      args=$(echo -output-dir $(realpath $PWD)/$sample_name -input-fastq-file $(realpath $raw_data_dir/$sample_name/*.fastq.gz) -genome $genome $non_directional $extra_trim_opts $extra_meth_opts)
+      args="$correct_mbias $biased_dir -output-dir $(realpath $PWD)/$sample_name -input-fastq-file $(realpath $raw_data_dir/$sample_name/*.fastq.gz) -genome $genome $non_directional $extra_trim_opts $extra_meth_opts"
     else
-      args=$(echo -output-dir $(realpath $PWD)/$sample_name -paired-input-fastq-files $(realpath $raw_data_dir/$sample_name/*.fastq.gz) -genome $genome $non_directional $extra_trim_opts $extra_meth_opts)
+      args="$correct_mbias $biased_dir -output-dir $(realpath $PWD)/$sample_name -paired-input-fastq-files $(realpath $raw_data_dir/$sample_name/*.fastq.gz) -genome $genome $non_directional $extra_trim_opts $extra_meth_opts"
     fi
 
     mkdir -p $sample_name
     cd $sample_name
-#TODO: 8.5.23: use zeus_new_q, holding all jobs for some reason. using long_q for now
-#TODO: 18.9.2023 : switched back to zeus_new_q. testing
+    #TODO: 8.5.23: use zeus_new_q, holding all jobs for some reason. using long_q for now
+    #TODO: 18.9.2023 : switched back to zeus_new_q. testing
     cat <<EOF >bismark_wgbs_${sample_name}.q
 #!/bin/bash
 #PBS  -N  bismark_wgbs_${sample_name}
@@ -143,13 +147,13 @@ EOF
 
   printf 'Submit all jobs now? (y/n) '
   read answer
-  if [ "$answer" != "${answer#[Yy]}" ] ;then # this grammar (the #[] operator) means that the variable $answer where any Y or y in 1st position will be dropped if they exist.
+  if [ "$answer" != "${answer#[Yy]}" ]; then # this grammar (the #[] operator) means that the variable $answer where any Y or y in 1st position will be dropped if they exist.
     find . -name "*.q" | awk '{print "qsub " $1}' | bash
-else
+  else
     echo You may find this list of submission commands usefull:
     find . -name "*.q" | awk '{print "qsub " $1}'
-fi
-echo Good luck!
+  fi
+  echo Good luck!
 
 }
 
@@ -181,10 +185,10 @@ arg_parse() {
       shift
       shift
       ;;
-#    -keep-bam)
-#      keep_bam="-keep-bam" #TODO: option to keep or delete bam
-#      shift
-#      ;;
+      #    -keep-bam)
+      #      keep_bam="-keep-bam" #TODO: option to keep or delete bam
+      #      shift
+      #      ;;
     -keep-trimmed-fq)
       keep_trimmed_fq="-keep-trimmed-fq"
       shift
@@ -204,6 +208,15 @@ arg_parse() {
       shift
       shift
       ;;
+    -correct-mbias)
+      correct_mbias="-correct-mbias"
+      shift
+      ;;
+    -biased-dir)
+      biased_dir="-biased-dir $2"
+      shift
+      shift
+      ;;
     *)
       help
       exit 1
@@ -211,7 +224,5 @@ arg_parse() {
     esac
   done
 }
-
-
 
 main "$@"
