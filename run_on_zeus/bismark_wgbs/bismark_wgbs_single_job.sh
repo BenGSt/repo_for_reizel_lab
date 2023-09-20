@@ -130,7 +130,7 @@ align_to_genome() {
   fi
 
   print_command_info "$command"
-  $command
+  $command || exit 1
 
   #cleanup
   rm_fq="rm -v *.fq"
