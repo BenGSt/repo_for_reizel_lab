@@ -128,11 +128,12 @@ main() {
     mkdir -p $sample_name
     cd $sample_name
     #TODO: 8.5.23: use zeus_new_q, holding all jobs for some reason. using long_q for now
-    #TODO: 18.9.2023 : switched back to zeus_new_q. testing
+    #TODO: 18.9.2023 : switched back to zeus_new_q. jobs fail with IO error, could it be because of host?
+    #TODO: 21.9.2023 : switched back to zeus_long_q. testing
     cat <<EOF >bismark_wgbs_${sample_name}.q
 #!/bin/bash
 #PBS  -N  bismark_wgbs_${sample_name}
-#PBS  -q  zeus_new_q
+#PBS  -q  zeus_long_q
 #PBS  -l select=1:ncpus=${N_CORES}
 #PBS  -l select=mem=64gb
 PBS_O_WORKDIR=$(realpath $PWD)
