@@ -19,11 +19,7 @@ main() {
   mkdir -p $output_dir
   cd $output_dir || exit 1
   eval "$(micromamba shell hook --shell=bash)"
-  #TODO: all of a sudden getting various IO erros e.g. "Unable to close OUT filehandle: Input/output error"
-  #This script was run successfully before but filed on 20.9.2023
-  # will try rrbs env to see if it works, bismark is a newer version there
-  micromamba activate /home/s.benjamin/micromamba/envs/ovation_rrbs_pipeline_2022
-#  micromamba activate /home/s.benjamin/micromamba/envs/wgbs_bismark_pipeline_2023
+  micromamba activate /home/s.benjamin/micromamba/envs/wgbs_bismark_pipeline_2023
 
 
   if [[ $correct_mbias -eq 1 ]]; then

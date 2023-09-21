@@ -29,7 +29,7 @@ optional:
 
 -correct-mbias & -biased-dir & -extra-meth-extract-options
   Use these three options together to correct m-bias by rerunning the methylation calling step and ignoring biased
-  positions.
+  positions. create a new dir and run from there.
 
 
 -extra-meth-extract-options "multiple quoted options"
@@ -128,8 +128,8 @@ main() {
     mkdir -p $sample_name
     cd $sample_name
     #TODO: 8.5.23: use zeus_new_q, holding all jobs for some reason. using long_q for now
-    #TODO: 18.9.2023 : switched back to zeus_new_q. jobs fail with IO error, could it be because of host?
-    #TODO: 21.9.2023 : switched back to zeus_long_q. testing
+    #TODO: 18.9.2023 : switched back to zeus_new_q. jobs fail with IO errors, could it be because of hosts in zeus_new_q?
+    #TODO: 21.9.2023 : switched back to zeus_long_q. testing - seems to work!
     cat <<EOF >bismark_wgbs_${sample_name}.q
 #!/bin/bash
 #PBS  -N  bismark_wgbs_${sample_name}
