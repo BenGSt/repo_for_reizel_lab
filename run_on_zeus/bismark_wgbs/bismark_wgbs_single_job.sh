@@ -62,6 +62,7 @@ print_command_info() { # $cmd
 running: $@
 date: $(date)
 pwd: $(pwd)
+hostname: $(hostname)
 #################################
 #################################
 
