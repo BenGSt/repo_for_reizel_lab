@@ -23,14 +23,9 @@ optional:
 -non-directional
   Use for non directional libraries. Instructs Bismark to align to OT, CTOT, OB, CTOB.
 
--keep-bam
-  Don't delete the deduplicated bam files. Useful for running methylation calling jobs again to fix m-bias without
-  trimming and rerunning the pipeline, and possibly other downstream analysis.
-
 -correct-mbias & -biased-dir & -extra-meth-extract-options
   Use these three options together to correct m-bias by rerunning the methylation calling step and ignoring biased
   positions. create a new dir and run from there.
-
 
 -extra-meth-extract-options "multiple quoted options"
 handy options (from Bismark manual):
