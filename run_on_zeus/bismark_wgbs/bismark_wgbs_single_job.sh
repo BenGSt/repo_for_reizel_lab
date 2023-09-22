@@ -144,8 +144,13 @@ align_to_genome() {
 }
 
 remove_duplicates() {
+  if [[ $read_type == "single_end" ]]; then
+    lib_type_flag="-s"
+  else
+    lib_type_flag="-p"
+  fi
   print_command_info "$(echo deduplicate_bismark ./*bismark*bam)"
-  deduplicate_bismark ./*bismark*bam
+  deduplicate_bismark $lib_type_flag /*bismark*bam || exit 1
   rm -v $(find . -name '*.bam' | grep -v deduplicated) #delete bam with duplicates
 }
 
