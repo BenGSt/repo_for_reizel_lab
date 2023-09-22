@@ -32,7 +32,7 @@ main() {
     remove_duplicates
     methylation_calling &
     nucleotide_cov_report &
-    wait %1 # wait for methylation_calling to complete
+    wait %1 && echo "Done waiting for methylation_calling to complete"
     calculate_tiles 100 10
     write_html_report
   fi
@@ -185,6 +185,7 @@ calculate_tiles() {
   min_coverage=$2
 
   meth_calling_output=$(find . -name "*.cov.gz")
+  print_command_info "calculate_tiles: meth_calling_output=$meth_calling_output"
 
   if [[ $genome == "mm10" ]]; then
     tiles_file=$GENOMIC_REFERENCE_DATA/from_huji/mm10/mm10_${tile_size}bp_tiles.bed
@@ -201,7 +202,8 @@ calculate_tiles() {
 }
 
 write_html_report() {
-  cmd=$(echo bismark2report --splitting_report *splitting_report.txt --mbias_report *M-bias.txt)
+  cmd=$(echo bismark2report --splitting_report *splitting_report.txt --mbias_report *M-bias.txt \
+                            --nucleotide_report *nucleotide_stats.txt --dedup_report *deduplication_report.txt)
   print_command_info "$cmd"
   $cmd
 
