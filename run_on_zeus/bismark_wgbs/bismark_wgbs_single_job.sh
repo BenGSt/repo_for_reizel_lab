@@ -34,7 +34,7 @@ main() {
     nucleotide_cov_report &
     wait %1 && echo "Done waiting for methylation_calling to complete"
     calculate_tiles 100 10
-    (wait %2 && echo "Done waiting for nucleotide_cov_report to complete") || echo "nucleotide_cov_report already done"
+    wait %2 && echo "Done waiting for nucleotide_cov_report to complete" || echo "nucleotide_cov_report already done"
     write_html_report
   fi
 
