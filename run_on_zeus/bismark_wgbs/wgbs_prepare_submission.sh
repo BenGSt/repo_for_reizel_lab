@@ -112,12 +112,26 @@ main() {
   arg_parse "$@"
   script=$REPO_FOR_REIZEL_LAB/run_on_zeus/bismark_wgbs/bismark_wgbs_single_job.sh
 
-  for sample_name in $(find -L $raw_data_dir -type d | awk -F / 'NR>1{print $NF}' | sort); do
-    input_fastq=$(realpath $raw_data_dir/$sample_name/*.fastq.gz | tr '\n' ' ')
-    if [[ $single_end -eq 1 ]]; then
-      args="$correct_mbias $biased_dir -output-dir $(realpath $PWD)/$sample_name -input-fastq-file $input_fastq -genome $genome $non_directional $extra_trim_opts $extra_meth_opts"
-    else
-      args="$correct_mbias $biased_dir -output-dir $(realpath $PWD)/$sample_name -paired-input-fastq-files $input_fastq -genome $genome $non_directional $extra_trim_opts $extra_meth_opts"
+  if [[ $correct_mbias ]]; then
+    search_dir=$(echo $biased_dir | awk '{print $2}')
+  else
+    search_dir=$raw_data_dir
+  fi
+
+  for sample_name in $(find -L $search_dir -type d | awk -F / 'NR>1{print $NF}' | sort); do
+    if [[ $correct_mbias ]]; then
+      if [[ $single_end -eq 1 ]]; then
+        args="$correct_mbias $biased_dir -output-dir $(realpath $PWD)/$sample_name $extra_meth_opts"
+      else
+        args="$correct_mbias $biased_dir -output-dir $(realpath $PWD)/$sample_name $extra_meth_opts"
+      fi
+    else #normal operation
+      input_fastq=$(realpath $raw_data_dir/$sample_name/*.fastq.gz | tr '\n' ' ')
+      if [[ $single_end -eq 1 ]]; then
+        args="-output-dir $(realpath $PWD)/$sample_name -input-fastq-file $input_fastq -genome $genome $non_directional $extra_trim_opts $extra_meth_opts"
+      else
+        args="-output-dir $(realpath $PWD)/$sample_name -paired-input-fastq-files $input_fastq -genome $genome $non_directional $extra_trim_opts $extra_meth_opts"
+      fi
     fi
 
     mkdir -p $sample_name
