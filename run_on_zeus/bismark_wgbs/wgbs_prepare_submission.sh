@@ -234,6 +234,7 @@ arg_parse() {
       shift
       ;;
     *)
+      echo "Unknown option: $1"
       help
       exit 1
       ;;
