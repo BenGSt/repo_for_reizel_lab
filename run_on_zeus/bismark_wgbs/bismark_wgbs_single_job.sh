@@ -6,9 +6,9 @@ GENOMIC_REFERENCE_DATA=/home/s.benjamin/genomic_reference_data/
 
 help() {
   cat <<EOF
-Author: Ben steinberg 2023
 Runs the bismark wgbs pipline on Zeus cluster.
 Intended to be used with wgbs_prepare_submission.sh which writes a PBS submission file for each sample, see help there.
+Author: Ben Steinberg 2023
 EOF
 }
 

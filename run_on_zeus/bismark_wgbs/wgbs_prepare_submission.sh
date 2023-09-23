@@ -216,7 +216,7 @@ arg_parse() {
       shift
       ;;
     -extra-meth-extract-options)
-      extra_meth_opts=$(echo -extra-meth_extract-options \'"$2"\')
+      extra_meth_opts=$(echo -extra-meth-extractor-options \'"$2"\')
       shift
       shift
       ;;
