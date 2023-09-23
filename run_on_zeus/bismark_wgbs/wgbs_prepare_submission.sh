@@ -225,7 +225,7 @@ arg_parse() {
       shift
       ;;
     -biased-dir)
-      biased_dir="-biased-dir $2"
+      biased_dir="-biased-dir $(realpath $2)"
       shift
       shift
       ;;
