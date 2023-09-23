@@ -173,7 +173,9 @@ methylation_calling() {
 
   #cleanup
   rm -v $(find ./ | grep -P 'OT|OB')
-  rm -v $(find . -name "*.bedGraph.gz")
+  if [[ keep_bedgraph -eq 0 ]]; then
+    rm -v $(find . -name "*.bedGraph.gz")
+  fi
 }
 
 nucleotide_cov_report() {
@@ -252,6 +254,10 @@ arg_parse() {
       ;;
     -keep-trimed-fq)
       keep_trimmed_fq=1
+      shift
+      ;;
+    -keep-bedgraph)
+      keep_bedgraph=1
       shift
       ;;
     -genome)

@@ -5,8 +5,7 @@ REPO_FOR_REIZEL_LAB=/home/s.benjamin/repo_for_reizel_lab
 
 help() {
   cat <<EOF
-Usage:  $(echo "$0" | awk -F / '{print$NF}') {-single-end or -paired-end} -raw-data-dir <raw_data_dir>
-    -genome <mm10 or hg38>  [optional]
+Usage:  $(echo "$0" | awk -F / '{print$NF}') {-single-end or -paired-end} -raw-data-dir <raw_data_dir> -genome <mm10 or hg38>  [optional]
 
 Run from the directory you wish the output to be written to.
 raw_data_dir should contain a dir for each sample containing it's fastq files.
@@ -20,6 +19,10 @@ advantages and disadvantages. Ignoring aligned bases is faster. Trimming the rea
 lot of resources and time.
 
 optional:
+-keep-bedgraph
+  By default, the bedgraph files are deleted after the methylation calling step (covergae files are kept).
+  Use this option to keep them (can be used for IGV). #TODO: try this out (23.9.2023)
+
 -non-directional
   Use for non directional libraries. Instructs Bismark to align to OT, CTOT, OB, CTOB.
 
@@ -121,16 +124,16 @@ main() {
   for sample_name in $(find -L $search_dir -type d | awk -F / 'NR>1{print $NF}' | sort); do
     if [[ $correct_mbias ]]; then
       if [[ $single_end -eq 1 ]]; then
-        args="$correct_mbias $biased_dir -output-dir $(realpath $PWD)/$sample_name $extra_meth_opts"
+        args="$correct_mbias $biased_dir -output-dir $(realpath $PWD)/$sample_name $extra_meth_opts $keep_bedgraph"
       else
-        args="$correct_mbias $biased_dir -output-dir $(realpath $PWD)/$sample_name $extra_meth_opts"
+        args="$correct_mbias $biased_dir -output-dir $(realpath $PWD)/$sample_name $extra_meth_opts $keep_bedgraph"
       fi
     else #normal operation
       input_fastq=$(realpath $raw_data_dir/$sample_name/*.fastq.gz | tr '\n' ' ')
       if [[ $single_end -eq 1 ]]; then
-        args="-output-dir $(realpath $PWD)/$sample_name -input-fastq-file $input_fastq -genome $genome $non_directional $extra_trim_opts $extra_meth_opts"
+        args="-output-dir $(realpath $PWD)/$sample_name -input-fastq-file $input_fastq -genome $genome $non_directional $extra_trim_opts $extra_meth_opts $keep_bedgraph"
       else
-        args="-output-dir $(realpath $PWD)/$sample_name -paired-input-fastq-files $input_fastq -genome $genome $non_directional $extra_trim_opts $extra_meth_opts"
+        args="-output-dir $(realpath $PWD)/$sample_name -paired-input-fastq-files $input_fastq -genome $genome $non_directional $extra_trim_opts $extra_meth_opts $keep_bedgraph"
       fi
     fi
 
@@ -224,6 +227,10 @@ arg_parse() {
     -biased-dir)
       biased_dir="-biased-dir $2"
       shift
+      shift
+      ;;
+    -keep-bedgraph)
+      keep_bedgraph="-keep-bedgraph"
       shift
       ;;
     *)
