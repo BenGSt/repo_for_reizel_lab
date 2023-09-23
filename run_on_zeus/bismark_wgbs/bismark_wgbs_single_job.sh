@@ -150,7 +150,7 @@ remove_duplicates() {
     lib_type_flag="-p"
   fi
   print_command_info "$(echo deduplicate_bismark ./*bismark*bam)"
-  deduplicate_bismark $lib_type_flag /*bismark*bam || exit 1
+  deduplicate_bismark $lib_type_flag ./*bismark*bam || exit 1
   rm -v $(find . -name '*.bam' | grep -v deduplicated) #delete bam with duplicates
 }
 
