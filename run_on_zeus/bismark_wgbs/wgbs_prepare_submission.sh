@@ -127,9 +127,9 @@ main() {
   for sample_name in $(find -L $search_dir -type d | awk -F / 'NR>1{print $NF}' | sort); do
     if [[ $correct_mbias ]]; then
       if [[ $single_end -eq 1 ]]; then
-        args="$correct_mbias $biased_dir -output-dir $(realpath $PWD)/$sample_name $extra_meth_opts $keep_bedgraph"
+        args="$correct_mbias $biased_dir -output-dir $(realpath $PWD)/$sample_name -genome $genome $extra_meth_opts $keep_bedgraph"
       else
-        args="$correct_mbias $biased_dir -output-dir $(realpath $PWD)/$sample_name $extra_meth_opts $keep_bedgraph"
+        args="$correct_mbias $biased_dir -output-dir $(realpath $PWD)/$sample_name -genome $genome $extra_meth_opts $keep_bedgraph"
       fi
     else #normal operation
       input_fastq=$(realpath $raw_data_dir/$sample_name/*.fastq.gz | tr '\n' ' ')
