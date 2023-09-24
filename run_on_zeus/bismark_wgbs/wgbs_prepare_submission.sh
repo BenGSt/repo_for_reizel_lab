@@ -5,7 +5,10 @@ REPO_FOR_REIZEL_LAB=/home/s.benjamin/repo_for_reizel_lab
 
 help() {
   cat <<EOF
-Usage:  $(echo "$0" | awk -F / '{print$NF}') {-single-end or -paired-end} -raw-data-dir <raw_data_dir> -genome <mm10 or hg38>  [optional]
+Normal Usage:  $(echo "$0" | awk -F / '{print$NF}') {-single-end or -paired-end} -raw-data-dir <raw_data_dir> -genome <mm10 or hg38>  [optional]
+Correct M-Bias Usage: $(echo "$0" | awk -F / '{print$NF}') -correct-mbias -biased-dir ../test_from_full_dataset/ -genome <mm10 or hg38> -extra-meth-extract-options "multiple quoted options" [optional]
+
+
 
 Run from the directory you wish the output to be written to.
 raw_data_dir should contain a dir for each sample containing it's fastq files.

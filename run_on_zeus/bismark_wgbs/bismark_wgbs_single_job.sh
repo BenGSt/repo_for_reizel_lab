@@ -211,7 +211,11 @@ calculate_tiles() {
 }
 
 write_html_report() {
-  cmd=$(echo bismark2report --splitting_report *splitting_report.txt --mbias_report *M-bias.txt \
+  if [[ $correct_mbias -eq 1 ]]; then
+    alignment_report=$(find $biased_dir -name '*bismark_bt2_??_report.txt')
+    alignment_report="--alignment_report $alignment_report"
+  fi
+  cmd=$(echo bismark2report $alignment_report --splitting_report *splitting_report.txt --mbias_report *M-bias.txt \
                             --nucleotide_report *nucleotide_stats.txt --dedup_report *deduplication_report.txt)
   print_command_info "$cmd"
   $cmd
