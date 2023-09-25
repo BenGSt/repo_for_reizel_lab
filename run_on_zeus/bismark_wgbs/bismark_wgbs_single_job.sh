@@ -1,7 +1,8 @@
 #!/bin/bash
 
 N_CORES_TRIM_GALORE=20
-N_BISMARK_INSTANCES=4
+N_BISMARK_INSTANCES=8
+N_METH_CALL_THREADS=10
 GENOMIC_REFERENCE_DATA=/home/s.benjamin/genomic_reference_data/
 
 help() {
@@ -166,7 +167,7 @@ methylation_calling() {
 
   #option2 use arrays
   # --ample_memory speeds things up for samples over 10 million reads or so. since it may take over an hour to get going ATLAS policy holds the jobs.
-  command=$(echo bismark_methylation_extractor --ample_memory --bedgraph $paired --multicore $N_BISMARK_INSTANCES --gzip $extra_meth_extract_opts $alignment_output)
+  command=$(echo bismark_methylation_extractor --ample_memory --bedgraph $paired --multicore $N_METH_CALL_THREADS --gzip $extra_meth_extract_opts $alignment_output)
 
   print_command_info "$command"
   $command
