@@ -15,7 +15,7 @@ EOF
 
 main() {
   script_name=$(echo $0 | awk -F / '{print $NF}')
-  print_command_info $script_name "$@"
+  print_command_info "running: " $script_name "$@"
   arg_parse "$@"
   mkdir -p $output_dir
   cd $output_dir || exit 1
@@ -38,16 +38,7 @@ main() {
     write_html_report
   fi
 
-  echo
-  echo
-  echo \#################################
-  echo \#################################
-  echo finished: $script_name "$@"
-  echo date: $(date)
-  echo \#################################
-  echo \#################################
-  echo
-  echo
+  print_command_info "finished: " $script_name "$@"
 }
 
 print_command_info() { # $cmd
@@ -56,7 +47,7 @@ print_command_info() { # $cmd
 
 #################################
 #################################
-running: $@
+$@
 date: $(date)
 pwd: $(pwd)
 hostname: $(hostname)
@@ -80,7 +71,7 @@ trim_reads_and_fastqc() { # R1 R2
     cmd="trim_galore --dont_gzip --paired $1 $2 --cores $N_CORES_TRIM_GALORE --fastqc $extra_trim_galore_opts"
   fi
 
-  print_command_info "$cmd"
+  print_command_info "running: " "$cmd"
   $cmd
 }
 
@@ -97,7 +88,7 @@ trim_reads() { # R1 R2
     cmd="trim_galore --dont_gzip --paired $1 $2 --cores $N_CORES_TRIM_GALORE  $extra_trim_galore_opts"
   fi
 
-  print_command_info "$cmd"
+  print_command_info "running:" "$cmd"
   $cmd
 }
 
@@ -132,7 +123,7 @@ align_to_genome() {
     command=$(echo bismark --multicore $N_BISMARK_INSTANCES --bowtie2 --genome $bismark_genome_location -1 $trim_galore_output_1 -2 $trim_galore_output_2 $non_directional $unmapped_ambig)
   fi
 
-  print_command_info "$command"
+  print_command_info "running: " "$command"
   $command || exit 1
 
   #cleanup
@@ -150,7 +141,7 @@ remove_duplicates() {
     lib_type_flag="-p"
   fi
   cmd="$(echo deduplicate_bismark $lib_type_flag ./*bismark*bam)"
-  print_command_info "$cmd"
+  print_command_info "running: " "$cmd"
   $cmd || exit 1
   rm -v $(find . -name '*.bam' | grep -v deduplicated) #delete bam with duplicates
 }
@@ -169,7 +160,7 @@ methylation_calling() {
   # --ample_memory speeds things up for samples over 10 million reads or so. since it may take over an hour to get going ATLAS policy holds the jobs.
   command=$(echo bismark_methylation_extractor --ample_memory --bedgraph $paired --multicore $N_METH_CALL_THREADS --gzip $extra_meth_extract_opts $alignment_output)
 
-  print_command_info "$command"
+  print_command_info "running: " "$command"
   $command
 
   #cleanup
@@ -181,8 +172,8 @@ methylation_calling() {
 
 nucleotide_cov_report() {
   cmd="$(echo bam2nuc --genome_folder $bismark_genome_location ./*.bam)"
-  print_command_info "$cmd"
-  $cmd
+  print_command_info "running: " "$cmd"
+  $cmd && print_command_info "finished nucleotide_cov_report"
 }
 
 calculate_tiles() {
@@ -194,7 +185,7 @@ calculate_tiles() {
   min_coverage=$2
 
   meth_calling_output=$(find . -name "*.cov.gz")
-  print_command_info "calculate_tiles: meth_calling_output=$meth_calling_output"
+  print_command_info "running calculate_tiles: meth_calling_output=$meth_calling_output"
 
   if [[ $genome == "mm10" ]]; then
     tiles_file=$GENOMIC_REFERENCE_DATA/from_huji/mm10/mm10_${tile_size}bp_tiles.bed
@@ -206,6 +197,7 @@ calculate_tiles() {
   output_file=$(echo ${meth_calling_output} | sed 's/_R[1-2].*//' | awk -v tile_size=$tile_size '{print $1 "_" tile_size "bp_tiles.bed" }')
   bedtools intersect -a $tiles_file -b ${meth_calling_output} -wa -wb | awk -v cov=${min_coverage} -v tileSize=${tile_size} 'BEGIN {OFS="\t"; Prev=-1} {if ($2 == Prev) {T=T+$8+$9; M=M+$8} else {if (Prev!=-1 && T>=cov) {print PrevChr,Prev,Prev+tileSize-1,M/T};T=$8+$9; M=$8;}; Prev=$2; PrevChr=$1}' >${output_file}
 
+  print_command_info "finished calculate_tiles"
   #to unite all tiles from different samples:
   #bedtools unionbedg -names `du -a -L | grep Tiles | awk '{print $2}' | sort | awk -F'/' '{print $NF}' | awk -F'.' '{print $1}'` -header -filler NA -i `du -a -L | grep Tiles | awk '{print $2}' | sort` > 100bpTiles_Tiles_Cov10_Tissues.bed
 }
@@ -229,7 +221,7 @@ write_html_report() {
         --dedup_report *deduplication_report.txt
     )
   fi
-  print_command_info "$cmd"
+  print_command_info "running: $cmd"
   $cmd
 
 }
