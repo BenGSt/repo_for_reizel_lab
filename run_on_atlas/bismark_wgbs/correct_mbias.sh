@@ -54,7 +54,7 @@ main() {
   echo Submit all jobs by running: condor_submit_dag $output_dir/condor_submission_files/submit_all_bismark_wgbs.dag
   echo
   echo To run samples individually:
-  for dag in $(find $output_dir/condor_submission_files -name "*.dag" | grep -v submit_all); do
+  for dag in $(find $output_dir/condor_submission_files -name "*.dag" | grep -v submit_all | sort -V); do
     echo condor_submit_dag $dag
   done
   echo
