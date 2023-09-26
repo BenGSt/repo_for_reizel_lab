@@ -67,7 +67,7 @@ NOTE: If The input fastq files were split into multiple files, the bismark html 
 echo -e "\033[0;36m${note}\033[0m"
 
   if [[ -d ./split ]]; then
-    bismark2report --alignment_report ./split/00/*trimming_report.txt --splitting_report *splitting_report.txt --mbias_report *M-bias.txt \
+    bismark2report --alignment_report ./split/00/*bismark_bt2_??_report.txt --splitting_report *splitting_report.txt --mbias_report *M-bias.txt \
       --nucleotide_report *nucleotide_stats.txt --dedup_report *deduplication_report.txt
   else
     bismark2report --splitting_report *splitting_report.txt --mbias_report *M-bias.txt \
