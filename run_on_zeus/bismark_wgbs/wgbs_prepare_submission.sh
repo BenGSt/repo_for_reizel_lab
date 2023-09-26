@@ -1,6 +1,8 @@
 #!/bin/bash
 
-N_CORES=20
+N_CORES=22
+MEM=128gb
+ZEUS_Q=zeus_combined_q
 REPO_FOR_REIZEL_LAB=/home/s.benjamin/repo_for_reizel_lab
 
 help() {
@@ -22,6 +24,21 @@ advantages and disadvantages. Ignoring aligned bases is faster. Trimming the rea
 lot of resources and time.
 
 optional:
+-n-cores)
+  default: $N_CORES
+  number of cores to use for jobs
+
+-mem)
+  default: $MEM
+  memory to request for jobs
+
+-zeus-q)
+  default: $ZEUS_Q
+  queue to submit jobs to
+  NOTE: zeus_new_q (72h) run on 12 "new nodes", zeus_combined_q (24h) runs on 18 old + 12 new nodes
+  and has higher priority. zeus_new_q didn't work for me on 21.9.2023, but seems to work on 26.9.2023
+  setting thing up for 24h jobs on zeus_combined_q. if there is a problem revert to an old queue.
+
 -keep-bedgraph
   By default, the bedgraph files are deleted after the methylation calling step (covergae files are kept).
   Use this option to keep them (can be used for IGV). #TODO: try this out (23.9.2023)
@@ -108,6 +125,7 @@ Remove bases from reads before alignment.
 EOF
 
 }
+
 main() {
   if [[ $# -gt 2 ]]; then #don't (re)write cmd.txt if no args
     echo \# the command used to prepare the jobs. Note that parentheses are lost >cmd.txt
@@ -145,12 +163,16 @@ main() {
     #TODO: 8.5.23: use zeus_new_q, holding all jobs for some reason. using long_q for now
     #TODO: 18.9.2023 : switched back to zeus_new_q. jobs fail with IO errors, could it be because of hosts in zeus_new_q?
     #TODO: 21.9.2023 : switched back to zeus_long_q. testing - seems to work!
+    #TODO: 26.9.2023 : zeus_long_q (168h), and zeus_all_q (24h) run on 18 "old" nodes,
+    #                  zeus_new_q (72h) run on 12 "new nodes", zeus_combined_q (24h) runs on 18 old + 12 new nodes
+    #                  and has higher priority. zeus_new_q didn't work for me on 21.9.2023, but seems to work now
+    #                  setting thing up for 24h jobs on zeus_combined_q. if there is a problem I may revert to zeus_long_q
     cat <<EOF >bismark_wgbs_${sample_name}.q
 #!/bin/bash
-#PBS  -N  bismark_wgbs_${sample_name}
-#PBS  -q  zeus_long_q
+#PBS  -N bismark_wgbs_${sample_name}
+#PBS  -q $ZEUS_Q
 #PBS  -l select=1:ncpus=${N_CORES}
-#PBS  -l select=mem=64gb
+#PBS  -l select=mem=$MEM
 PBS_O_WORKDIR=$(realpath $PWD)
 cd \$PBS_O_WORKDIR
 
@@ -240,6 +262,21 @@ arg_parse() {
       echo "Unknown option: $1"
       help
       exit 1
+      ;;
+    -n-cores)
+      N_CORES=$2
+      shift
+      shift
+      ;;
+    -mem)
+      MEM=$2
+      shift
+      shift
+      ;;
+    -zeus-q)
+      ZEUS_Q=$2
+      shift
+      shift
       ;;
     esac
   done
