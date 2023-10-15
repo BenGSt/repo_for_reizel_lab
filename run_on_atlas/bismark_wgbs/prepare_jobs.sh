@@ -197,7 +197,7 @@ submit_top_level_dag() {
   cat <<EOF | tee reminder.txt
 To submit the samples sepratly, you may run the following commands:
 $(
-for dag in $(find ./condor_submission_files/ -name "*.dag" | grep -v submit_all); do
+for dag in $(find ./condor_submission_files/ -name "*.dag" | grep -v submit_all | sort -V); do
     echo condor_submit_dag $dag
 done
   )
