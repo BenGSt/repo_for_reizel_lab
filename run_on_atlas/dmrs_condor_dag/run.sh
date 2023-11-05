@@ -153,7 +153,6 @@ make_dirs() {
 }
 
 edit() {
-
   #delete previous args
   cat heatmap_jobs.sub | awk '{if ($0==")") start=0; if (!start) print $0} {if ($0=="queue name,args from (")  start=1;}' >temp
   cat temp | awk -v heatmap_args="$heatmap_args" '{if ($0=="queue name,args from (") {print $0; print heatmap_args} else {print $0}}'
