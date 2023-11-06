@@ -1,3 +1,3 @@
 # source from .bashrc
 alias wgbs='/home/s.benjamin/repo_for_reizel_lab/run_on_zeus/bismark_wgbs/wgbs_prepare_submission.sh'
-alias encd_chip='/home/s.benjamin/bioinformatics_software/encode_pipelines/encd_chip_seq_pipeline2_bengst/encd_chip_seq_pipeline2_bengst/run_on_zeus.sh'
+alias encd_chip='/home/s.benjamin/bioinformatics_software/encode_pipelines/encd_chip_seq_pipeline2_bengst/run_on_zeus.sh'
