@@ -330,6 +330,7 @@ arg_parse() {
       shift
       ;;
     *)
+      echo "ERROR: unknown argument $1"
       help
       exit 1
       ;;
