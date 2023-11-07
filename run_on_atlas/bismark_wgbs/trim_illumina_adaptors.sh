@@ -122,11 +122,12 @@ arg_parse() {
       shift
       ;;
     -extra-trim-galore-options)
-      extra=$2
+      extra="$2"
       shift
       shift
       ;;
     *)
+      echo "ERROR: unknown argument \"$1\""
       help
       exit 1
       ;;
