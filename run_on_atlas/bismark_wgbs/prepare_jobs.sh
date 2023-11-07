@@ -149,7 +149,7 @@ prepare_sample() {
   write_sample_dag_file
 }
 
-build_args_str_prep_sub() {
+build_args_str() {
   if [[ $single_end -eq 1 ]]; then
     args_for_perp_sub="-single-end"
   else
@@ -166,14 +166,10 @@ build_args_str_prep_sub() {
     -n-reads-per-chunk $n_reads_per_chunk \
     $extra_trim_opts \
     $extra_meth_opts\
-    -sample-name \$(sample_name) \
-    -job \""
+    -sample-name \$(sample_name) \""
     echo $args_for_perp_sub
 }
 
-build_args_str_top_level(){
-  echo $(build_args_str_prep_sub)| sed 's/-job/-top-level/g'
-}
 
 write_prep_submission_files() {
   samples=$(find -L $raw_data_dir -type d | awk -F / 'NR>1{print $NF}' | sort)
@@ -183,7 +179,7 @@ write_prep_submission_files() {
   fi
 
 
-  args=$(build_args_str_prep_sub)
+  args="$(build_args_str) -job"
   cat <<EOF >condor_submission_files/prep/prep.sub
 Initialdir = $(pwd)
 executable = $REPO_FOR_REIZEL_LAB/run_on_atlas/bismark_wgbs/prepare_jobs.sh
@@ -355,7 +351,7 @@ main() {
     submit_top_level_dag
   else
     echo "$0" "$@" >cmd.txt
-    echo "$0" $(build_args_str_top_level) >prep2.cmd
+    echo "$0 $(build_args_str) -top-level" >prep2.cmd
     write_prep_submission_files "$@"
     submit_prep_jobs
   fi
