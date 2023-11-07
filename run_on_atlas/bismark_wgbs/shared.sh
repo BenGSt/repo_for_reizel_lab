@@ -99,6 +99,7 @@ write_trim_jobs_submission_file() {
     filename=condor_submission_files/${sample_name}/trim_job_${sample_name}.sub
     input_fastq=$(realpath $raw_data_dir/$sample_name/*.fastq.gz)
   fi
+  #NOTE: the following produces -paired-input-fastq-files *fq *fq, and not the full names like I wanted, but it works so leaving it for now.
   cat <<EOF >$filename
 Initialdir = $(pwd)
 executable = $REPO_FOR_REIZEL_LAB/run_on_atlas/bismark_wgbs/trim_illumina_adaptors.sh
