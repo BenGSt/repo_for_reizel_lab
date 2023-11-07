@@ -166,9 +166,8 @@ cat_args_str_prep_sub() {
     -n-reads-per-chunk $n_reads_per_chunk \
     $extra_trim_opts \
     $extra_meth_opts\
-    -sample-name $sample_name \"\
-    -job
-    "
+    -sample-name \$(sample_name) \
+    -job \""
     echo $args_for_perp_sub
 }
 
