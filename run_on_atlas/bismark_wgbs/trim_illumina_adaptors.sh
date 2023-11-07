@@ -105,29 +105,29 @@ arg_parse() {
     -input-fastq-file)
       read_type="single_end"
       input_fastq="$2"
-      ecgo DEBUG: input_fastq: $input_fastq
-      shift # past argument
-      shift # past value
+      shift
+      shift
       ;;
     -paired-input-fastq-files)
       read_type="paired_end"
       fastqs=$2
-      input_fastq_1=${fastqs%% *} #first string
-      input_fastq_2=${fastqs#* }  #second string
-      echo DEBUG: input_fastq_1: $input_fastq_1
-      echo DEBUG: input_fastq_2: $input_fastq_2
+#      input_fastq_1=${fastqs%% *} #first string
+#      input_fastq_2=${fastqs#* }  #second string
+#      shift
+#      shift
+      input_fastq_1=$2
+      shift
+      input_fastq_2=$2
       shift
       shift
       ;;
     -output-dir)
       output_dir="$2"
-      echo DEBUG: output_dir: $output_dir
       shift
       shift
       ;;
     -extra-trim-galore-options)
       extra="$2"
-      echo DEBUG: extra: $extra
       shift
       shift
       ;;
