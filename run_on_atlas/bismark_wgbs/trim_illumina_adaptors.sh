@@ -112,8 +112,8 @@ arg_parse() {
     -paired-input-fastq-files)
       read_type="paired_end"
       fastqs=$2
-      input_fastq_1=${fastqs%% *}
-      input_fastq_2=${fastqs#* }
+      input_fastq_1=${fastqs%% *} #first string
+      input_fastq_2=${fastqs#* }  #second string
       echo DEBUG: input_fastq_1: $input_fastq_1
       echo DEBUG: input_fastq_2: $input_fastq_2
       shift
