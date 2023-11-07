@@ -35,7 +35,7 @@ read_meth_call_files <- function(meth_call_files_dir, pipeline_, samp_ids, treat
                                 pattern = "*.cov.gz|*.cov",
                                 full.names = TRUE)
 
-  #try ro use basename to get file names without full path, if that fails use str_split
+  #try to use basename to get file names without full path, if that fails use str_split
   tryCatch(meth_call_files_no_fullpath <<- basename(meth_call_files),
            error = function(e) {
              print(e)
@@ -77,7 +77,6 @@ filter_bases <- function(methyl_raw_list)
 make_tiles <- function(meth_call_files_dir, pipeline, samp_ids, treatments, genome)
 {
   methyl_raw_list <- read_meth_call_files(meth_call_files_dir, pipeline, samp_ids, treatments, genome)
-
 
   methyl_raw_list <- filter_bases(methyl_raw_list)
   # getMethylationStats(methyl_raw_list[[3]],plot=T, both.strands=FALSE)
@@ -292,9 +291,8 @@ main <- function(meth_call_files_dir, samp_ids, treatments, pipeline, output_dir
   plot_corelation_pca_hc(tiles_raw_Cov10_unite)
   tiles_raw_Cov10_unite_DMRs <- calculateDiffMeth(tiles_raw_Cov10_unite)
 
-  # get hyper methylated bases
-  dmrs_hyper = getMethylDiff(tiles_raw_Cov10_unite_DMRs, difference = meth_difference, qvalue = 0.01, type = "hyper")
-  # get hypo methylated bases
+  # get hyper and hypo methylated bases
+  dmrs_hyper <- getMethylDiff(tiles_raw_Cov10_unite_DMRs, difference = meth_difference, qvalue = 0.01, type = "hyper")
   dmrs_hypo <- getMethylDiff(tiles_raw_Cov10_unite_DMRs, difference = meth_difference, qvalue = 0.01, type = "hypo")
 
   plot_meth_diff_per_chr(meth_difference, tiles_raw_Cov10_unite_DMRs)
