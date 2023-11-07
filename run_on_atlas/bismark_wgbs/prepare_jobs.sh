@@ -149,6 +149,34 @@ prepare_sample() {
   write_sample_dag_file
 }
 
+cat_args_str_prep_sub() {
+  if [[ $single_end -eq 1 ]]; then
+    args_for_perp_sub="-single-end"
+  else
+     args_for_perp_sub="-paired-end"
+  fi
+  if [[ $job -eq 1 ]]; then
+    args_for_perp_sub="$args_for_perp_sub -job"
+  fi
+  if [[ $top_level -eq 1 ]]; then
+    args_for_perp_sub="$args_for_perp_sub -top-level"
+  fi
+
+  args_for_perp_sub=" \" $args_for_perp_sub
+    $non_directional \
+    -raw-data-dir $raw_data_dir \
+    $keep_bam \
+    $keep_trimmed_fq \
+    $dovetail \
+    -genome $genome \
+    -n-reads-per-chunk $n_reads_per_chunk \
+    $extra_trim_opts \
+    $extra_meth_opts\
+    -sample-name $sample_name \"\
+    "
+    echo $args_for_perp_sub
+}
+
 write_prep_submission_files() {
   samples=$(find -L $raw_data_dir -type d | awk -F / 'NR>1{print $NF}' | sort)
   if [[ -z $samples ]]; then
@@ -156,10 +184,14 @@ write_prep_submission_files() {
     exit 1
   fi
 
+
+  args=$(cat_args_str_prep_sub)
   cat <<EOF >condor_submission_files/prep/prep.sub
 Initialdir = $(pwd)
 executable = $REPO_FOR_REIZEL_LAB/run_on_atlas/bismark_wgbs/prepare_jobs.sh
-Arguments = $@ -job -sample-name \$(sample_name)
+#Arguments = $@ -job -sample-name \$(sample_name) #TODO: if extra_meth_opts or extra_trim_opts are given then this will not work
+#TODO: write a function to parse $@ and use the already parsed args to build the arguments for the job
+Arguments = $args
 request_cpus = 1
 RequestMemory = 500MB
 universe = vanilla
