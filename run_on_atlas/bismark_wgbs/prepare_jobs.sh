@@ -165,7 +165,7 @@ build_args_str() {
     -genome $genome \
     -n-reads-per-chunk $n_reads_per_chunk \
     $extra_trim_opts \
-    $extra_meth_opts"
+    ${extra_meth_opts/-extra-options/-extra-meth_extract-options/}"
     echo $args_for_perp_sub
 }
 
