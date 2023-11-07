@@ -43,7 +43,7 @@ optional arguments:
   trimming and rerunning the pipeline, and possibly other downstream analysis. If not running methylation calling jobs again,
   bam files should be deleted because they large and not needed for most downstream analysis (use the .cov files).
 
--extra-meth_extract-options "multiple quoted options"
+-extra-meth-extract-options "multiple quoted options"
 handy options (from Bismark manual):
 =====================================
 
@@ -165,7 +165,7 @@ build_args_str() {
     -genome $genome \
     -n-reads-per-chunk $n_reads_per_chunk \
     $extra_trim_opts \
-    ${extra_meth_opts/-extra-options/-extra-meth_extract-options/}"
+    ${extra_meth_opts/-extra-options/-extra-meth-extract-options/}"
     echo $args_for_perp_sub
 }
 
@@ -311,7 +311,7 @@ arg_parse() {
       shift
       shift
       ;;
-    -extra-meth_extract-options)
+    -extra-meth-extract-options)
       extra_meth_opts=$(echo -extra-options \'"$2"\')
       shift
       shift
