@@ -111,10 +111,10 @@ arg_parse() {
       ;;
     -paired-input-fastq-files)
       read_type="paired_end"
-      input_fastq_1="$2"
+      input_fastq_1=$2
       echo DEBUG: input_fastq_1: $input_fastq_1
       shift
-      input_fastq_2="$2"
+      input_fastq_2=$2
       echo DEBUG: input_fastq_2: $input_fastq_2
       shift
       shift
