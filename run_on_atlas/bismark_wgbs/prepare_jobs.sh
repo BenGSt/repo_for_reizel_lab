@@ -172,7 +172,7 @@ build_args_str_prep_sub() {
 }
 
 build_args_str_top_level(){
-  echo $args_for_perp_sub | sed 's/-job/-top-level/g'
+  echo $(build_args_str_prep_sub)| sed 's/-job/-top-level/g'
 }
 
 write_prep_submission_files() {
