@@ -155,12 +155,6 @@ cat_args_str_prep_sub() {
   else
      args_for_perp_sub="-paired-end"
   fi
-  if [[ $job -eq 1 ]]; then
-    args_for_perp_sub="$args_for_perp_sub -job"
-  fi
-  if [[ $top_level -eq 1 ]]; then
-    args_for_perp_sub="$args_for_perp_sub -top-level"
-  fi
 
   args_for_perp_sub=" \" $args_for_perp_sub
     $non_directional \
@@ -173,6 +167,7 @@ cat_args_str_prep_sub() {
     $extra_trim_opts \
     $extra_meth_opts\
     -sample-name $sample_name \"\
+    -job
     "
     echo $args_for_perp_sub
 }
