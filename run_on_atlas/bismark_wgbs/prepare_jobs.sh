@@ -149,7 +149,7 @@ prepare_sample() {
   write_sample_dag_file
 }
 
-cat_args_str_prep_sub() {
+build_args_str_prep_sub() {
   if [[ $single_end -eq 1 ]]; then
     args_for_perp_sub="-single-end"
   else
@@ -179,12 +179,10 @@ write_prep_submission_files() {
   fi
 
 
-  args=$(cat_args_str_prep_sub)
+  args=$(build_args_str_prep_sub)
   cat <<EOF >condor_submission_files/prep/prep.sub
 Initialdir = $(pwd)
 executable = $REPO_FOR_REIZEL_LAB/run_on_atlas/bismark_wgbs/prepare_jobs.sh
-#Arguments = $@ -job -sample-name \$(sample_name) #TODO: if extra_meth_opts or extra_trim_opts are given then this will not work
-#TODO: write a function to parse $@ and use the already parsed args to build the arguments for the job
 Arguments = $args
 request_cpus = 1
 RequestMemory = 500MB
