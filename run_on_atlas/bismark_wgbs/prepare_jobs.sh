@@ -171,6 +171,10 @@ build_args_str_prep_sub() {
     echo $args_for_perp_sub
 }
 
+build_args_str_top_level(){
+  echo $args_for_perp_sub | sed 's/-job/-top-level/g'
+}
+
 write_prep_submission_files() {
   samples=$(find -L $raw_data_dir -type d | awk -F / 'NR>1{print $NF}' | sort)
   if [[ -z $samples ]]; then
@@ -351,7 +355,7 @@ main() {
     submit_top_level_dag
   else
     echo "$0" "$@" >cmd.txt
-    echo "$0" "$@" -top-level >prep2.cmd
+    echo "$0" $(build_args_str_top_level) >prep2.cmd
     write_prep_submission_files "$@"
     submit_prep_jobs
   fi
