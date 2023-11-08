@@ -99,7 +99,10 @@ write_trim_jobs_submission_file() {
     filename=condor_submission_files/${sample_name}/trim_job_${sample_name}.sub
     input_fastq=$(realpath $raw_data_dir/$sample_name/*.fastq.gz)
   fi
-  #NOTE: the following produces -paired-input-fastq-files *fq *fq, and not the full names like I wanted, but it works so leaving it for now.
+  if [[ $single_end -eq 0 ]]; then
+    input_fastq_1=${input_fastq%% *} #first string
+    input_fastq_2=${input_fastq#* }  #last string
+  fi
   cat <<EOF >$filename
 Initialdir = $(pwd)
 executable = $REPO_FOR_REIZEL_LAB/run_on_atlas/bismark_wgbs/trim_illumina_adaptors.sh
@@ -115,8 +118,6 @@ $(
     if [[ $single_end -eq 1 ]]; then
       echo $sample_name$sep$chunk, \" -output-dir $(pwd)/$sample_name/$split/$chunk -input-fastq-file $input_fastq $extra_trim_opts\"
     else
-      input_fastq_1=${input_fastq%% *} #first string
-      input_fastq_2=${input_fastq#* }  #second string
       echo $sample_name$sep$chunk, \" -output-dir $(pwd)/$sample_name/$split/$chunk -paired-input-fastq-files $input_fastq_1 $input_fastq_2 $extra_trim_opts\"
     fi
   )
