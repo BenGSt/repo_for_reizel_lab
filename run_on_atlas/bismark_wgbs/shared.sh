@@ -94,7 +94,7 @@ write_trim_jobs_submission_file() {
   chunk=$1
   if [[ $chunk ]]; then
     filename=condor_submission_files/${sample_name}/trim_job_${sample_name}_${chunk}.sub
-    input_fastq=$(pwd)/$sample_name/$split/$chunk/\*.fq
+    input_fastq=$(pwd)/$sample_name/$split/$chunk/*.fq
   else
     filename=condor_submission_files/${sample_name}/trim_job_${sample_name}.sub
     input_fastq=$(realpath $raw_data_dir/$sample_name/*.fastq.gz)
