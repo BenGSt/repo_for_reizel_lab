@@ -100,8 +100,8 @@ write_trim_jobs_submission_file() {
     input_fastq=$(realpath $raw_data_dir/$sample_name/*.fastq.gz)
   fi
   if [[ $single_end -eq 0 ]]; then
-    input_fastq_1=${input_fastq%% *} #first string
-    input_fastq_2=${input_fastq#* }  #last string
+    input_fastq_1=${input_fastq/*.fq/*R1*.fg}
+    input_fastq_2=${input_fastq/*.fq/*R2*.fg}
   fi
   cat <<EOF >$filename
 Initialdir = $(pwd)
