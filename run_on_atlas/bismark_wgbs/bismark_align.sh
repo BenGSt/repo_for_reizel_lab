@@ -58,7 +58,6 @@ main() {
     bismark_genome_location=$MM10_REF # (defined in shared.sh)
   elif [[ $genome == "hg38" ]]; then
     bismark_genome_location=$HG38_REF
-
   else
     echo genome not recognized
     exit 1
@@ -71,6 +70,7 @@ main() {
   # (maybe slow writing to nfs at peak times?) the temp fastq files have not finished being written after 1 hour.
   # Atlas' ht_condor scheduler will kill jobs after an hour if less than 20% of requested mem is used.
   perl -e '$a = " " x (3*1000*1000*1000); sleep 20*60' &
+
   wait %1
 
   #cleanup
@@ -79,7 +79,6 @@ main() {
     $rm_fq
   fi
   rm -v *.fq.gz #rm unmapped, ambiguous
-
   print_info "finished: " "$script_name " "$@"
 }
 
