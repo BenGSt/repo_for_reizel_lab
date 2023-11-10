@@ -64,7 +64,15 @@ main() {
     exit 1
   fi
 
-  align_to_genome
+  # Use 5Gb RAM so job isn't held by atlas (
+  # we will use at least 12GB and up to 40GB after 2 hours, but atlas ht_condor shecduler will kill job within an hour
+  # if less than 20% of requested mem is used)
+
+  align_to_genome &
+  dd if=/dev/zero of=/dev/shm/test bs=1M count=5120
+  sleep 5m
+  rm /dev/shm/test
+  wait %1
 
   #cleanup
   rm_fq="rm -v *.fq" #the non gz trimmed fq
