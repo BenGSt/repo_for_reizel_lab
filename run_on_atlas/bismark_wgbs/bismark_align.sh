@@ -65,7 +65,7 @@ main() {
   fi
 
   # Use 5Gb RAM so job isn't held by atlas (
-  # we will use at least 12GB and up to 40GB after 2 hours, but atlas ht_condor shecduler will kill job within an hour
+  # we will use at least 12GB and up to 40GB after 2 hours, but atlas ht_condor scheduler will kill job within an hour
   # if less than 20% of requested mem is used)
 
   align_to_genome &
