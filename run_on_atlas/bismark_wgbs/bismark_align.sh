@@ -64,14 +64,13 @@ main() {
     exit 1
   fi
 
-  # Use 5Gb RAM so job isn't held by atlas (
-  # we will use at least 12GB and up to 40GB after 2 hours, but atlas ht_condor scheduler will kill job within an hour
-  # if less than 20% of requested mem is used)
-
   align_to_genome &
-  dd if=/dev/zero of=/dev/shm/test bs=1M count=5120
-  sleep 5m
-  rm /dev/shm/test
+
+  # Use ~5GB RAM for 20 min so job isn't held
+  # We will use at minimum 12GB, usually within 15 min. However I have seen cases where for some reason
+  # (maybe slow writing to nfs at peak times?) the temp fastq files have not finished being written after 1 hour.
+  # Atlas' ht_condor scheduler will kill jobs after an hour if less than 20% of requested mem is used.
+  perl -e '$a = " " x (3*1000*1000*1000); sleep 20*60' &
   wait %1
 
   #cleanup
