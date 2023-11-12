@@ -234,6 +234,11 @@ condor_submit_dag condor_submission_files/submit_all_bismark_wgbs.dag
 
 !Note: Atlas policy is to hold jobs after 3 days of running, so you may need to release them using condor_release!
 
+I have seen a case where memory usage in alignment jobs was less than 20% of the requested memory after 1 hour,
+and jobs were held. I'm guessing this had to do with io bottleneck in nfs and is a low probability situation.
+to deal with this you can wait for the dag to finish (with errors) and then run the rescue dag:
+condor_submit_dag -DoRescueFrom 1 condor_submission_files/submit_all_bismark_wgbs.dag
+
 Check the status of the jobs by running: condor_q -nobatch -dag
 !Good luck and happy clustering!
 
