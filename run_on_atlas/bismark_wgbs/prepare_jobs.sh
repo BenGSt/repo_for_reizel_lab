@@ -361,7 +361,6 @@ main() {
     write_prep_submission_files "$@"
     submit_prep_jobs
   fi
-
 }
 
 main "$@"
