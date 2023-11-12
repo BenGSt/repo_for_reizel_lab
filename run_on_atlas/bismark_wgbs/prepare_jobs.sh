@@ -355,8 +355,8 @@ main() {
     write_top_level_dag
     submit_top_level_dag
   else
-    echo "# -extar-trim-galore-options and -extra-meth-extract-options must be quoted strings, these are lost here. add to run again"
-    echo "$0" "$@" >cmd.txt
+    echo "# -extar-trim-galore-options and -extra-meth-extract-options must be quoted strings, these are lost here. add to run again" >cmd.txt
+    echo "$0" "$@" >>cmd.txt
     echo "$0 $(build_args_str) -top-level" >prep2.cmd
     write_prep_submission_files "$@"
     submit_prep_jobs
