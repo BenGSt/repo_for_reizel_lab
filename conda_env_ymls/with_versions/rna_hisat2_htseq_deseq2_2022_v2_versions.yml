@@ -8,7 +8,7 @@ dependencies:
   - htseq=2.0.2
   - samtools=1.16.1
   - r-base=4.2.2
-  - bioconductor-deseq2=1.38.0=
+  - bioconductor-deseq2=1.38.0
   - bioconductor-reportingtools=2.38.0
   - bioconductor-enhancedvolcano=1.16.0
   - bioconductor-org.hs.eg.db=3.16.0
