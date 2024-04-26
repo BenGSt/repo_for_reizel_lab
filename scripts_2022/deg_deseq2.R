@@ -175,8 +175,15 @@ main = function(htseq_out_dir, report_dir, padj_cutoff = 0.01, log2_fc_cutoff = 
   symbols[is.na(symbols)] <- names(symbols[is.na(symbols)])
   rownames(deg_list) <- symbols
   write.csv(as.data.frame(deg_list), file = csv_path)
+
+  #write table of all genes
+  symbols_all <- mapIds(annotation_db, keys = rownames(res),
+                    column = c('SYMBOL'), keytype = GTF_USED_BY_HTSEQ)
   all_genes_csv <- gsub("(.*)\\.csv", "\\1_all_genes.csv", csv_path)
-  write.csv(as.data.frame(res), file = all_genes_csv)
+  res_df <- as.data.frame(res)
+  #add symbol column as second column (move the other columns right)
+  res_df <- cbind(res_df[,1], SYMBOL = symbols_all, res_df[,2:ncol(res_df)])
+  write.csv(res_df, file = all_genes_csv)
 }
 
 
