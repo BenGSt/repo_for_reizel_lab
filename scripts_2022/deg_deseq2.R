@@ -182,7 +182,7 @@ main = function(htseq_out_dir, report_dir, padj_cutoff = 0.01, log2_fc_cutoff = 
   all_genes_csv <- gsub("(.*)\\.csv", "\\1_all_genes.csv", csv_path)
   res_df <- as.data.frame(res)
   #add symbol column as second column (move the other columns right)
-  res_df <- cbind(res_df[,1], SYMBOL = symbols_all, res_df[,2:ncol(res_df)])
+  res_df <- cbind(SYMBOL = symbols_all, res_df)
   write.csv(res_df, file = all_genes_csv)
 }
 
