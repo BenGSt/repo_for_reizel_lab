@@ -175,6 +175,8 @@ main = function(htseq_out_dir, report_dir, padj_cutoff = 0.01, log2_fc_cutoff = 
   symbols[is.na(symbols)] <- names(symbols[is.na(symbols)])
   rownames(deg_list) <- symbols
   write.csv(as.data.frame(deg_list), file = csv_path)
+  all_genes_csv <- gsub("(.*)\\.csv", "\\1_all_genes.csv", csv_path)
+  write.csv(as.data.frame(res), file = all_genes_csv)
 }
 
 
