@@ -418,7 +418,7 @@ argv <- parse_cli_args()
 cat("\n\nRunning:\n", commandArgs(trailingOnly = FALSE), "\n")
 process_cli_args(argv)
 find_dmrs_main(meth_call_files_dir, samp_ids, treatments, argv$pipeline,
-               output_dir, argv$known_genes_file, as.numeric(argv$meth_difference), argv$genome,
+               output_dir, as.numeric(argv$meth_difference), argv$genome,
                as.numeric(argv$base_cov), as.numeric(argv$tile_cov), argv$tile_size, argv$filt_hi_perc,
                as.numeric(argv$mc.cores)
 )
