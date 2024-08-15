@@ -67,9 +67,12 @@ find_dmrs_main <-
 
     plot_meth_diff_per_chr(meth_difference, tiles_raw_unite_DMRs)
 
+    # save objects. MethylKit objects cannot be loaded without methylKit package, objects are
+    # therefore saved as GRanges objects by default, and optionally as MethylKit objects.
     info_str <- str_c(tile_size, "bpTiles_", meth_difference, "perc_", "basecov", base_cov, "_tilecov", tile_cov)
-    save_methykit_objects(dmrs_hyper, dmrs_hypo, info_str, output_dir, tiles_raw_unite)
-    #TODO maybe also save as Granges objects? check if methylKit objects can be cast to GRanges without methylKit package
+    save_methykit_objects(dmrs_hyper, dmrs_hypo, tiles_raw_unite, info_str, output_dir)
+    save_granges_objects(dmrs_hyper, dmrs_hypo, tiles_raw_unite, info_str, output_dir)
+    #TODO: add option to save as MethylKit objects
 
     #TODO: do we need meth scores in bed format? maybe bigWIg is better (can be done with rtracklayer)
     #write all tiles with meth scores (not only dmrs) that can be used for heatmaps and other applications
@@ -286,13 +289,17 @@ plot_meth_diff_per_chr <- function(meth_difference, tiles_raw_unite_DMRs) {
 #' Save objects to disk
 #' dmrs are saved as methylDiff objects
 #' tiles methylation info is saved as a methylRaw object
-save_methykit_objects <-
-  function(dmrs_hyper, dmrs_hypo, info_str, output_dir, tiles_raw_unite) {
-    save(dmrs_hyper, file = str_c(output_dir, "/dmrs_hyper_", info_str, ".methylDiff"))
-    save(dmrs_hypo, file = str_c(output_dir, "/dmrs_hypo_", info_str, ".methylDiff"))
-    save(tiles_raw_unite, file = str_c(output_dir, "/raw_unite_", info_str, ".methylRaw"))
+save_methykit_objects <- function(dmrs_hyper, dmrs_hypo, tiles_raw_unite, info_str, output_dir) {
+    saveRDS(dmrs_hyper, file = str_c(output_dir, "/dmrs_hyper_", info_str, ".rds.methylDiff"))
+    saveRDS(dmrs_hypo, file = str_c(output_dir, "/dmrs_hypo_", info_str, ".rds.methylDiff"))
+    saveRDS(tiles_raw_unite, file = str_c(output_dir, "/raw_unite_", info_str, ".rds.methylRaw"))
   }
 
+save_granges_objects <- function(dmrs_hyper, dmrs_hypo, tiles_raw_unite, info_str, output_dir) {
+  saveRDS(as(dmrs_hyper, "GRanges"), file = str_c(output_dir, "/dmrs_hyper_", info_str, ".rds.GRanges"))
+  saveRDS(as(dmrs_hypo, "GRanges"), file = str_c(output_dir, "/dmrs_hypo_", info_str, ".rds.GRanges"))
+  saveRDS(as(tiles_raw_unite, "GRanges"), file = str_c(output_dir, "/raw_unite_", info_str, ".rds.GRanges"))
+}
 
 #' Write bed files (only chr start end)
 #' tiles_raw_unite - all tiles covered by all samples
