@@ -340,9 +340,7 @@ write_bg_for_great <- function(output_dir, dmrs_hyper, dmrs_hypo, tiles_raw_unit
 
   # replace above block with loop
   for (n in n_samples) {
-    if (nrow(dmrs_hyper) < n |
-      nrow(dmrs_hypo) < n |
-      nrow(tiles_raw_unite) < n) {
+    if (nrow(tiles_raw_unite) < n) {
       cat(str_c("Not enough regions to randomly sample n=", n
         , " from  - background BED file for GREAT not written\n"))
       next
