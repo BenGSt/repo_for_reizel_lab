@@ -127,55 +127,34 @@ check_missing_args "$@"
 
 #- run and remove the container
 docker run --rm \
-  -v "$hypo_dmrs":/data/hypo_dmrs \
-  -v "$hyper_dmrs":/data/hyper_dmrs \
-  -v "$all_tiles":/data/all_tiles \
+  -v "$hypo_dmrs":/data/"$(basename "$hypo_dmrs")" \
+  -v "$hyper_dmrs":/data/"$(basename "$hyper_dmrs")" \
+  -v "$all_tiles":/data/"$(basename "$all_tiles")" \
   -v "$output_dir":/output_dir \
   -v "$SCRIPT":/annotate_dmrs_annotatr.R \
-  annotatr_annotate_regions:15.8.2024 /annotate_dmrs_annotatr.R\
-  --hypo_dmrs /data/hypo_dmrs \
-  --hyper_dmrs /data/hyper_dmrs \
-  --all_tiles /data/all_tiles \
+  annotatr_annotate_regions:15.8.2024 /annotate_dmrs_annotatr.R \
+  --hypo_dmrs /data/"$(basename "$hypo_dmrs")" \
+  --hyper_dmrs /data/"$(basename "$hyper_dmrs")" \
+  --all_tiles /data/"$(basename "$all_tiles")" \
   --genome "$genome" \
   $internet \
   $print_plots \
   $dont_save_plots \
   --output_dir /output_dir
 
-#run from the sh script args and remove container
-#docker run --rm \
-#  -v "$meth_call_files_dir":/meth_call_files_dir \
-#  -v "$output_dir":/output_dir \
-#  -v "$DMRS_SCRIPT":/find_dmrs.R \
-#  methylkit_dmrs:11.8.2024 \
-#  /find_dmrs.R --meth_call_files_dir /meth_call_files_dir \
-#  --samp_ids "$samp_ids" \
-#  --treatments "$treatments" \
-#  --pipeline "$pipeline" \
-#  --output_dir /output_dir \
-#  --genome "$genome" \
-#  --meth_difference "$meth_difference" \
-#  --base_cov "$base_cov" \
-#  --tile_cov "$tile_cov" \
-#  --tile_size "$tile_size" \
-#  --filt_hi_perc "$filt_hi_perc" \
-#  --mc.cores "$mc_cores"
-
-# execute the R script in the singularity container
-#singularity exec \
-#  -B "$meth_call_files_dir":/meth_call_files_dir \
-#  -B "$output_dir":/output_dir \
-#  -B "$DMRS_SCRIPT":/find_dmrs.R \
-#  methylkit_dmrs_11_8_2024.img /find_dmrs.R \
-#  --meth_call_files_dir /meth_call_files_dir \
-#  --samp_ids "$samp_ids" \
-#  --treatments "$treatments" \
-#  --pipeline "$pipeline" \
-#  --output_dir /output_dir \
-#  --genome "$genome" \
-#  --meth_difference "$meth_difference" \
-#  --base_cov "$base_cov" \
-#  --tile_cov "$tile_cov" \
-#  --tile_size "$tile_size" \
-#  --filt_hi_perc "$filt_hi_perc" \
-#  --mc.cores "$mc_cores"
+#TODO: build image and test singularity
+# singularity exec \
+#   -B "$hypo_dmrs":/data/hypo_dmrs \
+#   -B "$hyper_dmrs":/data/hyper_dmrs \
+#   -B "$all_tiles":/data/all_tiles \
+#   -B "$output_dir":/output_dir \
+#   -B "$SCRIPT":/annotate_dmrs_annotatr.R \
+#   annotatr_annotate_regions_15_8_2024.img /annotate_dmrs_annotatr.R \
+#   --hypo_dmrs /data/hypo_dmrs \
+#   --hyper_dmrs /data/hyper_dmrs \
+#   --all_tiles /data/all_tiles \
+#   --genome "$genome" \
+#   $internet \
+#   $print_plots \
+#   $dont_save_plots \
+#   --output_dir /output_dir
