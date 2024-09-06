@@ -88,7 +88,7 @@ setMethod(
         id = regions_no_hits_indeces,
         coverage = 0, numCs = NA, numTs = NA, covered = 0
       ))
-      # sort by id #TODO: make sure order is correct here, are regions sorted before?.
+      # sort by id to keep the order of the regions
       setkey(sum.dt, id)
     }
 
