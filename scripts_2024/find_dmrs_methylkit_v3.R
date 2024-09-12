@@ -290,15 +290,15 @@ plot_meth_diff_per_chr <- function(meth_difference, tiles_raw_unite_DMRs) {
 #' dmrs are saved as methylDiff objects
 #' tiles methylation info is saved as a methylRaw object
 save_methykit_objects <- function(dmrs_hyper, dmrs_hypo, tiles_raw_unite, info_str, output_dir) {
-    saveRDS(dmrs_hyper, file = str_c(output_dir, "/dmrs_hyper_", info_str, ".rds.methylDiff"))
-    saveRDS(dmrs_hypo, file = str_c(output_dir, "/dmrs_hypo_", info_str, ".rds.methylDiff"))
-    saveRDS(tiles_raw_unite, file = str_c(output_dir, "/raw_unite_", info_str, ".rds.methylRaw"))
+    saveRDS(dmrs_hyper, file = str_c(output_dir, "/dmrs_hyper_", info_str, ".methylDiff.rds"))
+    saveRDS(dmrs_hypo, file = str_c(output_dir, "/dmrs_hypo_", info_str, ".methylDiff.rds"))
+    saveRDS(tiles_raw_unite, file = str_c(output_dir, "/raw_unite_", info_str, ".methylRaw.rds"))
   }
 
 save_granges_objects <- function(dmrs_hyper, dmrs_hypo, tiles_raw_unite, info_str, output_dir) {
-  saveRDS(as(dmrs_hyper, "GRanges"), file = str_c(output_dir, "/dmrs_hyper_", info_str, ".rds.GRanges"))
-  saveRDS(as(dmrs_hypo, "GRanges"), file = str_c(output_dir, "/dmrs_hypo_", info_str, ".rds.GRanges"))
-  saveRDS(as(tiles_raw_unite, "GRanges"), file = str_c(output_dir, "/raw_unite_", info_str, ".rds.GRanges"))
+  saveRDS(as(dmrs_hyper, "GRanges"), file = str_c(output_dir, "/dmrs_hyper_", info_str, "GRanges.rds."))
+  saveRDS(as(dmrs_hypo, "GRanges"), file = str_c(output_dir, "/dmrs_hypo_", info_str, "GRanges.rds."))
+  saveRDS(as(tiles_raw_unite, "GRanges"), file = str_c(output_dir, "/raw_unite_", info_str, "GRanges.rds."))
 }
 
 #' Write bed files (only chr start end)
