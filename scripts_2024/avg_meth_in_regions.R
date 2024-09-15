@@ -6,7 +6,7 @@
 #' then taking the average of each tile over all regions.
 #' @author Ben Steinberg
 #' @date 6.9.2024
-#TODO: needs testing (can test with arbs)
+# TODO: needs testing (can test with arbs)
 
 library(rtracklayer)
 library(data.table)
@@ -263,8 +263,8 @@ parse_cli_args <- function() {
   if (is.null(args$regions) && is.null(args$regions_list_file)) {
     stop("Either --regions or --regions_list_file must be provided.")
   }
-  if ((!is.null(args$regions)) && is.null(args$name)) {
-    stop("if --regions is given --name must be provided.")
+  if (is.null(args$name)) {
+    stop("--name must be provided, results are saved as ${name}.rds")
   }
   if (is.null(args$sample_path)) {
     stop("--sample_path must be provided.")
@@ -408,8 +408,7 @@ args <- parse_cli_args()
 print_args(args)
 args_main <- process_cli_args(args)
 result <- main(
-  narbs = args_main$narbs,
-  tarbs = args_main$tarbs,
+  regions_list = args_main$regions_list,
   sample = args_main$sample,
   bp_to_pad = args_main$bp_to_pad,
   tile_width = args_main$tile_width,
@@ -438,7 +437,7 @@ narbs <- narbs[1:100]
 tarbs <- tarbs[1:100]
 
 # use methylRawListDB to get the sample. (could also use bismark coverage file with MethRead - time the two methods)
-sample <- readMethylDB("./data/MethRawDB/tumor1_peters2024.txt.bgz")
+sample <- readMethylDB("./data/MethRawDB/tumor4_peters2024.txt.bgz")
 sample <- sample[] # load sample to memory as a methylRaw object
 
 # pad arbs (extend the regions s.t. there length is 2*bp_to_pad)
@@ -449,7 +448,7 @@ tile_step <<- 10
 region_min_cov <- 5
 mc_cores <- 5
 
-result <- main_genralized(
+result <- main(
   list("narbs" = narbs, "tarbs" = tarbs), sample,
   bp_to_pad, tile_width, tile_step, region_min_cov, mc_cores
 )
