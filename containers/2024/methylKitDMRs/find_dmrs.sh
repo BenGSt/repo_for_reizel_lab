@@ -2,7 +2,7 @@
 
 # if enviornment variable DMRS_SCRIPT is not set, set it to the default
 DMRS_SCRIPT=${DMRS_SCRIPT:-/mnt/c/Users/User/Nextcloud/Tzachi_bioinformatics/bioinformatics_repo/scripts_2024/find_dmrs_methylkit_v3.R}
-
+SINGULARITY_IMG=${SINGULARITY_IMG:-methylkit_dmrs_11_8_2024.img}
 help() {
   cat <<EOF
 The given arguments will be passed on to the R script that runs the DMRs analysis with
@@ -218,40 +218,40 @@ check_missing_args
 #  --tile_size 100 --filt_hi_perc NULL --mc.cores 10
 
 #run from the sh script args and remove container
-#docker run --rm \
-#  -v "$meth_call_files_dir":/meth_call_files_dir \
-#  -v "$output_dir":/output_dir \
-#  -v "$DMRS_SCRIPT":/find_dmrs.R \
-#  methylkit_dmrs:11.8.2024 \
-#  /find_dmrs.R --meth_call_files_dir /meth_call_files_dir \
-#  --samp_ids "$samp_ids" \
-#  --treatments "$treatments" \
-#  --pipeline "$pipeline" \
-#  --output_dir /output_dir \
-#  --genome "$genome" \
-#  --meth_difference "$meth_difference" \
-#  --base_cov "$base_cov" \
-#  --tile_cov "$tile_cov" \
-#  --tile_size "$tile_size" \
-#  --filt_hi_perc "$filt_hi_perc" \
-#  --mc.cores "$mc_cores"
+docker run --rm \
+  -v "$meth_call_files_dir":/meth_call_files_dir \
+  -v "$output_dir":/output_dir \
+  -v "$DMRS_SCRIPT":/find_dmrs.R \
+  methylkit_dmrs:11.8.2024 \
+  /find_dmrs.R --meth_call_files_dir /meth_call_files_dir \
+  --samp_ids "$samp_ids" \
+  --treatments "$treatments" \
+  --pipeline "$pipeline" \
+  --output_dir /output_dir \
+  --genome "$genome" \
+  --meth_difference "$meth_difference" \
+  --base_cov "$base_cov" \
+  --tile_cov "$tile_cov" \
+  --tile_size "$tile_size" \
+  --filt_hi_perc "$filt_hi_perc" \
+  --mc.cores "$mc_cores"
 
 # execute the R script in the singularity container
-singularity exec \
-  -B "$meth_call_files_dir":/meth_call_files_dir \
-  -B "$output_dir":/output_dir \
-  -B "$DMRS_SCRIPT":/find_dmrs.R \
-  methylkit_dmrs_11_8_2024.img /find_dmrs.R \
-    --meth_call_files_dir /meth_call_files_dir \
-    --samp_ids "$samp_ids" \
-    --treatments "$treatments" \
-    --pipeline "$pipeline" \
-    --output_dir /output_dir \
-    --genome "$genome" \
-    --meth_difference "$meth_difference" \
-    --base_cov "$base_cov" \
-    --tile_cov "$tile_cov" \
-    --tile_size "$tile_size" \
-    --filt_hi_perc "$filt_hi_perc" \
-    --mc.cores "$mc_cores"
+#echo singularity exec \
+#  -B "$meth_call_files_dir":/meth_call_files_dir \
+#  -B "$output_dir":/output_dir \
+#  -B "$DMRS_SCRIPT":/find_dmrs.R \
+#  $SINGULARITY_IMG /find_dmrs.R \
+#    --meth_call_files_dir /meth_call_files_dir \
+#    --samp_ids "$samp_ids" \
+#    --treatments "$treatments" \
+#    --pipeline "$pipeline" \
+#    --output_dir /output_dir \
+#    --genome "$genome" \
+#    --meth_difference "$meth_difference" \
+#    --base_cov "$base_cov" \
+#    --tile_cov "$tile_cov" \
+#    --tile_size "$tile_size" \
+#    --filt_hi_perc "$filt_hi_perc" \
+#    --mc.cores "$mc_cores"
 

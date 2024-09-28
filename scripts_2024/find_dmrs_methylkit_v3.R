@@ -296,9 +296,9 @@ save_methykit_objects <- function(dmrs_hyper, dmrs_hypo, tiles_raw_unite, info_s
   }
 
 save_granges_objects <- function(dmrs_hyper, dmrs_hypo, tiles_raw_unite, info_str, output_dir) {
-  saveRDS(as(dmrs_hyper, "GRanges"), file = str_c(output_dir, "/dmrs_hyper_", info_str, "GRanges.rds."))
-  saveRDS(as(dmrs_hypo, "GRanges"), file = str_c(output_dir, "/dmrs_hypo_", info_str, "GRanges.rds."))
-  saveRDS(as(tiles_raw_unite, "GRanges"), file = str_c(output_dir, "/raw_unite_", info_str, "GRanges.rds."))
+  saveRDS(as(dmrs_hyper, "GRanges"), file = str_c(output_dir, "/dmrs_hyper_", info_str, ".GRanges.rds"))
+  saveRDS(as(dmrs_hypo, "GRanges"), file = str_c(output_dir, "/dmrs_hypo_", info_str, ".GRanges.rds"))
+  saveRDS(as(tiles_raw_unite, "GRanges"), file = str_c(output_dir, "/raw_unite_", info_str, ".GRanges.rds"))
 }
 
 #' Write bed files (only chr start end)
@@ -415,12 +415,12 @@ set_up_directories <- function(output_dir) {
 ##########
 ## main ##
 ##########
+cat("\n\nRunning:\n", commandArgs(trailingOnly = FALSE), "\n")
 
 # Create a parser
 argv <- parse_cli_args()
 
 #print cli args
-cat("\n\nRunning:\n", commandArgs(trailingOnly = FALSE), "\n")
 process_cli_args(argv)
 find_dmrs_main(meth_call_files_dir, samp_ids, treatments, argv$pipeline,
                output_dir, as.numeric(argv$meth_difference), argv$genome,
