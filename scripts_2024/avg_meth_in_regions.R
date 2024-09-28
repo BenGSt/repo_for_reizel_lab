@@ -247,9 +247,11 @@ count_c_t_in_regions <- function(regions_tiled, num_regions, sample, mc_cores = 
 
 parse_cli_args <- function() {
   p <- arg_parser("Average methylation by position in genomic regions")
-  p <- add_argument(p, "--regions", help = "path to regions file - can be bed file or GRanges object saved as rds")
-  p <- add_argument(p, "--name", help = "results are saved as ${name}.rds")
   p <- add_argument(p, "--regions_list_file", help = "path to csv file with header including one set of regions per line: regions_name,regions_path")
+  p <- add_argument(p, "--regions", help = "path to regions file - can be bed file or GRanges object saved as rds")
+  p <- add_argument(p, "--regions_name", help = "name of the given regions group. used for logging and for naming the item in the results list")
+  p <- add_argument(p, "--results_name", help = "results are saved as ${results_name}.rds")
+  p <- add_argument(p, "--sample_name", help = "name of the sample we are calculating the methylation for")
   p <- add_argument(p, "--sample_path", help = "path to sample file - can be methylRawDB bgz or bismark coverage file")
   p <- add_argument(p, "--output_dir", help = "output directory", default = ".")
   p <- add_argument(p, "--bp_to_pad", help = "number of base pairs to pad the regions", type = "integer", default = 2500)
@@ -260,14 +262,20 @@ parse_cli_args <- function() {
   p <- add_argument(p, "--assembly", help = "genome assembly", default = "hg38")
 
   args <- parse_args(p)
-  if (is.null(args$regions) && is.null(args$regions_list_file)) {
+  if (is.na(args$regions) && is.na(args$regions_list_file)) {
     stop("Either --regions or --regions_list_file must be provided.")
   }
-  if (is.null(args$name)) {
-    stop("--name must be provided, results are saved as ${name}.rds")
+  if ((!is.na(args$regions)) && is.na(args$regions_name)) {
+    stop("--regions_name must be provided when using --regions")
   }
-  if (is.null(args$sample_path)) {
+  if (is.na(args$sample_path)) {
     stop("--sample_path must be provided.")
+  }
+  if (is.na(args$sample_name)) {
+    stop("--sample_name must be provided.")
+  }
+  if (is.na(args$results_name)) {
+    stop("--results_name must be provided, results are saved as ${results_name}.rds")
   }
   return(args)
 }
@@ -311,20 +319,22 @@ process_cli_args <- function(args) {
   }
 
   # read regions or regions_list_file
-  if (is.null(args$regions)) {
+  if (is.na(args$regions)) {
     regions_list <- read.csv(args$regions_list_file, header = TRUE)
     # create a list of regions
     regions_list <- lapply(regions_list, function(regions) {
       read_regions_file(regions[, "regions_path"])
     })
   } else {
-    regions_list <- list(setNames(list(read_regions_file(args$regions)), as.character(args$name)))
+    regions_list <- list(read_regions_file(args$regions))
+    names(regions_list) <- as.character(args$regions_name)
+    print(regions_list) #debug
   }
 
   # debug: print a line to see if the function read_meth_file is called correctly
-  cat(sprintf("debug: read_meth_file(%s, %s, %s)\n", args$sample_path, args$name, args$assembly)) # debug
-  sample <- read_meth_file(args$sample_path, sample_id = args$name, assembly = args$assembly)
-  cat("debug: class(sample)=", class(sample), "\n") # debug
+  cat(sprintf("debug: read_meth_file(%s, %s, %s)\n", args$sample_path, args$sample_name, args$assembly)) # debug
+  sample <- read_meth_file(args$sample_path, sample_id = args$sample_name, assembly = args$assembly)
+  cat("debug: class(sample) = ", class(sample), "\n", sep = "") # debug
 
   return(list(
     "regions_list" = regions_list,
@@ -339,7 +349,7 @@ process_cli_args <- function(args) {
 
 print_args <- function(args) {
   cat("Arguments:\n")
-  if (!is.null(args$regions_list)) {
+  if (!is.na(args$regions_list)) {
     cat("regions_list:\n")
     for (i in seq_along(args$regions_list)) {
       cat(sprintf("  %s: %s\n", names(args$regions_list)[i], args$regions_list[[i]]))
@@ -365,7 +375,7 @@ main <- function(regions_list, sample, bp_to_pad, tile_width, tile_step,
     regions <- regions_list[[regions_name]]
     num_regions <- length(regions)
     # print info
-    cat(sprintf("Processing region %s\n", regions_name))
+    cat(sprintf("Processing %s\n", regions_name))
     cat(sprintf("Number of regions: %d\n", num_regions))
     cat(sprintf(
       "padding and tiling regions:\n bp_to_pad: %d\n tile_width: %d\n tile_step: %d\n",
@@ -391,7 +401,7 @@ main <- function(regions_list, sample, bp_to_pad, tile_width, tile_step,
     avg_meth_by_pos <- calc_avg_meth_by_pos(counts)
 
     # TODO: get this out of the loop - replace with onetime caculation based on bp_to_pad, tile_width, tile_step
-    # not a big deal for onlly 2 iterations - but would be noce to generalize for an arbitrary number of regions
+    # not a big deal for only 2 iterations - but would be nice to generalize for an arbitrary number of regions
     # also while we are at it - replace loop with lapply
     dist_from_center <- seq(-bp_to_pad, (bp_to_pad - 1), length.out = length(avg_meth_by_pos))
 
@@ -420,7 +430,8 @@ result <- main(
 if (!dir.exists(args$output_dir)) {
   dir.create(args$output_dir)
 }
-saveRDS(result, file = sprintf("%s/%s.rds", args$output_dir, args$name))
+cat(sprintf("saving file: %s/%s.rds", args$output_dir, args$results_name))
+saveRDS(result, file = sprintf("%s/%s.rds", args$output_dir, args$results_name))
 quit(status = 0)
 
 
@@ -448,8 +459,21 @@ tile_step <<- 10
 region_min_cov <- 5
 mc_cores <- 5
 
+args <- list()
+args$regions_list_file <- "./analysis/avg_meth_arbs_dmrs_lncap_vs_prec/regions_list.csv"
+args$name <- "tumor4_peters2024"
+args$sample_path <- "./data/MethRawDB/tumor4_peters2024.txt.bgz"
+args$bp_to_pad <- 2500
+args$tile_width <- 500
+args$tile_step <- 10
+args$min_cov <- 5
+args$mc_cores <- 1
+args$assembly <- "hg19"
+
+args_main <- process_cli_args(args)
+
 result <- main(
-  list("narbs" = narbs, "tarbs" = tarbs), sample,
+  regions_list, sample,
   bp_to_pad, tile_width, tile_step, region_min_cov, mc_cores
 )
 
