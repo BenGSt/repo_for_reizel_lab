@@ -407,6 +407,7 @@ main <- function(regions_list, sample, bp_to_pad, tile_width, tile_step,
 
     return(list("avg_meth_by_pos" = avg_meth_by_pos, "dist_from_center" = dist_from_center))
   })
+  names(result) <- names(regions_list) #needs testing (18.10.24)
   return(result)
 }
 
