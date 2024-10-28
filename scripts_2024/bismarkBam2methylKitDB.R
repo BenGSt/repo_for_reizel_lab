@@ -1,4 +1,4 @@
-#!/usr/bin/Rscript
+#!/usr/local/bin/Rscript
 
 # File: bismarkBam2methylKitDB.R
 # Description: Script to process Bismark BAM files and convert to methylKit database
