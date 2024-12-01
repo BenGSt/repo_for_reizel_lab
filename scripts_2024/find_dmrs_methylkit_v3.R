@@ -239,6 +239,10 @@ plot_corelation_pca_hc <- function(tiles_raw_unite) {
   png(file = "pca.png", width = 1500, height = 1000, res = 100)
   PCASamples(tiles_raw_unite)
   dev.off()
+
+  png(file = "pca_screeplot.png", width = 1500, height = 1000, res = 100)
+  PCASamples(tiles_raw_unite, screeplot = TRUE)
+  dev.off()
 }
 
 #TODO: fix or delete (used to work in 2022, broke in 2023)
