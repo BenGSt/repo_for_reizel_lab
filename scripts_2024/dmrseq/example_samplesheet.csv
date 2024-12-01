@@ -1,0 +1,5 @@
+sample_name,condition,replicate,file_path
+22RV1-I360-1,I360,1,~/OneDriveTechnion/ARBS_meth_prostate_cancer/data/wgbs_foxa1_kd_lncap_and_mutation_i360_22rv1_nova2024/bismark_trim_r1-10_r2-10_3pr2-2_no_ignore/methylation_coverage/22RV1-I360-1_1_val_1_bismark_bt2_pe.deduplicated.bismark.cov.gz
+22RV1-I360-2,I360,2,~/OneDriveTechnion/ARBS_meth_prostate_cancer/data/wgbs_foxa1_kd_lncap_and_mutation_i360_22rv1_nova2024/bismark_trim_r1-10_r2-10_3pr2-2_no_ignore/methylation_coverage/22RV1-I360-2_1_val_1_bismark_bt2_pe.deduplicated.bismark.cov.gz
+22RV1-WT-1,WT,1,~/OneDriveTechnion/ARBS_meth_prostate_cancer/data/wgbs_foxa1_kd_lncap_and_mutation_i360_22rv1_nova2024/bismark_trim_r1-10_r2-10_3pr2-2_no_ignore/methylation_coverage/22RV1-WT-1_1_val_1_bismark_bt2_pe.deduplicated.bismark.cov.gz
+22RV1-WT-2,WT,2,~/OneDriveTechnion/ARBS_meth_prostate_cancer/data/wgbs_foxa1_kd_lncap_and_mutation_i360_22rv1_nova2024/bismark_trim_r1-10_r2-10_3pr2-2_no_ignore/methylation_coverage/22RV1-WT-2_1_val_1_bismark_bt2_pe.deduplicated.bismark.cov.gz
