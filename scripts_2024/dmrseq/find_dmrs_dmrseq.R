@@ -22,7 +22,7 @@ write_table <- function(to_write, path) {
 #'          2. BED sorted by region width, methylation difference, and q-value
 #' @return No return value, writes BED files to disk
 write_bed_files <- function(
-    significant_regions, output_path, min_meth_diff = 25) {
+    significant_regions, output_path, min_qval, min_meth_diff = 25) {
   if (!dir.exists(output_path)) {
     message("Creating output directory: ", output_path)
     dir.create(output_path, recursive = TRUE)
@@ -31,8 +31,9 @@ write_bed_files <- function(
   hypo_dmrs <- significant_regions[significant_regions$meth_diff < 0, ]
   hyper_dmrs <- significant_regions[significant_regions$meth_diff > 0, ]
 
-  # print # of significant dmrs
-  print_num_dmrs(nrow(hyper_dmrs), nrow(hypo_dmrs), significant = TRUE)
+  n_hyper_diff <- sum(abs(hyper_dmrs$meth_diff) >= min_meth_diff)
+  n_hypo_diff <- sum(abs(hypo_dmrs$meth_diff) >= min_meth_diff)
+  print_num_dmrs(n_hyper_diff, n_hypo_diff, diff = min_meth_diff)
 
   for (dmrs in c("hypo_dmrs", "hyper_dmrs")) {
     bed_path <- paste0(output_path, "/", dmrs, ".bed")
@@ -48,7 +49,7 @@ write_bed_files <- function(
     write_table(dmrs_df[, 1:3], bed_path)
 
     write_table(
-      dmrs_df[dmrs_df$meth_diff >= min_meth_diff, 1:3], filtered_bed_path
+      dmrs_df[abs(dmrs_df$meth_diff) >= min_meth_diff, 1:3], filtered_bed_path
     )
 
     # sort by descending width, descending diff, ascending qval
@@ -77,8 +78,8 @@ write_full_dmr_data <- function(significant_regions, output_path, save_rds = FAL
 }
 
 
-print_num_dmrs <- function(n_hyper, n_hypo, significant = FALSE) {
-  prefix <- if (significant) "significant " else ""
+print_num_dmrs <- function(n_hyper, n_hypo, diff = NULL) {
+  prefix <- ifelse(is.null(diff), "", sprintf("(diff >= %d) ", diff))
   sprintf(
     "number of %shyper DMRs: %d\nnumber of %shypo DMRs: %d\n",
     prefix, n_hyper, prefix, n_hypo
@@ -171,7 +172,7 @@ main <- function(
   )
 
   # only work on one chromosome for debugging
-  loci_idx <- loci_idx[which(seqnames(bs)[loci_idx] == "chr3")] # debug
+  # loci_idx <- loci_idx[which(seqnames(bs)[loci_idx] == "chr3")] # debug
 
   # How many CpGs have coverage in all samples?
   print_cpg_cov_info(bs, loci_idx)
@@ -194,7 +195,7 @@ main <- function(
 
     # write bed files of dmrs, hyper and hypo separately
     # standard bed sorted and sorted by width, diff, qval
-    write_bed_files(significant_regions, output_path, min_meth_diff)
+    write_bed_files(significant_regions, output_path, min_qval, min_meth_diff)
 
     # write all data in significant_regions as tsv
     if (save_full_dmr_data) {
