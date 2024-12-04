@@ -179,6 +179,8 @@ main <- function(
 
   # filter bs object to only keep CpGs with coverage in all samples
   bs <- bs[loci_idx, ]
+  # bs <- bs[loci_idx[1:20000], ] #DEBUG
+
 
   # run dmrseq
   regions <- dmrseq(bs, testCovariate, ...)
@@ -196,6 +198,7 @@ main <- function(
     # write bed files of dmrs, hyper and hypo separately
     # standard bed sorted and sorted by width, diff, qval
     write_bed_files(significant_regions, output_path, min_qval, min_meth_diff)
+    cat("BED files written\n")
 
     # write all data in significant_regions as tsv
     if (save_full_dmr_data) {
