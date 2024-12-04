@@ -5,7 +5,7 @@ sampleheet=$(realpath ./example_samplesheet.csv)
 output_dir=$(realpath ./example_output)
 
 #get sample dirs from samplesheet to bind to container
-cov_data_paths=$(dirname $(awk 'NR>1' "$sampleheet" | cut -d, -f4) | sort | uniq | sed "s/~/$HOME/")
+cov_data_paths=$(dirname $(awk 'NR>1' "$sampleheet" | cut -d, -f4) | sort | uniq | sed "s|~|$HOME|")
 cov_data_paths=$(echo $cov_data_paths | sed 's/ /,/g')
 
 #write a new samplesheet with continer paths (replace 4th field dirnames with /coverage_data/)
