@@ -288,6 +288,8 @@ parse_cli_args <- function() {
   p <- add_argument(p, "--mc_cores", help = "number of cores to use for parallel processing (test on one sample used ~3GB per core)", type = "integer", default = 1L)
   p <- add_argument(p, "--assembly", help = "genome assembly", default = "hg38")
   p <- add_argument(p, "--min_covered_windows", help = "min fraction of covered windows in a site to be considered valid 0.0-1.0", type = "double", default = 0.5)
+  p <- add_argument(p, "--valid_sites_bed_name", help = "saves the valid sites to this file")
+
 
   args <- parse_args(p)
   if (is.na(args$regions) && is.na(args$regions_list_file)) {
@@ -398,7 +400,7 @@ print_args <- function(args) {
 
 
 main <- function(regions_list, sample, bp_to_pad, tile_width, tile_step,
-                 region_min_cov, mc_cores = 1, thresh, out) {
+                 region_min_cov, mc_cores = 1, thresh, out, valid_sites_bed_name) {
   result <- lapply(names(regions_list), function(regions_name) {
     regions <- regions_list[[regions_name]]
     num_regions <- length(regions)
@@ -423,14 +425,34 @@ main <- function(regions_list, sample, bp_to_pad, tile_width, tile_step,
     ))
     # check tile coverage: if below region_min_cov, replace numCs with NA
     #  -> calculated methylation will be NA. [2]
-    #saveRDS(counts, file = paste0(out, "/output_file.rds"))
     counts <- set_numcs_na_if_low_coverage(counts, region_min_cov)
 
-    # count and return valid sites with less than thresh% NA in numCs
-    # NOTE: "uncovered" sites are not removed from counts so they still affect the avarage 
-    # TODO: only keep covered sites in counts
-    valid_sites <- count_sites_with_na_threshold(counts, thresh)
+    # will only run if provided save path
+    if (!is.null(args$valid_sites_bed_name)) {
+      # count and return valid sites with less than thresh% NA in numCs
+      # NOTE: "uncovered" sites are not removed from counts so they still affect the avarage 
+      # TODO: only keep covered sites in counts
+      valid_sites <- count_sites_with_na_threshold(counts, thresh)
+
     
+      # Convert to GRanges
+      bed_regions <- lapply(valid_sites, function(meth_raw) {
+        GRanges(
+          seqnames = as.character(meth_raw$chr[1]),
+          ranges = IRanges(
+            start = min(meth_raw$start),
+            end   = max(meth_raw$end)
+          ),
+          strand = as.character(meth_raw$strand[1])
+        )
+      })
+      # Combine all into a single GRanges object
+      bed_regions_gr <- do.call(c, bed_regions)
+      # Export to BED
+      export.bed(bed_regions_gr, "reconstructed_regions.bed")
+    }
+    
+    # Calculating average methylation per position
     cat("Calculating average methylation per position\n")
     avg_meth_by_pos <- calc_avg_meth_by_pos(counts)
 
@@ -439,7 +461,7 @@ main <- function(regions_list, sample, bp_to_pad, tile_width, tile_step,
     # also while we are at it - replace loop with lapply
     dist_from_center <- seq(-bp_to_pad, (bp_to_pad - 1), length.out = length(avg_meth_by_pos))
 
-    return(list("avg_meth_by_pos" = avg_meth_by_pos, "dist_from_center" = dist_from_center, "valid_sites" = valid_sites))
+    return(list("avg_meth_by_pos" = avg_meth_by_pos, "dist_from_center" = dist_from_center))
   })
   names(result) <- names(regions_list) #needs testing (18.10.24)
   return(result)
@@ -462,6 +484,7 @@ result <- main(
   mc_cores = args_main$mc_cores,
   thresh = args$min_covered_windows,
   out = args$output_dir
+  valid_sites_bed_name = args$valid_sites_bed_name
 )
 # if output dir does not exist, create it
 if (!dir.exists(args$output_dir)) {
