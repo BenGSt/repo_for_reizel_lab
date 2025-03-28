@@ -428,7 +428,7 @@ main <- function(regions_list, sample, bp_to_pad, tile_width, tile_step,
     counts <- set_numcs_na_if_low_coverage(counts, region_min_cov)
 
     # will only run if provided save path
-    if (!is.null(args$valid_sites_bed_name)) {
+    if (!is.null(valid_sites_bed_name)) {
       # count and return valid sites with less than thresh% NA in numCs
       # NOTE: "uncovered" sites are not removed from counts so they still affect the avarage 
       # TODO: only keep covered sites in counts
@@ -449,7 +449,7 @@ main <- function(regions_list, sample, bp_to_pad, tile_width, tile_step,
       # Combine all into a single GRanges object
       bed_regions_gr <- do.call(c, bed_regions)
       # Export to BED
-      export.bed(bed_regions_gr, "reconstructed_regions.bed")
+      export.bed(bed_regions_gr, valid_sites_bed_name)
     }
     
     # Calculating average methylation per position
@@ -483,7 +483,7 @@ result <- main(
   region_min_cov = args_main$min_cov,
   mc_cores = args_main$mc_cores,
   thresh = args$min_covered_windows,
-  out = args$output_dir
+  out = args$output_dir,
   valid_sites_bed_name = args$valid_sites_bed_name
 )
 # if output dir does not exist, create it
