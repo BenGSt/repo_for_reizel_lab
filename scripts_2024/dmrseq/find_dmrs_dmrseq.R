@@ -216,7 +216,7 @@ main <- function(
   }
 
   if (save_rdata) {
-    save.image(file.path(output_path, "dmrseq_results.RData"))
+    save.image(file.path(output_path, "dmrseq_results.RData"), envir = environment())
   }
 
   return()
