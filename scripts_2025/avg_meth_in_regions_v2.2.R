@@ -4,9 +4,9 @@
 #' @description calculate the average methylation by position over a set genomic regions
 #' by finding the methylation level in sliding window tiles for each region,
 #' then taking the average of each tile over all regions.
-#' @author Ben Steinberg
+#' @author Ben Steinberg, Pleleg Shalev
 #' @date 6.9.2024
-# TODO: needs testing (can test with arbs)
+# TODO: tested on ido goldstein's data - set header = TRUE in methRead for methyldackel files - see TODOs in body
 
 library(rtracklayer)
 library(data.table)
@@ -188,7 +188,7 @@ read_bismark_cov <- function(file_path,
     sample.id = sample_id,
     assembly = assembly,
     pipeline = pipeline,
-    header = FALSE,
+    header = TRUE,
     context = context,
     mincov = mincov
   )
@@ -290,7 +290,6 @@ parse_cli_args <- function() {
   p <- add_argument(p, "--min_covered_windows", help = "min fraction of covered windows in a site to be considered valid 0.0-1.0", type = "double", default = 0.5)
   p <- add_argument(p, "--valid_sites_bed_name", help = "saves the valid sites to this file")
 
-
   args <- parse_args(p)
   if (is.na(args$regions) && is.na(args$regions_list_file)) {
     stop("Either --regions or --regions_list_file must be provided.")
@@ -321,7 +320,9 @@ process_cli_args <- function(args) {
     return(endsWith(file_path, ".bgz"))
   }
   is_bismark <- function(file_path) {
-    return(endsWith(file_path, ".cov.gz"))
+    return(endsWith(file_path, ".cov.gz") || endsWith(file_path, ".bedGraph")) #include bedGraph from methyldackel
+    #note that for methyldakel there is a header, not for bismark. for now I set the header=TRUE
+    #TODO: if methyldackel is used, add a parameter to the function to set header=TRUE/FALSE
   }
 
   read_regions_file <- function(file_path) {
@@ -351,10 +352,20 @@ process_cli_args <- function(args) {
   # read regions or regions_list_file
   if (is.na(args$regions)) {
     regions_list <- read.csv(args$regions_list_file, header = TRUE)
+    cat("regions_list:\n") #debug
+    print(regions_list) #debug
     # create a list of regions
-    regions_list <- lapply(regions_list, function(regions) {
-      read_regions_file(regions[, "regions_path"])
+    regions_names <- regions_list$regions_name
+    regions_list <- lapply(regions_list$regions_path, function(regions_path) {
+      cat(sprintf("reading regions file: %s\n", regions_path)) #debug
+      read_regions_file(regions_path)
     })
+    names(regions_list) <- regions_names
+
+#debug
+  # regions_list <- read.csv("/home/bengst/OneDriveTechnion/ido_goldstein_fasting/avg_meth_in_regions/regions_list.csv", header = TRUE)
+
+
   } else {
     regions_list <- list(read_regions_file(args$regions))
     names(regions_list) <- as.character(args$regions_name)
@@ -380,6 +391,7 @@ process_cli_args <- function(args) {
 print_args <- function(args) {
   cat("Arguments:\n")
   if (!is.na(args$regions_list)) {
+    cat("regions_list_file: ", args$regions_list_file, "\n")
     cat("regions_list:\n")
     for (i in seq_along(args$regions_list)) {
       cat(sprintf("  %s: %s\n", names(args$regions_list)[i], args$regions_list[[i]]))
@@ -428,31 +440,31 @@ main <- function(regions_list, sample, bp_to_pad, tile_width, tile_step,
     counts <- set_numcs_na_if_low_coverage(counts, region_min_cov)
 
     # will only run if provided save path
-    if (!is.null(valid_sites_bed_name)) {
-      # count and return valid sites with less than thresh% NA in numCs
-      # NOTE: "uncovered" sites are not removed from counts so they still affect the avarage 
-      # TODO: only keep covered sites in counts
-      valid_sites <- count_sites_with_na_threshold(counts, thresh)
-
-    
-      # Convert to GRanges
-      bed_regions <- lapply(valid_sites, function(meth_raw) {
-        GRanges(
-          seqnames = as.character(meth_raw$chr[1]),
-          ranges = IRanges(
-            start = min(meth_raw$start),
-            end   = max(meth_raw$end)
-          ),
-          strand = as.character(meth_raw$strand[1])
-        )
-      })
-      # Combine all into a single GRanges object
-      bed_regions_gr <- do.call(c, bed_regions)
-      # Export to BED
-      export.bed(bed_regions_gr, valid_sites_bed_name)
-    }
-    
-    # Calculating average methylation per position
+    if (!is.null(args$valid_sites_bed_name)) {
+       # count and return valid sites with less than thresh% NA in numCs
+       # NOTE: "uncovered" sites are not removed from counts so they still affect the avarage 
+       # TODO: only keep covered sites in counts
+       valid_sites <- count_sites_with_na_threshold(counts, thresh)
+ 
+     
+       # Convert to GRanges
+       bed_regions <- lapply(valid_sites, function(meth_raw) {
+         GRanges(
+           seqnames = as.character(meth_raw$chr[1]),
+           ranges = IRanges(
+             start = min(meth_raw$start),
+             end   = max(meth_raw$end)
+           ),
+           strand = as.character(meth_raw$strand[1])
+         )
+       })
+       # Combine all into a single GRanges object
+       bed_regions_gr <- do.call(c, bed_regions)
+       # Export to BED
+       export.bed(bed_regions_gr, "reconstructed_regions.bed")
+     }
+ 
+     # Calculating average methylation per position
     cat("Calculating average methylation per position\n")
     avg_meth_by_pos <- calc_avg_meth_by_pos(counts)
 
@@ -483,8 +495,7 @@ result <- main(
   region_min_cov = args_main$min_cov,
   mc_cores = args_main$mc_cores,
   thresh = args$min_covered_windows,
-  out = args$output_dir,
-  valid_sites_bed_name = args$valid_sites_bed_name
+  out = args$output_dir
 )
 # if output dir does not exist, create it
 if (!dir.exists(args$output_dir)) {
