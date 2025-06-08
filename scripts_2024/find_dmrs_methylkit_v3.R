@@ -148,7 +148,7 @@ process_cli_args <- function(argv) {
 read_meth_call_files <- function(meth_call_files_dir, pipeline_, samp_ids, treatments, genome, mincov = 10)
 {
   meth_call_files <- list.files(path = meth_call_files_dir,
-                                pattern = "*.cov.gz|*.cov",
+                                pattern = "*.cov.gz|*.cov|*.bedGraph",
                                 full.names = TRUE)
 
   #try to use basename to get file names without full path, if that fails use str_split
