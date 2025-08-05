@@ -56,7 +56,7 @@ find_dmrs_main <-
     set_up_directories(output_dir)
     print_args(genome, meth_call_files_dir, meth_difference,
                output_dir, pipeline, samp_ids, treatments, base_cov, tile_cov,
-               tile_size, filt_hi_perc, mc.cores, qval)
+               tile_size, filt_hi_perc, mc.cores, qval, save_granges)
 
     tiles_raw_unite <- make_tiles(meth_call_files_dir, pipeline, samp_ids, treatments, genome,
                                   base_cov, tile_cov, tile_size, filt_hi_perc, mc.cores)
