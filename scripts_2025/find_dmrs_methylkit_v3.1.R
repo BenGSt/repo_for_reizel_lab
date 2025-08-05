@@ -49,7 +49,7 @@ suppressMessages(library(methylKit))
 #'
 find_dmrs_main <-
   function(meth_call_files_dir, samp_ids, treatments, pipeline, output_dir, meth_difference,
-           genome, base_cov = 1, tile_cov = 10, tile_size = 100, filt_hi_perc = 99.9, mc.cores = 1, qval = 0.01)
+           genome, base_cov = 1, tile_cov = 10, tile_size = 100, filt_hi_perc = 99.9, mc.cores = 1, qval = 0.01, save_granges = FALSE)
   {
     cat("\n\nRunning find_dmrs_methylkit_v3.1.R\n")
 
@@ -75,7 +75,8 @@ find_dmrs_main <-
     info_str <- str_c(tile_size, "bpTiles_", meth_difference, "perc_", "basecov", base_cov, "_tilecov", tile_cov)
     #TODO: add option to save as MethylKit objects (These aren't really used, it's easier to import bed files)
     # save_methykit_objects(dmrs_hyper, dmrs_hypo, tiles_raw_unite, info_str, output_dir)
-    # save_granges_objects(dmrs_hyper, dmrs_hypo, tiles_raw_unite, info_str, output_dir)
+    if (save_granges)
+      save_granges_objects(dmrs_hyper, dmrs_hypo, tiles_raw_unite, info_str, output_dir)
 
     #TODO: do we need meth scores in bed format? maybe bigWIg is better (can be done with rtracklayer)
     #write all tiles with meth scores (not only dmrs) that can be used for heatmaps and other applications
@@ -117,6 +118,7 @@ parse_cli_args <- function() {
                     default = "99.9", type = "character") #type char to allow NULL
   p <- add_argument(p, "--mc.cores", help = "number of cores to use for unite() and calculateDiffMeth(). must be set to 1 in Windows", default = 1)
   p <- add_argument(p, "--qval", help = "qvalue cutoff for DMRs, default 0.01", default = 0.01)
+  p <- add_argument(p, "--save_granges", help = "save GRanges objects as rds files (default: FALSE)", default = FALSE, flag = TRUE)
   argv <- parse_args(p)
   return(argv)
 }
@@ -388,6 +390,7 @@ print_args <- function(genome, meth_call_files_dir, meth_difference, output_dir,
   sprintf("filt_hi_perc: %s\n", filt_hi_perc) %>% cat()
   sprintf("mc.cores: %s\n\n\n", mc.cores) %>% cat()
   sprintf("qval: %s\n", qval) %>% cat()
+  sprintf("save_granges: %s\n", save_granges) %>% cat()
 }
 
 create_dir <- function(output_dir) {
@@ -422,7 +425,7 @@ process_cli_args(argv)
 find_dmrs_main(meth_call_files_dir, samp_ids, treatments, argv$pipeline,
                output_dir, as.numeric(argv$meth_difference), argv$genome,
                as.numeric(argv$base_cov), as.numeric(argv$tile_cov), argv$tile_size, argv$filt_hi_perc,
-               as.numeric(argv$mc.cores), as.numeric(argv$qval)
+               as.numeric(argv$mc.cores), as.numeric(argv$qval), argv$save_granges
 )
 
 #use main manually
