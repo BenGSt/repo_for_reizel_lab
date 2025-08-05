@@ -374,7 +374,7 @@ run_gene_ontology_analysis <- function(dmrs_hypo, genome) {
 }
 
 print_args <- function(genome, meth_call_files_dir, meth_difference, output_dir, pipeline, samp_ids,
-                       treatments, base_cov, tile_cov, tile_size, filt_hi_perc, mc.cores, qval) {
+                       treatments, base_cov, tile_cov, tile_size, filt_hi_perc, mc.cores, qval, save_granges) {
   sprintf("\n\nGiven Arguments:\n") %>% cat()
   sprintf("pwd: %s\n", getwd()) %>% cat()
   sprintf("meth_call_files_dir: %s\n", meth_call_files_dir) %>% cat()
