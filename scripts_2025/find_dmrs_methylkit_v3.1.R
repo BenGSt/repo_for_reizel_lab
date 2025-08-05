@@ -388,9 +388,9 @@ print_args <- function(genome, meth_call_files_dir, meth_difference, output_dir,
   sprintf("tile_size: %s\n", tile_size) %>% cat()
   sprintf("genome: %s\n", genome) %>% cat()
   sprintf("filt_hi_perc: %s\n", filt_hi_perc) %>% cat()
-  sprintf("mc.cores: %s\n\n\n", mc.cores) %>% cat()
+  sprintf("mc.cores: %s\n", mc.cores) %>% cat()
   sprintf("qval: %s\n", qval) %>% cat()
-  sprintf("save_granges: %s\n", save_granges) %>% cat()
+  sprintf("save_granges: %s\n\n\n", save_granges) %>% cat()
 }
 
 create_dir <- function(output_dir) {
