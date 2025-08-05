@@ -51,6 +51,8 @@ find_dmrs_main <-
   function(meth_call_files_dir, samp_ids, treatments, pipeline, output_dir, meth_difference,
            genome, base_cov = 1, tile_cov = 10, tile_size = 100, filt_hi_perc = 99.9, mc.cores = 1, qval = 0.01)
   {
+    cat("\n\nRunning find_dmrs_methylkit_v3.1.R\n")
+
     set_up_directories(output_dir)
     print_args(genome, meth_call_files_dir, meth_difference,
                output_dir, pipeline, samp_ids, treatments, base_cov, tile_cov,
@@ -312,7 +314,7 @@ save_granges_objects <- function(dmrs_hyper, dmrs_hypo, tiles_raw_unite, info_st
 write_bed_files <- function(output_dir, dmrs_hyper, dmrs_hypo, dmrs_all, tiles_raw_unite, info_str) {
   write.table(getData(dmrs_hyper)[, 1:3], str_c(output_dir, "/dmrs_hyper_", info_str, ".bed"), sep = "\t", row.names = FALSE, col.names = FALSE, quote = FALSE)
   write.table(getData(dmrs_hypo)[, 1:3], str_c(output_dir, "/dmrs_hypo_", info_str, ".bed"), sep = "\t", row.names = FALSE, col.names = FALSE, quote = FALSE)
-  write.table(getData(dmrs_all)[, 1:3], str_c(output_dir, "/dmrs_all_", info_str, ".meth"), sep = "\t", row.names = FALSE, col.names = FALSE, quote = FALSE)
+  write.table(getData(dmrs_all), str_c(output_dir, "/dmrs_all_", info_str, ".meth"), sep = "\t", row.names = FALSE, col.names = FALSE, quote = FALSE)
   write.table(getData(tiles_raw_unite)[, 1:3], str_c(output_dir, "/raw_unite_", info_str, ".bed"), sep = "\t", row.names = FALSE, col.names = FALSE, quote = FALSE)
 }
 
