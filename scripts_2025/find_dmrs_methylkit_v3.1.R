@@ -64,6 +64,7 @@ find_dmrs_main <-
     # get hyper and hypo methylated bases
     dmrs_hyper <- getMethylDiff(tiles_raw_unite_DMRs, difference = meth_difference, qvalue = qval, type = "hyper")
     dmrs_hypo <- getMethylDiff(tiles_raw_unite_DMRs, difference = meth_difference, qvalue = qval, type = "hypo")
+    dmrs_all <- getMethylDiff(tiles_raw_unite_DMRs, difference = meth_difference, qvalue = 1, type = "all")
 
     plot_meth_diff_per_chr(meth_difference, tiles_raw_unite_DMRs)
 
@@ -78,7 +79,7 @@ find_dmrs_main <-
     #write all tiles with meth scores (not only dmrs) that can be used for heatmaps and other applications
     write_meth_scores(tiles_raw_unite, str_c(output_dir, "/all_samps_", tile_size, "bp_tiles_meth_scores.bed"))
 
-    write_bed_files(output_dir, dmrs_hyper, dmrs_hypo, tiles_raw_unite, info_str)
+    write_bed_files(output_dir, dmrs_hyper, dmrs_hypo, dmrs_all, tiles_raw_unite, info_str)
     write_bg_for_great(output_dir, dmrs_hyper, dmrs_hypo, tiles_raw_unite, info_str)
 
 
@@ -308,9 +309,10 @@ save_granges_objects <- function(dmrs_hyper, dmrs_hypo, tiles_raw_unite, info_st
 
 #' Write bed files (only chr start end)
 #' tiles_raw_unite - all tiles covered by all samples
-write_bed_files <- function(output_dir, dmrs_hyper, dmrs_hypo, tiles_raw_unite, info_str) {
+write_bed_files <- function(output_dir, dmrs_hyper, dmrs_hypo, dmrs_all, tiles_raw_unite, info_str) {
   write.table(getData(dmrs_hyper)[, 1:3], str_c(output_dir, "/dmrs_hyper_", info_str, ".bed"), sep = "\t", row.names = FALSE, col.names = FALSE, quote = FALSE)
   write.table(getData(dmrs_hypo)[, 1:3], str_c(output_dir, "/dmrs_hypo_", info_str, ".bed"), sep = "\t", row.names = FALSE, col.names = FALSE, quote = FALSE)
+  write.table(getData(dmrs_all)[, 1:3], str_c(output_dir, "/dmrs_all_", info_str, ".meth"), sep = "\t", row.names = FALSE, col.names = FALSE, quote = FALSE)
   write.table(getData(tiles_raw_unite)[, 1:3], str_c(output_dir, "/raw_unite_", info_str, ".bed"), sep = "\t", row.names = FALSE, col.names = FALSE, quote = FALSE)
 }
 
@@ -330,20 +332,7 @@ write_bg_for_great <- function(output_dir, dmrs_hyper, dmrs_hypo, tiles_raw_unit
     return(1)
   }
 
-  # write.table(rbind(getData(dmrs_hyper)[, 1:3], getData(dmrs_hypo)[, 1:3],
-  #                   sample_n(getData(tiles_raw_unite)[, 1:3], 3000)) %>% unique(),
-  #             str_c(output_dir, "/dmrs_plus_random_3000_", info_str, ".bed"),
-  #             sep = "\t", row.names = FALSE, col.names = FALSE, quote = FALSE)
-  # write.table(rbind(getData(dmrs_hyper)[, 1:3], getData(dmrs_hypo)[, 1:3],
-  #                   sample_n(getData(tiles_raw_unite)[, 1:3], 5000)) %>% unique(),
-  #             str_c(output_dir, "/dmrs_plus_random_5000_", info_str, ".bed"),
-  #             sep = "\t", row.names = FALSE, col.names = FALSE, quote = FALSE)
-  # write.table(rbind(getData(dmrs_hyper)[, 1:3], getData(dmrs_hypo)[, 1:3],
-  #                   sample_n(getData(tiles_raw_unite)[, 1:3], 50000)) %>% unique(),
-  #             str_c(output_dir, "/dmrs_plus_random_50000_", info_str, ".bed"),
-  #             sep = "\t", row.names = FALSE, col.names = FALSE, quote = FALSE)
-
-  # replace above block with loop
+  # write background files for GREAT
   for (n in n_samples) {
     if (nrow(tiles_raw_unite) < n) {
       cat(str_c("Not enough regions to randomly sample n=", n
