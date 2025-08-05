@@ -49,7 +49,7 @@ suppressMessages(library(methylKit))
 #'
 find_dmrs_main <-
   function(meth_call_files_dir, samp_ids, treatments, pipeline, output_dir, meth_difference,
-           genome, base_cov = 1, tile_cov = 10, tile_size = 100, filt_hi_perc = 99.9, mc.cores = 1, qval = 0.01) {
+           genome, base_cov = 1, tile_cov = 10, tile_size = 100, filt_hi_perc = 99.9, mc.cores = 1, qval = 0.01)
   {
     set_up_directories(output_dir)
     print_args(genome, meth_call_files_dir, meth_difference,
@@ -381,7 +381,7 @@ run_gene_ontology_analysis <- function(dmrs_hypo, genome) {
 }
 
 print_args <- function(genome, meth_call_files_dir, meth_difference, output_dir, pipeline, samp_ids,
-                       treatments, base_cov, tile_cov, tile_size, filt_hi_perc, mc.cores) {
+                       treatments, base_cov, tile_cov, tile_size, filt_hi_perc, mc.cores, qval) {
   sprintf("\n\nGiven Arguments:\n") %>% cat()
   sprintf("pwd: %s\n", getwd()) %>% cat()
   sprintf("meth_call_files_dir: %s\n", meth_call_files_dir) %>% cat()
