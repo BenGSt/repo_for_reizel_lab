@@ -118,7 +118,7 @@ parse_cli_args <- function() {
                     default = "99.9", type = "character") #type char to allow NULL
   p <- add_argument(p, "--mc.cores", help = "number of cores to use for unite() and calculateDiffMeth(). must be set to 1 in Windows", default = 1)
   p <- add_argument(p, "--qval", help = "qvalue cutoff for DMRs, default 0.01", default = 0.01)
-  p <- add_argument(p, "--save_granges", help = "save GRanges objects as rds files (default: FALSE)", default = FALSE, flag = TRUE)
+  p <- add_argument(p, "--save_granges", help = "save GRanges objects as rds files (flag, default: FALSE)", flag = TRUE)
   argv <- parse_args(p)
   return(argv)
 }
