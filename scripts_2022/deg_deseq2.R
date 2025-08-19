@@ -155,6 +155,10 @@ main = function(htseq_out_dir, report_dir, padj_cutoff = 0.01, log2_fc_cutoff = 
   dds = buildDESeqDataSet(sampleTable, htseq_out_dir)
   dds <- DESeq(dds)
 
+  #save normalized counts matrix
+  norm_counts <- counts(dds, normalized = TRUE)
+  write.csv(as.data.frame(norm_counts), file = paste0(dirname(csv_path), "/normalized_counts.csv"))
+
   buildHtmlReport(dds, report_dir, padj_cutoff, contrast)
 
   #NOTE: 3.8.2023 added PCA
