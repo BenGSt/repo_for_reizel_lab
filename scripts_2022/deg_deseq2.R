@@ -156,10 +156,15 @@ main = function(htseq_out_dir, report_dir, padj_cutoff = 0.01, log2_fc_cutoff = 
   dds <- DESeq(dds)
 
   #save normalized counts matrix
-  norm_counts_path <- file.path(dirname(csv_path), gsub("(.*)\\.csv", "\\1_normalized_counts.csv", csv_path))
+  norm_counts_path <- file.path(report_dir, "normalized_counts.csv")
   norm_counts <- counts(dds, normalized = TRUE)
   cat("Saving normalized counts to:", norm_counts_path, "\n")
-  write.csv(as.data.frame(norm_counts), file = norm_counts_path)
+  #map geneID to symbol
+  symbols <- mapIds(annotation_db, keys = rownames(norm_counts),
+                    column = c('SYMBOL'), keytype = GTF_USED_BY_HTSEQ)
+  symbols[is.na(symbols)] <- names(symbols[is.na(symbols)])
+  norm_counts <- cbind(SYMBOL = symbols, as.data.frame(norm_counts))
+  write.csv(norm_counts, file = norm_counts_path)
 
   buildHtmlReport(dds, report_dir, padj_cutoff, contrast)
 
