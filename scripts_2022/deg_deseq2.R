@@ -156,7 +156,7 @@ main = function(htseq_out_dir, report_dir, padj_cutoff = 0.01, log2_fc_cutoff = 
   dds <- DESeq(dds)
 
   #save normalized counts matrix
-  norm_counts_path <- gsub("(.*)\\.csv", "\\1_normalized_counts.csv", csv_path)
+  norm_counts_path <- file.path(dirname(csv_path), gsub("(.*)\\.csv", "\\1_normalized_counts.csv", csv_path))
   norm_counts <- counts(dds, normalized = TRUE)
   cat("Saving normalized counts to:", norm_counts_path, "\n")
   write.csv(as.data.frame(norm_counts), file = norm_counts_path)
