@@ -150,6 +150,9 @@ main = function(htseq_out_dir, report_dir, padj_cutoff = 0.01, log2_fc_cutoff = 
                 contrast = NULL, csv_path = "deg_deseq2.csv", volcano_plot_title = NULL, png_path = "volcano_plot.png")
 {
 
+  if (! dir.exists(report_dir)) {
+    dir.create(report_dir, recursive = TRUE)
+  }
 
   sampleTable = MakeSampleTable(htseq_out_dir)
   dds = buildDESeqDataSet(sampleTable, htseq_out_dir)
