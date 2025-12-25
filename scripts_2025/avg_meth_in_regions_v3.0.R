@@ -1,6 +1,6 @@
 #!/usr/bin/env Rscript
 
-#' --- version 3.0 chnanges:
+#' --- version 3.0 chnages:
 #' - Use BiocParallel for parallelization instead of parallel package
 #' TODO: -- increase memory efficiency by avoiding repeated object conversion in regionCounts
 #' #TODO: -- avoid accumulating counts in memory and then calculating avg methylation per tile,
@@ -17,7 +17,7 @@
 library(rtracklayer)
 library(data.table)
 library(dplyr)
-library(parallel)
+library(BiocParallel)
 library(argparser)
 library(IRanges)
 
@@ -235,7 +235,7 @@ display_progress_bar <- function(current, total, bar_length = 50) {
 }
 # count number of Cs and Ts in each tile. see comment [1]
 count_c_t_in_regions <- function(regions_tiled, num_regions, sample, mc_cores = 1) {
-  counts <- mclapply(seq_along(regions_tiled), function(i) {
+  counts <- bplapply(seq_along(regions_tiled), function(i) {
     if (i %% 10 == 0 || i == num_regions) {
       display_progress_bar(i, num_regions)
     }
@@ -252,7 +252,7 @@ count_c_t_in_regions <- function(regions_tiled, num_regions, sample, mc_cores = 
         return(NULL)
       }
     )
-  }, mc.cores = mc_cores)
+  }, BPPARAM = MulticoreParam(workers = mc_cores))
   cat("\n")
   return(counts)
 }
