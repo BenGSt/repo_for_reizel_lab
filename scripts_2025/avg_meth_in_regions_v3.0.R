@@ -470,29 +470,29 @@ main <- function(regions_list, sample, bp_to_pad, tile_width, tile_step,
 
     # will only run if provided save path
     # TODO: next block is by peleg - needs review
-    if (!is.null(args$valid_sites_bed_name)) {
-       # count and return valid sites with less than thresh% NA in numCs
-       # NOTE: "uncovered" sites are not removed from counts so they still affect the avarage 
-       # TODO: only keep covered sites in counts
-       valid_sites <- count_sites_with_na_threshold(counts, thresh)
+    # if (!is.null(args$valid_sites_bed_name)) {
+    #    # count and return valid sites with less than thresh% NA in numCs
+    #    # NOTE: "uncovered" sites are not removed from counts so they still affect the avarage 
+    #    # TODO: only keep covered sites in counts
+    #    valid_sites <- count_sites_with_na_threshold(counts, thresh)
  
      
-       # Convert to GRanges
-       bed_regions <- lapply(valid_sites, function(meth_raw) {
-         GRanges(
-           seqnames = as.character(meth_raw$chr[1]),
-           ranges = IRanges(
-             start = min(meth_raw$start),
-             end   = max(meth_raw$end)
-           ),
-           strand = as.character(meth_raw$strand[1])
-         )
-       })
-       # Combine all into a single GRanges object
-       bed_regions_gr <- do.call(c, bed_regions)
-       # Export to BED
-       export.bed(bed_regions_gr, "reconstructed_regions.bed")
-     }
+    #    # Convert to GRanges
+    #    bed_regions <- lapply(valid_sites, function(meth_raw) {
+    #      GRanges(
+    #        seqnames = as.character(meth_raw$chr[1]),
+    #        ranges = IRanges(
+    #          start = min(meth_raw$start),
+    #          end   = max(meth_raw$end)
+    #        ),
+    #        strand = as.character(meth_raw$strand[1])
+    #      )
+    #    })
+    #    # Combine all into a single GRanges object
+    #    bed_regions_gr <- do.call(c, bed_regions)
+    #    # Export to BED
+    #    export.bed(bed_regions_gr, "reconstructed_regions.bed")
+    #  }
  
      # Calculating average methylation per position
     cat("Calculating average methylation per position\n")
