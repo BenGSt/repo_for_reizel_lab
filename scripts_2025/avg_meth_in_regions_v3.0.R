@@ -236,9 +236,10 @@ display_progress_bar <- function(current, total, bar_length = 50) {
 # count number of Cs and Ts in each tile. see comment [1]
 count_c_t_in_regions <- function(regions_tiled, num_regions, sample, mc_cores = 1) {
   counts <- bplapply(seq_along(regions_tiled), function(i) {
-    if (i %% 10 == 0 || i == num_regions) {
-      display_progress_bar(i, num_regions)
-    }
+    # if (i %% 10 == 0 || i == num_regions) {
+    #   display_progress_bar(i, num_regions)
+    # }
+    # We will use the progress bar from BiocParallel
     tryCatch(
       {
         return(
@@ -252,7 +253,7 @@ count_c_t_in_regions <- function(regions_tiled, num_regions, sample, mc_cores = 
         return(NULL)
       }
     )
-  }, BPPARAM = MulticoreParam(workers = mc_cores))
+  }, BPPARAM = MulticoreParam(workers = mc_cores, progressbar = TRUE))
   cat("\n")
   return(counts)
 }
