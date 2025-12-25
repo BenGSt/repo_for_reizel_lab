@@ -290,7 +290,7 @@ parse_cli_args <- function() {
   p <- add_argument(p, "--chunk_size", help = "number of regions to process in one batch to control memory usage", type = "integer", default = 500L)
   p <- add_argument(p, "--assembly", help = "genome assembly", default = "hg38")
   p <- add_argument(p, "--min_covered_windows", help = "min fraction of covered windows in a site to be considered valid 0.0-1.0", type = "double", default = 0.5)
-  p <- add_argument(p, "--valid_sites_bed_name", help = "saves the valid sites to this file")
+  p <- add_argument(p, "--valid_sites_bed_name", help = "saves the valid sites to this file", )
 
   args <- parse_args(p)
   if (is.na(args$regions) && is.na(args$regions_list_file)) {
@@ -413,6 +413,8 @@ print_args <- function(args) {
   cat(sprintf("mc_cores: %d\n", args$mc_cores))
   cat(sprintf("chunk_size: %d\n", args$chunk_size))
   cat(sprintf("assembly: %s\n", args$assembly))
+  cat(sprintf("min_covered_windows: %f\n", args$min_covered_windows))
+  cat(sprintf("valid_sites_bed_name: %s\n", args$valid_sites_bed_name))
 }
 
 
@@ -490,7 +492,7 @@ main <- function(regions_list, sample, bp_to_pad, tile_width, tile_step,
                 valid_observation_count_vector <- valid_observation_count_vector + as.numeric(not_na_idx)
                 
                 # Store valid region if requested and valid
-                if (!is.null(valid_sites_bed_name) && res$is_valid) {
+                if (!is.na(valid_sites_bed_name) && res$is_valid) {
                     valid_regions_gr_list[[length(valid_regions_gr_list) + 1]] <- res$region_gr
                 }
             }
@@ -504,7 +506,7 @@ main <- function(regions_list, sample, bp_to_pad, tile_width, tile_step,
     print_mem_usage("After processing all chunks")
 
     # Export valid sites if requested
-    if (!is.null(valid_sites_bed_name) && length(valid_regions_gr_list) > 0) {
+    if (!is.na(valid_sites_bed_name) && length(valid_regions_gr_list) > 0) {
         cat("Exporting valid sites...\n")
         valid_regions_gr <- do.call(c, valid_regions_gr_list)
         export.bed(valid_regions_gr, valid_sites_bed_name)
