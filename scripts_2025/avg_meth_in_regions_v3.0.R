@@ -2,9 +2,9 @@
 
 #' --- version 3.0 chnages:
 #' - Use BiocParallel for parallelization instead of parallel package
-#' TODO: -- increase memory efficiency by avoiding repeated object conversion in regionCounts
+#' - increase memory efficiency by avoiding repeated object conversion in regionCounts
 #' #TODO: -- avoid accumulating counts in memory and then calculating avg methylation per tile,
-#' #TODO: -- instead calculate avg methylation per tile on the fly and only keep the result
+#'           instead calculate avg methylation per tile on the fly and only keep the result
 
 #' @title Average methylation by position in genomic regions
 #' @description calculate the average methylation by position over a set genomic regions
@@ -68,17 +68,24 @@ setMethod(
     # sort regions
     regions <- sortSeqlevels(regions)
     regions <- sort(regions, ignore.strand = TRUE)
-    # overlap object with regions
-    # convert object to GRanges
-    if (!strand.aware) {
-      g.meth <- as(object, "GRanges")
-      strand(g.meth) <- "*"
-      mat <- IRanges::as.matrix(findOverlaps(regions, g.meth))
+    
+    # Check for pre-converted GRanges in ...
+    args <- list(...)
+    if ("g.meth" %in% names(args)) {
+      g.meth <- args$g.meth
     } else {
-      mat <- IRanges::as.matrix(findOverlaps(regions, as(object, "GRanges")))
+      # overlap object with regions
+      # convert object to GRanges
+      g.meth <- as(object, "GRanges")
+      if (!strand.aware) {
+        strand(g.meth) <- "*"
+      }
     }
+
+    mat <- IRanges::as.matrix(findOverlaps(regions, g.meth))
+    
     # find the regions that have no coverage
-    regions_no_hits_indeces <- which(is.na(findOverlaps(regions, g.meth, select = "first")))
+    regions_no_hits_indeces <- setdiff(seq_along(regions), unique(mat[, 1]))
 
     # create a temporary data.table row ids from regions and counts from object
     coverage <- numCs <- numTs <- id <- covered <- NULL
@@ -235,6 +242,10 @@ display_progress_bar <- function(current, total, bar_length = 50) {
 }
 # count number of Cs and Ts in each tile. see comment [1]
 count_c_t_in_regions <- function(regions_tiled, num_regions, sample, mc_cores = 1) {
+  # Pre-convert sample to GRanges to avoid repeated conversion in regionCounts
+  g.meth <- as(sample, "GRanges")
+  strand(g.meth) <- "*" # Since we use strand.aware = FALSE
+
   counts <- bplapply(seq_along(regions_tiled), function(i) {
     # if (i %% 10 == 0 || i == num_regions) {
     #   display_progress_bar(i, num_regions)
@@ -243,7 +254,7 @@ count_c_t_in_regions <- function(regions_tiled, num_regions, sample, mc_cores = 
     tryCatch(
       {
         return(
-          regionCounts(sample, regions_tiled[[i]], cov.bases = 0, strand.aware = FALSE)
+          regionCounts(sample, regions_tiled[[i]], cov.bases = 0, strand.aware = FALSE, g.meth = g.meth)
         )
       },
       error = function(e) {
