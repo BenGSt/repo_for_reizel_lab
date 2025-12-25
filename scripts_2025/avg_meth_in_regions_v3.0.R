@@ -3,6 +3,7 @@
 #' --- version 3.0 chnages:
 #' - Use BiocParallel for parallelization instead of parallel package
 #' - increase memory efficiency by avoiding repeated object conversion in regionCounts
+#' So far this works well. comitting here before making more changes.
 #' #TODO: -- avoid accumulating counts in memory and then calculating avg methylation per tile,
 #'           instead calculate avg methylation per tile on the fly and only keep the result
 
