@@ -1,5 +1,14 @@
 #!/usr/bin/env Rscript
 
+
+
+#' @title Average methylation by position in genomic regions
+#' @description calculate the average methylation by position over a set genomic regions
+#' by finding the methylation level in sliding window tiles for each region,
+#' then taking the average of each tile over all regions.
+#' @author Ben Steinberg, Pleleg Shalev
+#' @date 26.12.2025
+# 'NOTE: set header = TRUE in methRead for methyldackel files, chnage for bismark files if needed
 #' --- version 3.0.1 changes:
 #' - avoid accumulating counts in memory and then calculating avg methylation per tile,
 #'   instead calculate avg methylation per tile on the fly and only keep the result
@@ -7,14 +16,6 @@
 #' - option to save valid sites as bed file
 #' This version works with only floating point difference from v3.0. It was not more memory efficient when testing for 100 regions,
 #' # will test on larger datasets.
-
-#' @title Average methylation by position in genomic regions
-#' @description calculate the average methylation by position over a set genomic regions
-#' by finding the methylation level in sliding window tiles for each region,
-#' then taking the average of each tile over all regions.
-#' @author Ben Steinberg, Pleleg Shalev
-#' @date 6.9.2024
-# TODO: tested on ido goldstein's data - set header = TRUE in methRead for methyldackel files - see TODOs in body
 
 library(rtracklayer)
 library(data.table)
